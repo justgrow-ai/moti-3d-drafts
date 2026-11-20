@@ -516,7 +516,7 @@ function shapeP(k,u){
     case 3: case 6: { tmpR.length=0; for (const b of BALLS[k]) tmpR.push(sph(u,b[0],b[1])); r=smax(tmpR,0.07);
               if (k===3){ if (y<-0.05) r=smin(r,0.6/(-y),0.05); zs=0.85; } else zs=0.78; r*=1.08; break; }
     case 7: { const fw=1+0.1*Math.max(0,y); tmpR.length=0; tmpR.push(ell(u,1.05*fw,0.95,0.92)); for (const e of SHIBA) tmpR.push(ellR(u,e[0],e[1])); r=smax(tmpR,SHIBA_K); break; }
-    case 100: { const D=ANI[ANIK]; tmpR.length=0; tmpR.push(ell(u,D.base[0],D.base[1],D.base[2])); for (const e of D.sh) tmpR.push(ellR(u,e[0],e[1])); r=smax(tmpR,D.k||0.07); break; }
+    case 100: { const D=ANI[ANIK]; tmpR.length=0; tmpR.push(ell(u,D.base[0],D.base[1],D.base[2])); for (const e of D.sh) tmpR.push(ellR(u,e[0],e[1])); r=smax(tmpR,D.k||0.07)*(D.sc||1); break; }
     case 8: { tmpR.length=0; tmpR.push(ell(u,1.08,0.95,0.88)); for (const b of BALLS[8]) tmpR.push(sph(u,b[0],b[1])); r=smax(tmpR,0.06); if (z<-0.05) r=smin(r,0.95/(-z),0.05); break; }
   }
   SX=x*r; SY=y*r; SZ=z*r*zs; }
@@ -1802,86 +1802,109 @@ const FRONT=[0,0,-1];
 const roundEar=(s,d,h,r,o={})=>{ const u=norm([s*d[0],d[1],d[2]]); return [Ep(u,h,r,o.col||'body',{ay:u,az:FRONT}), Ep(u,h,[r[0]*0.62,r[1]*0.6,r[2]*0.6],'inner',{ay:u,az:FRONT,off:r[2]*0.75,rim:false,yo:-r[1]*0.08})]; };
 const sideEar=(s,d,h,r,tilt)=>{ const u=norm([s*d[0],d[1],d[2]]), ay=norm([s,tilt,0]); return [Ep(u,h,r,'body',{ay,az:FRONT}), Ep(u,h,[r[0]*0.6,r[1]*0.7,r[2]*0.5],'inner',{ay,az:FRONT,off:r[2]*0.8,rim:false})]; };
 const nostrils=(dx,y,z,r,col='ink')=>bothS(s=>[Ep([s*dx,y,z],0.012,r,col,{rim:false})]);
+const dirOf=c=>norm(c);
+const elM=(u,c,r)=>{ const d=norm(c); return Math.hypot((u[0]-d[0])/r[0],(u[1]-d[1])/r[1]); };   // 방향 공간 타원 거리
+const blob=(u,c,r,e=0.12)=>sstep(1+e,1-e,elM(u,c,r));
+const triNose=(d,h,r,col,tri=0.55)=>Ep(d,h,r,col,{rim:false,tri,az:FRONT});
+const SHJ={"2": {"sc": 0.96, "n": "고릴라", "base": [1.06, 0.9, 0.86], "k": 0.06, "sh": [[[0, 0.4, 0.05], [0.62, 0.66, 0.72]], [[0, 0.28, -0.58], [0.62, 0.19, 0.36]], [[0, -0.3, -0.58], [0.6, 0.42, 0.54]], [[0, -0.36, -0.86], [0.42, 0.3, 0.34]], [[-0.56, -0.12, -0.28], [0.5, 0.5, 0.5]], [[0.56, -0.12, -0.28], [0.5, 0.5, 0.5]]], "eye": [0.5, 0.22, 0.74], "mouth": [0, -0.47, -0.88], "ms": 0.8}, "3": {"n": "고양이", "base": [1.04, 0.9, 0.88], "k": 0.06, "sh": [[[-0.5, -0.3, -0.25], [0.6, 0.42, 0.55]], [[0.5, -0.3, -0.25], [0.6, 0.42, 0.55]], [[-0.14, -0.31, -0.76], [0.2, 0.15, 0.19]], [[0.14, -0.31, -0.76], [0.2, 0.15, 0.19]], [[0, -0.46, -0.72], [0.14, 0.1, 0.13]], [[0, -0.1, -0.76], [0.13, 0.17, 0.15]]], "eye": [0.6, 0.3, 0.86], "mouth": [0, -0.4, -0.92], "ms": 0.55}, "4": {"sc": 0.88, "n": "기린", "base": [0.9, 1.0, 0.9], "k": 0.07, "sh": [[[0, -0.2, -0.66], [0.3, 0.55, 0.42]], [[0, -0.25, -0.42], [0.5, 0.5, 0.52]], [[0, -0.52, -0.72], [0.36, 0.4, 0.44]], [[0, -0.66, -1.0], [0.32, 0.3, 0.36]], [[-0.4, -0.15, -0.2], [0.5, 0.55, 0.55]], [[0.4, -0.15, -0.2], [0.5, 0.55, 0.55]]], "eye": [0.86, 0.7, 0.78], "mouth": [0, -0.59, -0.81], "ms": 0.5}, "5": {"sc": 0.9, "n": "티라노", "base": [0.94, 0.88, 0.9], "k": 0.07, "sh": [[[0, -0.12, -0.7], [0.58, 0.44, 0.66]], [[0, -0.16, -1.12], [0.44, 0.34, 0.44]], [[0, -0.46, -0.9], [0.5, 0.24, 0.62]], [[-0.32, 0.5, -0.55], [0.22, 0.15, 0.22]], [[0.32, 0.5, -0.55], [0.22, 0.15, 0.22]], [[-0.52, -0.3, -0.3], [0.42, 0.42, 0.45]], [[0.52, -0.3, -0.3], [0.42, 0.42, 0.45]]], "eye": [0.66, 0.92, 0.76], "mouth": [0, -0.3, -0.95], "ms": 0.9}, "6": {"sc": 0.93, "n": "용", "base": [0.96, 0.94, 0.92], "k": 0.07, "sh": [[[0, -0.16, -0.68], [0.44, 0.36, 0.6]], [[0, -0.14, -1.04], [0.34, 0.27, 0.34]], [[-0.15, -0.04, -1.22], [0.13, 0.11, 0.12]], [[0.15, -0.04, -1.22], [0.13, 0.11, 0.12]], [[0, -0.4, -0.86], [0.36, 0.2, 0.5]], [[-0.3, 0.42, -0.58], [0.2, 0.13, 0.2]], [[0.3, 0.42, -0.58], [0.2, 0.13, 0.2]]], "eye": [0.64, 0.78, 0.8], "mouth": [0, -0.36, -0.93], "ms": 0.85}, "7": {"sc": 0.95, "n": "뱀", "base": [1.0, 0.76, 0.94], "k": 0.07, "sh": [[[0, -0.06, -0.62], [0.74, 0.38, 0.66]], [[0, -0.06, -1.0], [0.44, 0.28, 0.36]], [[-0.5, -0.1, -0.22], [0.55, 0.4, 0.6]], [[0.5, -0.1, -0.22], [0.55, 0.4, 0.6]]], "eye": [0.6, 0.12, 0.9], "mouth": [0, -0.24, -0.97], "ms": 0.95}, "8": {"sc": 0.85, "n": "말", "base": [0.86, 1.0, 0.88], "k": 0.07, "sh": [[[0, -0.28, -0.62], [0.3, 0.62, 0.42]], [[0, -0.3, -0.38], [0.48, 0.56, 0.5]], [[0, -0.62, -0.7], [0.36, 0.44, 0.44]], [[0, -0.86, -0.98], [0.42, 0.36, 0.4]], [[-0.36, -0.15, -0.2], [0.48, 0.55, 0.55]], [[0.36, -0.15, -0.2], [0.48, 0.55, 0.55]]], "eye": [0.92, 0.62, 0.78], "mouth": [0, -0.6, -0.8], "ms": 0.5}, "9": {"sc": 0.93, "n": "소", "base": [1.04, 0.92, 0.9], "k": 0.06, "sh": [[[0, -0.3, -0.6], [0.5, 0.5, 0.5]], [[0, -0.44, -0.8], [0.58, 0.4, 0.42]], [[0, -0.48, -1.0], [0.55, 0.32, 0.3]], [[-0.44, 0.7, -0.05], [0.32, 0.26, 0.32]], [[0.44, 0.7, -0.05], [0.32, 0.26, 0.32]]], "eye": [0.64, 0.36, 0.82], "mouth": [0, -0.54, -0.84], "ms": 0.62}, "10": {"n": "사자", "base": [1.0, 0.95, 0.9], "k": 0.06, "sh": [[[0, -0.06, -0.74], [0.2, 0.32, 0.2]], [[-0.15, -0.33, -0.76], [0.23, 0.17, 0.2]], [[0.15, -0.33, -0.76], [0.23, 0.17, 0.2]], [[0, -0.52, -0.68], [0.17, 0.12, 0.15]], [[-0.45, -0.22, -0.38], [0.45, 0.4, 0.45]], [[0.45, -0.22, -0.38], [0.45, 0.4, 0.45]]], "eye": [0.54, 0.32, 0.82], "mouth": [0, -0.42, -0.91], "ms": 0.55}, "11": {"n": "호랑이", "base": [1.04, 0.92, 0.88], "k": 0.06, "sh": [[[0, -0.06, -0.72], [0.18, 0.3, 0.2]], [[-0.15, -0.32, -0.76], [0.22, 0.16, 0.2]], [[0.15, -0.32, -0.76], [0.22, 0.16, 0.2]], [[0, -0.5, -0.7], [0.16, 0.11, 0.14]], [[-0.55, -0.26, -0.3], [0.55, 0.42, 0.5]], [[0.55, -0.26, -0.3], [0.55, 0.42, 0.5]]], "eye": [0.56, 0.34, 0.84], "mouth": [0, -0.41, -0.91], "ms": 0.55}};
 const ANI=[];
-ANI[2]={ n:'고릴라', base:[1.1,0.96,0.92], sh:[[[0,0.24,-0.62],[0.66,0.15,0.36]],[[0,-0.3,-0.56],[0.54,0.38,0.46]]],
-  mask(u){ const [x,y,z]=u, f=-z; const fr=sstep(0.25,0.45,f);
-    const l=Math.max(circ(x,y,-0.25,0.12,0.29),circ(x,y,0.25,0.12,0.29),circ(x,y,0,-0.25,0.5,0.42))*fr;
-    const p=circ(x,y,0,0.33,0.6,0.085)*fr*sstep(0.2,0.3,y+0.0); return [l,p]; },
-  eye:[0.56,0.24,0.8], mouth:[0,-0.44,-0.9], ms:0.85, ear:4,
-  cols:{body:'#5e5856',light:'#cdb7a2',pat:'#9c8777',inner:'#cdb7a2',cheek:'#ff9c8a',ink:'#231f1d',mouth:'#b5483f',bg:'#eef0e8'},
-  props:[Ep([0,-0.1,-1],0.0,[0.3,0.12,0.1],'#3d3734',{rim:false}), ...nostrils(0.085,-0.12,-1,[0.06,0.045,0.04],'#1b1817')] };
-ANI[3]={ n:'고양이', base:[1.1,0.94,0.92], sh:bothS(s=>[[[s*0.12,-0.3,-0.84],[0.18,0.14,0.16]]]),
+// ---- 고릴라: 넓고 높은 정수리, 튀어나온 눈썹뼈, 앞으로 나온 넓은 입 주변, 넓적한 코
+ANI[2]={ ...SHJ[2],
+  mask(u){ const [x,y,z]=u, fr=sstep(0.3,0.5,-z);
+    const l=Math.max(circ(x,y,-0.23,0.1,0.19,0.15),circ(x,y,0.23,0.1,0.19,0.15),circ(x,y,0,-0.27,0.42,0.33),circ(x,y,0,0.06,0.16,0.18))*fr;
+    const p=Math.max(circ(x,y,-0.2,0.27,0.27,0.075),circ(x,y,0.2,0.27,0.27,0.075))*fr; return [Math.max(l,p),p]; },
+  ear:4,
+  cols:{body:'#5a5552',light:'#c9b6a6',pat:'#a08d7f',inner:'#c9b6a6',cheek:'#ff9c8a',ink:'#231f1d',mouth:'#b5483f',bg:'#eef0e8'},
+  props:[Ep([0,-0.22,-0.97],0.03,[0.34,0.13,0.12],'#3d3734',{rim:false,tri:0.25,az:FRONT}), ...bothS(s=>[Ep([s*0.1,-0.25,-0.97],0.07,[0.075,0.05,0.04],'#1b1817',{rim:false,az:FRONT})])] };
+// ---- 고양이: 넓은 볼살, 볼록한 수염 패드 두 개, 작은 턱, 역삼각 코, ω 입
+ANI[3]={ ...SHJ[3],
   mask(u){ const [x,y,z]=u, f=-z, fr=sstep(0.45,0.6,f);
-    const l=Math.max(circ(x,y,-0.12,-0.3,0.2,0.16),circ(x,y,0.12,-0.3,0.2,0.16),circ(x,y,0,-0.42,0.15,0.11))*fr;
+    const l=Math.max(circ(x,y,-0.15,-0.34,0.2,0.15),circ(x,y,0.15,-0.34,0.2,0.15),circ(x,y,0,-0.47,0.15,0.11))*fr;
     const fh=sstep(0.3,0.45,f), p=Math.max(band(x,0.032)*sstep(0.44,0.48,y)*sstep(0.74,0.7,y), Math.max(band(x-0.15-(y-0.5)*0.2,0.026),band(x+0.15+(y-0.5)*0.2,0.026))*sstep(0.47,0.51,y)*sstep(0.68,0.64,y))*fh; return [l,p]; },
-  eye:[0.6,0.3,0.86], mouth:[0,-0.35,-0.94], ms:0.62, om:1, ear:2,
+  om:1, ear:2,
   cols:{body:'#aab4bb',light:'#fbf7f1',pat:'#7f8a92',inner:'#ffb6b6',cheek:'#ffa3a3',ink:'#262a2e',mouth:'#c4544a',bg:'#eef3f5'},
-  props:[Ep([0,-0.2,-1],0.03,[0.1,0.07,0.06],'#ff8f9a',{rim:false}),
-    ...bothS(s=>[0,1,2].map(k=>{ const b=SP([s*0.33,-0.22-k*0.07,-0.92],-0.01); return Tb(rel(b,[s*0.5,0.03-k*0.04,0.05],[s*0.95,0.07-k*0.11,0.2]),[0.022,0.018,0.01],'ink',{rim:false}); }))] };
-ANI[4]={ n:'기린', base:[1.0,1.0,0.95], sh:[[[0,-0.4,-0.7],[0.44,0.4,0.56]]],
-  mask(u){ const [x,y,z]=u; const l=sstep(0.52,0.44,angD(u,[0,-0.52,-0.85]));
-    const [d1,d2]=cell12(u,GCELL); const p=sstep(0.045,0.075,d2-d1)*sstep(0.5,0.62,angD(u,[0,0.1,-1]))*(1-l); return [l,p]; },
-  eye:[0.66,0.5,0.8], mouth:[0,-0.66,-0.75], ms:0.55, ear:0,
+  props:[triNose([0,-0.2,-1],0.02,[0.105,0.07,0.06],'#ff8f9a'),
+    ...bothS(s=>[0,1,2].map(k=>{ const b=SP([s*0.36,-0.27-k*0.06,-0.9],-0.01); return Tb(rel(b,[s*0.5,0.03-k*0.04,0.1],[s*0.95,0.07-k*0.11,0.3]),[0.022,0.018,0.01],'ink',{rim:false,jig:0.8}); }))] };
+// ---- 기린: 길게 앞·아래로 뻗은 주둥이(3단), 콧구멍, 오시콘, 옆으로 난 귀
+ANI[4]={ ...SHJ[4],
+  mask(u){ const l=sstep(0.4,0.32,angD(u,[0,-0.5,-0.87]));
+    const [d1,d2]=cell12(u,GCELL); const p=sstep(0.045,0.075,d2-d1)*sstep(0.5,0.62,angD(u,[0,-0.1,-1]))*sstep(0.34,0.44,angD(u,[0,-0.5,-0.87]))*(1-l); return [l,p]; },
+  ear:0,
   cols:{body:'#f7c75a',light:'#f5e2bf',pat:'#c27a3a',inner:'#f3b28d',cheek:'#ff9f86',ink:'#2e2018',mouth:'#b5483f',bg:'#fbf3dc'},
-  props:[...bothS(s=>{ const b=SP([s*0.3,0.95,0.02],-0.06), top=add(b,[s*0.1,0.62,0.04]); return [Tb([b,add(b,[s*0.05,0.32,0.02]),top],[0.1,0.09,0.085],'body'), Ep(norm(top),0,[0.13,0.13,0.13],'#8a4f24',{p:top})]; }),
-    ...bothS(s=>sideEar(s,[0.82,0.5,-0.02],0.1,[0.13,0.32,0.07],0.12)), ...nostrils(0.12,-0.5,-0.86,[0.05,0.06,0.04])] };
-ANI[5]={ n:'티라노', base:[1.02,0.95,0.94], sh:[[[0,-0.15,-0.7],[0.72,0.48,0.62]],[[0,-0.22,-1.0],[0.52,0.36,0.38]]],
-  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.3,-0.36,y-0.1*x*x)*sstep(0.05,0.25,f);
-    const [d1]=cell12(u,TSPOT); const p=sstep(0.14,0.11,d1)*Math.max(sstep(-0.25,0.0,z),sstep(0.6,0.7,y))*(1-l); return [l,p]; },
-  eye:[0.66,0.66,0.8], mouth:[0,-0.36,-0.93], ms:1.3, ear:0,
+  props:[...bothS(s=>{ const b=SP([s*0.3,0.95,0.06],-0.06), top=add(b,[s*0.12,0.66,0.08]); return [Tb([b,add(b,[s*0.05,0.34,0.03]),top],[0.11,0.095,0.09],'body',{jig:0.35}), Ep(norm(top),0,[0.14,0.14,0.14],'#8a4f24',{p:top,jig:0.35})]; }),
+    ...bothS(s=>sideEar(s,[0.8,0.58,0.05],0.1,[0.13,0.32,0.07],0.12).map(e=>({...e,ear:1,jig:0.5}))),
+    ...bothS(s=>[Ep([s*0.13,-0.37,-0.92],0.012,[0.045,0.075,0.04],'ink',{rim:false,ay:[s*0.4,1,0],az:FRONT})])] };
+// ---- 티라노: 길고 큰 주둥이와 아래턱, 눈 위 혹, 웃는 입 선과 이빨 줄
+ANI[5]={ ...SHJ[5],
+  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.36,-0.44,y-0.1*x*x)*sstep(0.05,0.25,f);
+    const [d1]=cell12(u,TSPOT); const p=sstep(0.14,0.11,d1)*Math.max(sstep(-0.25,0.0,z),sstep(0.62,0.72,y))*(1-l); return [l,p]; },
+  ear:0,
   cols:{body:'#86c96f',light:'#eef3b5',pat:'#5d9d4f',inner:'#eef3b5',cheek:'#ff9e8a',ink:'#1f2a1c',mouth:'#c4544a',bg:'#eef6e3'},
-  props:[...bothS(s=>[Ep([s*0.31,0.5,-0.8],0.02,[0.15,0.09,0.09],'pat')]), ...nostrils(0.13,-0.06,-1,[0.06,0.04,0.04]),
-    ...[-0.34,-0.2,-0.07,0.07,0.2,0.34].map(x=>{ const t=x/(0.3*1.3), by=(0.16*t*t-0.056)*1.3-0.03; const b=SP([x/R,-0.36+by/R,-0.93],-0.01); return Tb([b,add(b,[0,-0.17,-0.04])],[0.07,0.01],'#ffffff'); })] };
-ANI[6]={ n:'용', base:[1.0,0.97,0.95], sh:[[[0,-0.22,-0.75],[0.5,0.36,0.58]],...bothS(s=>[[[s*0.15,-0.12,-1.1],[0.11,0.1,0.1]]])],
-  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.32,-0.4,y)*sstep(0.0,0.2,f);
+  props:[...nostrils(0.13,-0.02,-1,[0.06,0.04,0.04]),
+    ...bothS(s=>{ const P=[0.14,0.28,0.42,0.56].map(t=>SP([s*t,-0.29+0.14*t*t,-Math.sqrt(1-t*t-0.09)],0.0)); return [Tb(P,[0.045,0.042,0.038,0.028],'ink',{rim:false})]; }),
+    ...[-0.5,-0.36,-0.22,-0.08,0.08,0.22,0.36,0.5].map(t=>{ const b=SP([t,-0.3+0.14*t*t,-Math.sqrt(1-t*t-0.095)],0.0); return Tb([b,add(b,[0,-0.2,-0.05])],[0.085,0.01],'#ffffff',{rim:false}); })] };
+// ---- 용: 앞으로 나온 주둥이 + 콧방울, 눈 위 혹, 금빛 뿔(뒤로), 옆·뒤로 흐르는 수염, 등 가시
+ANI[6]={ ...SHJ[6],
+  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.33,-0.41,y)*sstep(0.0,0.2,f);
     const th=Math.acos(Math.max(-1,Math.min(1,y))), ph=Math.atan2(z,x), cs=0.3, row=Math.floor(th/cs), fx=ph*Math.sin(th)/cs+(row%2)*0.5;
-    const lx=fx-Math.floor(fx)-0.5, ly=th/cs-row-0.5; const p=sstep(0.34,0.28,Math.hypot(lx,ly))*sstep(-0.4,-0.2,z)*sstep(-0.3,-0.1,y)*(1-l); return [l,p]; },
-  eye:[0.62,0.55,0.82], mouth:[0,-0.42,-0.9], ms:1.0, ear:0,
+    const lx=fx-Math.floor(fx)-0.5, ly=th/cs-row-0.5; const p=sstep(0.34,0.28,Math.hypot(lx,ly))*sstep(-0.3,-0.1,z)*sstep(-0.3,-0.1,y)*(1-l); return [l,p]; },
+  ear:0,
   cols:{body:'#ef6b57',light:'#ffe2a8',pat:'#c94b3e',inner:'#ffe2a8',cheek:'#ffb08f',ink:'#2e1a17',mouth:'#9e2f2a',bg:'#fdeee6'},
-  props:[...bothS(s=>{ const b=SP([s*0.34,0.86,0.2],-0.05); return [Tb(rel(b,[s*0.16,0.5,0.18],[s*0.26,0.86,0.5]),[0.18,0.12,0.03],'#ffd36b')]; }),
-    ...bothS(s=>{ const b=SP([s*0.3,-0.18,-1.0],-0.02); return [Tb(rel(b,[s*0.4,-0.08,0.0],[s*0.8,0.04,0.12],[s*1.05,0.32,0.25]),[0.045,0.036,0.026,0.012],'#ffd36b')]; }),
-    ...[[0,0.92,0.38],[0,0.62,0.78],[0,0.22,0.97]].map(d=>{ const b=SP(d,-0.03); return Tb([b,add(b,mul(norm(d),0.36))],[0.13,0.01],'#ffd36b'); }),
-    ...nostrils(0.15,-0.1,-1,[0.045,0.035,0.035])] };
-ANI[7]={ n:'뱀', base:[1.12,0.86,0.98], sh:[[[0,-0.06,-0.5],[0.78,0.52,0.56]]],
-  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.38,-0.46,y)*sstep(-0.2,0.2,f);
-    const s=Math.atan2(y,-z); let p=0; for (const k of [0.72,1.12,1.52,1.92,2.32,2.72]) p=Math.max(p,sstep(1.08,0.92,Math.abs(x)/0.21+Math.abs(s-k)/0.2));
+  props:[...bothS(s=>{ const b=SP([s*0.36,0.84,0.22],-0.05); return [Tb(rel(b,[s*0.14,0.42,0.3],[s*0.2,0.7,0.72]),[0.19,0.13,0.035],'#ffd36b',{jig:0.3})]; }),
+    ...bothS(s=>{ const b=SP([s*0.3,-0.12,-0.95],-0.02); return [Tb(rel(b,[s*0.3,-0.2,0.12],[s*0.62,-0.55,0.2],[s*0.82,-0.95,0.16],[s*0.95,-1.2,0.02]),[0.05,0.042,0.032,0.022,0.012],'#ffd36b',{jig:1})]; }),
+    ...[[0,0.92,0.38],[0,0.62,0.78],[0,0.22,0.97]].map(d=>{ const b=SP(d,-0.03); return Tb([b,add(b,mul(norm(d),0.36))],[0.13,0.01],'#ffd36b',{jig:0.3}); }),
+    ...bothS(s=>[Ep([s*0.16,-0.04,-1],0.012,[0.045,0.035,0.035],'ink',{rim:false})])] };
+// ---- 뱀: 납작하고 넓은 머리가 앞으로(삽 모양), 눈은 위쪽 옆, 넓은 입 선, 날름 혀
+ANI[7]={ ...SHJ[7],
+  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.3,-0.38,y)*sstep(-0.2,0.2,f);
+    const s=Math.atan2(y,-z); let p=0; for (const k of [0.62,1.02,1.42,1.82,2.22,2.62]) p=Math.max(p,sstep(1.08,0.92,Math.abs(x)/0.21+Math.abs(s-k)/0.2));
     for (const k of [0.25,0.75,1.25,1.75,2.25]) for (const sx of [-1,1]) p=Math.max(p,sstep(1.08,0.92,Math.hypot((x-sx*0.74)/0.09,(Math.atan2(y,-z)-k+0.2)/0.11)));
     return [l,p*(1-l)]; },
-  eye:[0.7,0.4,0.9], mouth:[0,-0.4,-0.92], ms:1.15, ear:0,
+  ear:0,
   cols:{body:'#f3c24f',light:'#fff1c7',pat:'#b06a2e',inner:'#fff1c7',cheek:'#ffa08a',ink:'#2e2018',mouth:'#b5483f',bg:'#f8f1dc'},
-  props:(()=>{ const b=SP([0,-0.43,-0.9],-0.05), m1=add(b,[0,-0.26,-0.16]), m2=add(b,[0,-0.44,-0.16]);
-    return [Tb([b,m1,m2],[0.075,0.065,0.055],'#e8454d',{anim:'flick',piv:b}), ...bothS(s=>[Tb([m2,add(m2,[s*0.13,-0.15,0])],[0.055,0.018],'#e8454d',{anim:'flick',piv:b})]), ...nostrils(0.12,-0.02,-1,[0.04,0.03,0.03])]; })() };
-ANI[8]={ n:'말', base:[0.96,1.0,0.95], sh:[[[0,-0.44,-0.62],[0.5,0.48,0.58]]],
-  mask(u){ const [x,y,z]=u, f=-z; const l=Math.max(sstep(0.47,0.4,angD(u,[0,-0.6,-0.8])), band(x,0.06)*sstep(0.35,0.5,f)*sstep(-0.3,-0.2,y)*sstep(0.62,0.55,y)); return [l,0]; },
-  eye:[0.74,0.42,0.8], mouth:[0,-0.8,-0.6], ms:0.58, ear:1,
+  props:(()=>{ const b=SP([0,-0.34,-0.94],-0.05), m1=add(b,[0,-0.24,-0.22]), m2=add(b,[0,-0.4,-0.24]);
+    return [Tb([b,m1,m2],[0.075,0.065,0.055],'#e8454d',{anim:'flick',piv:b}), ...bothS(s=>[Tb([m2,add(m2,[s*0.13,-0.15,0])],[0.055,0.018],'#e8454d',{anim:'flick',piv:b})]),
+      ...bothS(s=>[Ep([s*0.13,0.0,-1],0.01,[0.035,0.028,0.03],'ink',{rim:false})]),
+      ...bothS(s=>{ const P=[0.16,0.32,0.48,0.62].map(t=>SP([s*t,-0.3-0.04*t,-Math.sqrt(Math.max(0.05,1-t*t-0.09))],0.0)); return [Tb(P,[0.032,0.03,0.028,0.02],'ink',{rim:false})]; })]; })() };
+// ---- 말: 긴 얼굴과 앞·아래로 길게 뻗은 주둥이, 끝이 둥근 코끝 + 큰 콧구멍, 앞머리·갈기
+ANI[8]={ ...SHJ[8],
+  mask(u){ const [x,y,z]=u, f=-z; const l=Math.max(sstep(0.4,0.32,angD(u,[0,-0.6,-0.8])), band(x,0.055)*sstep(0.35,0.5,f)*sstep(-0.5,-0.4,y)*sstep(0.6,0.52,y)); return [l,0]; },
+  ear:1,
   cols:{body:'#be7f4f',light:'#f4e0c4',pat:'#5a3a29',inner:'#f4b49a',cheek:'#ff9e86',ink:'#2b1d15',mouth:'#a8453d',bg:'#f6ede2'},
-  props:[...[-1,0,1].map(k=>{ const u=norm([k*0.15,0.84-Math.abs(k)*0.05,-0.52]); return Ep(u,0.01,[0.15,0.36,0.07],'pat',{ay:[k*0.55,1,0.4],az:u}); }), ...[[0,0.97,-0.1],[0,0.9,0.42],[0,0.62,0.78],[0,0.25,0.97]].map(d=>Ep(d,0.0,[0.2,0.34,0.16],'pat',{lat:10,lon:14})),
-    ...bothS(s=>[Ep([s*0.17,-0.54,-0.83],0.015,[0.05,0.085,0.04],'ink',{rim:false})])] };
-ANI[9]={ n:'소', base:[1.08,0.95,0.93], sh:[[[0,-0.4,-0.68],[0.64,0.38,0.46]]],
-  mask(u){ const [x,y,z]=u, f=-z; const l=circ(x,y,0,-0.45,0.52,0.3)*sstep(0.35,0.5,f); let p=0; const ph=Math.atan2(z,x);
+  props:[...[-1,0,1].map(k=>{ const u=norm([k*0.15,0.86-Math.abs(k)*0.05,-0.5]); return Ep(u,0.01,[0.15,0.36,0.07],'pat',{ay:[k*0.55,1,0.4],az:u,jig:0.6}); }),
+    ...[[0,0.97,-0.1],[0,0.9,0.42],[0,0.62,0.78],[0,0.25,0.97]].map(d=>Ep(d,0.0,[0.2,0.34,0.16],'pat',{lat:10,lon:14,jig:0.45})),
+    ...bothS(s=>[Ep([s*0.15,-0.38,-0.91],0.012,[0.06,0.075,0.04],'ink',{rim:false,ay:[s*0.35,1,0],az:FRONT,tri:-0.35})])] };
+// ---- 소: 넓고 납작한 이마, 앞으로 나온 넓은 코 패드, 옆으로 뻗은 뿔, 옆으로 난 귀
+ANI[9]={ ...SHJ[9],
+  mask(u){ const [x,y,z]=u, f=-z; const l=circ(x,y,0,-0.42,0.52,0.2)*sstep(0.35,0.5,f); let p=0; const ph=Math.atan2(z,x);
     for (const [d,r] of [[[0.55,0.7,-0.45],0.24],[[-0.75,0.35,0.55],0.42],[[0.1,0.95,0.25],0.3],[[0.6,-0.1,0.8],0.4],[[-0.3,-0.45,0.84],0.3]]) p=Math.max(p,sstep(1.06,0.94,angD(u,d)/(r*(1+0.13*Math.sin(5*ph+3*y)))));
     return [l,p*(1-l)]; },
-  eye:[0.6,0.38,0.82], mouth:[0,-0.64,-0.77], ms:0.62, ear:0,
+  ear:0,
   cols:{body:'#fbfaf6',light:'#f8bcb2',pat:'#2f2a28',inner:'#f8bcb2',cheek:'#ffa59a',ink:'#2b2523',mouth:'#b5483f',bg:'#eef5ec'},
-  props:[...bothS(s=>{ const b=SP([s*0.4,0.88,-0.05],-0.04); return [Tb(rel(b,[s*0.2,0.1,0],[s*0.3,0.32,-0.02]),[0.1,0.075,0.03],'#f3e3c2')]; }),
-    ...bothS(s=>sideEar(s,[0.86,0.42,-0.05],0.1,[0.14,0.34,0.07],-0.25)), ...nostrils(0.17,-0.44,-0.88,[0.06,0.045,0.04],'#c46e66')] };
-ANI[10]={ n:'사자', base:[1.0,0.97,0.93], sh:[...bothS(s=>[[[s*0.14,-0.28,-0.85],[0.21,0.16,0.17]]]),[[0,-0.44,-0.78],[0.2,0.13,0.15]]],
-  mask(u){ const [x,y,z]=u, f=-z; return [Math.max(circ(x,y,-0.14,-0.28,0.22,0.17),circ(x,y,0.14,-0.28,0.22,0.17),circ(x,y,0,-0.44,0.17,0.12))*sstep(0.45,0.6,f),0]; },
-  eye:[0.56,0.3,0.82], mouth:[0,-0.36,-0.93], ms:0.6, om:0.8, ear:0,
+  props:[...bothS(s=>{ const b=SP([s*0.5,0.8,-0.08],-0.04); return [Tb(rel(b,[s*0.3,0.06,-0.02],[s*0.55,0.3,-0.06],[s*0.62,0.55,-0.08]),[0.12,0.095,0.07,0.035],'#f3e3c2',{jig:0.25})]; }),
+    ...bothS(s=>sideEar(s,[0.92,0.36,0.0],0.1,[0.15,0.34,0.07],-0.3).map(e=>({...e,ear:1,jig:0.5}))),
+    ...bothS(s=>[Ep([s*0.2,-0.34,-0.92],0.012,[0.06,0.075,0.04],'#c46e66',{rim:false,ay:[s*0.4,1,0],az:FRONT})])] };
+// ---- 사자: 콧등 + 볼록한 수염 패드 + 턱, 역삼각 코, 두 겹 갈기 실루엣
+ANI[10]={ ...SHJ[10],
+  mask(u){ const [x,y,z]=u, f=-z; return [Math.max(circ(x,y,-0.15,-0.33,0.22,0.17),circ(x,y,0.15,-0.33,0.22,0.17),circ(x,y,0,-0.5,0.17,0.12),circ(x,y,0,-0.12,0.1,0.22))*sstep(0.45,0.6,f),0]; },
+  om:0.8, ear:0,
   cols:{body:'#f6bb52',light:'#fff2d4',pat:'#c9702e',inner:'#fff2d4',cheek:'#ff9e7c',ink:'#2e1d12',mouth:'#b5483f',bg:'#fbf1df'},
-  props:[...Array.from({length:14},(_,k)=>{ const a=k/14*Math.PI*2, s=Math.sin(60*D2R); return Ep([s*Math.cos(a),s*Math.sin(a),-Math.cos(60*D2R)],0.02,[0.46,0.46,0.3],'pat',{lat:9,lon:14}); }),
-    ...Array.from({length:10},(_,k)=>{ const a=(k+0.5)/10*Math.PI*2, s=Math.sin(100*D2R); return Ep([s*Math.cos(a),s*Math.sin(a),-Math.cos(100*D2R)],0.0,[0.52,0.52,0.32],'pat',{lat:9,lon:14}); }),
-    ...bothS(s=>roundEar(s,[0.4,0.88,-0.26],0.2,[0.25,0.22,0.08])), Ep([0,-0.18,-1],0.03,[0.14,0.1,0.07],'#6b3f2c',{rim:false})] };
-ANI[11]={ n:'호랑이', base:[1.08,0.95,0.92], sh:[...bothS(s=>[[[s*0.13,-0.3,-0.85],[0.2,0.15,0.16]]]),...bothS(s=>[[[s*0.55,-0.28,-0.5],[0.44,0.36,0.42]]])],
+  props:[...Array.from({length:14},(_,k)=>{ const a=k/14*Math.PI*2, s=Math.sin(60*D2R); return Ep([s*Math.cos(a),s*Math.sin(a),-Math.cos(60*D2R)],0.02,[0.46,0.46,0.3],'pat',{lat:LOWQ?7:9,lon:LOWQ?11:14,jig:0.45}); }),
+    ...Array.from({length:10},(_,k)=>{ const a=(k+0.5)/10*Math.PI*2, s=Math.sin(100*D2R); return Ep([s*Math.cos(a),s*Math.sin(a),-Math.cos(100*D2R)],0.0,[0.52,0.52,0.32],'pat',{lat:LOWQ?7:9,lon:LOWQ?11:14,jig:0.55}); }),
+    ...Array.from({length:12},(_,k)=>{ const a=(k+0.5)/12*Math.PI*2, th=86*D2R, d=[Math.sin(th)*Math.cos(a),Math.sin(th)*Math.sin(a),-Math.cos(th)], o=norm([d[0],d[1],0.25]); const b=SP(d,0.1); return Tb([b,add(b,mul(o,0.3)),add(b,add(mul(o,0.52),[0,-0.05,0.14]))],[0.32,0.24,0.1],'pat',{jig:0.7}); }),
+    ...bothS(s=>roundEar(s,[0.4,0.88,-0.26],0.2,[0.25,0.22,0.08]).map(e=>({...e,ear:1,jig:0.4}))), triNose([0,-0.2,-1],0.03,[0.15,0.1,0.07],'#6b3f2c',0.6)] };
+// ---- 호랑이: 넓은 볼과 옆으로 뻗은 볼 털(뾰족 털뭉치), 콧등·수염 패드, 역삼각 코
+ANI[11]={ ...SHJ[11],
   mask(u){ const [x,y,z]=u, f=-z, ax=Math.abs(x);
-    const l=Math.max(Math.max(circ(x,y,-0.2,-0.3,0.3,0.24),circ(x,y,0.2,-0.3,0.3,0.24),circ(x,y,0,-0.45,0.25,0.14))*sstep(0.35,0.5,f), Math.max(circ(x,y,-0.26,0.43,0.075,0.055),circ(x,y,0.26,0.43,0.075,0.055))*sstep(0.5,0.6,f));
+    const l=Math.max(Math.max(circ(x,y,-0.2,-0.32,0.3,0.22),circ(x,y,0.2,-0.32,0.3,0.22),circ(x,y,0,-0.47,0.25,0.14))*sstep(0.35,0.5,f), Math.max(circ(x,y,-0.26,0.43,0.075,0.055),circ(x,y,0.26,0.43,0.075,0.055))*sstep(0.5,0.6,f));
     let p=Math.max(band(x,0.035*(1-(y-0.5)*1.5))*sstep(0.5,0.54,y)*sstep(0.82,0.78,y), Math.max(band(x-0.15-(y-0.52)*0.25,0.026),band(x+0.15+(y-0.52)*0.25,0.026))*sstep(0.54,0.58,y)*sstep(0.74,0.7,y))*sstep(0.3,0.45,f);
-    for (const k of [0.3,0.06,-0.18]) p=Math.max(p,band(y-k-(ax-0.6)*0.12,0.065*sstep(0.58,0.9,ax)));
+    for (const k of [0.3,0.1]) p=Math.max(p,band(y-k-(ax-0.6)*0.12,0.06*sstep(0.58,0.9,ax)));
     const ph=Math.atan2(x,z), v=((ph/(2*Math.PI)*10)%1+1)%1-0.5; p=Math.max(p,band(v,0.13*sstep(-0.5,0.3,y))*sstep(0.1,0.3,z));
     return [l,p*(1-l)]; },
-  eye:[0.58,0.34,0.84], mouth:[0,-0.36,-0.93], ms:0.62, om:0.8, ear:0,
+  om:0.8, ear:0,
   cols:{body:'#f68f35',light:'#fff6ea',pat:'#2b2320',inner:'#fff6ea',cheek:'#ff8f7a',ink:'#2b2320',mouth:'#b5483f',bg:'#fff3e3'},
-  props:[...bothS(s=>roundEar(s,[0.55,0.78,-0.15],0.14,[0.26,0.24,0.08])), Ep([0,-0.2,-1],0.03,[0.12,0.085,0.07],'#ff8f9a',{rim:false})] };
+  props:[...bothS(s=>roundEar(s,[0.55,0.78,-0.15],0.14,[0.26,0.24,0.08]).map(e=>({...e,ear:1,jig:0.4}))), triNose([0,-0.2,-1],0.03,[0.13,0.09,0.07],'#ff8f9a',0.6),
+    ...bothS(s=>[[-0.12,0.0],[-0.3,0.28],[-0.48,0.08]].map(([y0,zz])=>{ const b=SP([s*0.9,y0,-0.3+zz],-0.12); return Tb(rel(b,[s*0.36,-0.12,0.04],[s*0.58,-0.3,0.08]),[0.22,0.13,0.02],'body',{jig:0.6}); }))] };
 
 let ANIK=-1, aniBuilt=-2; const ANIP=[], ANIMAT={};
 const ANIKEY={body:'몸색',light:'얼굴무늬색',pat:'무늬색',ink:'잉크색',inner:'귀안쪽색'};
@@ -1893,20 +1916,35 @@ function frame3(u,ay,az){ let Y,Z;
   return [cross(Y,Z),Y,Z]; }
 const SHIBA_MK=bodyGeo.attributes.aMask.array.slice();
 // 소품은 색(+애니메이션)별로 한 덩어리 지오메트리로 합쳐 그려요 (사자 갈기 24개 → 드로우콜 1개)
-function buildAnimal(){ for (const p of ANIP){ hupi.remove(p.o); p.geo.dispose(); } ANIP.length=0; aniBuilt=ANIK;
+const aniKey=()=>ANIK<0?'x':ANIK+'|'+(S['귀']===ANI[ANIK].ear?1:0)+'|'+(LOWQ?1:0);
+const ANIJ={lt:-1,wp:null,reset:true};
+function buildAnimal(){ for (const p of ANIP){ hupi.remove(p.o); p.geo.dispose(); } ANIP.length=0; aniBuilt=aniKey(); ANIJ.reset=true;
   const mk=bodyGeo.attributes.aMask.array;
   if (ANIK<0) mk.set(SHIBA_MK); else { const f=ANI[ANIK].mask; for (let i=0;i<NV;i++){ const m=f(norm([rest[i*3],rest[i*3+1],rest[i*3+2]])); mk[i*2]=clamp01(m[0]); mk[i*2+1]=clamp01(m[1]); } }
   bodyGeo.attributes.aMask.needsUpdate=true; if (ANIK<0) return;
-  const G=new Map();
-  for (const sp of ANI[ANIK].props){ const key=sp.col+'|'+(sp.anim||'')+'|'+(sp.rim===false?1:0); if (!G.has(key)) G.set(key,{b:LB(),sp}); const b=G.get(key).b;
-    if (sp.t==='E'){ const u=norm(sp.u); const [X,Y,Z]=frame3(u,sp.ay,sp.az); let c=sp.p||SP(u,sp.h||0); if (sp.off) c=add(c,mul(Z,sp.off)); if (sp.yo) c=add(c,mul(Y,sp.yo)); ellip(b,c,sp.r,{ax:X,ay:Y,az:Z,lat:sp.lat||(LOWQ?9:12),lon:sp.lon||(LOWQ?13:18)}); }
-    else tube(b,sp.pts,sp.rad,{bone:0,sub:sp.sub||(LOWQ?4:6),su:sp.su||(LOWQ?8:10),cap:3}); }
-  for (const {b,sp} of G.values()){ const geo=makeGeo(b.V,b.T[0],true); let o; if (sp.rim===false){ o=new THREE.Mesh(geo,aniMat(sp.col)); o.frustumCulled=false; o.renderOrder=2; hupi.add(o); } else o=addPart(null,geo,aniMat(sp.col),1);
+  const D=ANI[ANIK], ownEar=S['귀']===D.ear, G=new Map();
+  for (const sp of D.props){ if (sp.ear && !ownEar) continue;
+    const key=sp.col+'|'+(sp.anim||'')+'|'+(sp.rim===false?1:0); if (!G.has(key)) G.set(key,{b:LB(),sp,w:[]}); const g=G.get(key), b=g.b, v0=b.V.length; let anc;
+    if (sp.t==='E'){ const u=norm(sp.u); const [X,Y,Z]=frame3(u,sp.ay,sp.az); let c=sp.p||SP(u,sp.h||0); if (sp.off) c=add(c,mul(Z,sp.off)); if (sp.yo) c=add(c,mul(Y,sp.yo)); anc=sp.p?SP(u,-0.05):SP(u,0);
+      ellip(b,c,sp.r,{ax:X,ay:Y,az:Z,lat:sp.lat||(LOWQ?9:12),lon:sp.lon||(LOWQ?13:18)});
+      if (sp.tri) for (let i=v0;i<b.V.length;i++){ const d=sub(b.V[i],c), ly=dot(d,Y)/sp.r[1], lx=dot(d,X); b.V[i]=add(b.V[i],mul(X,lx*sp.tri*ly)); } }
+    else { tube(b,sp.pts,sp.rad,{bone:0,sub:sp.sub||(LOWQ?4:6),su:sp.su||(LOWQ?8:10),cap:3}); anc=sp.pts[0]; }
+    let dm=1e-6; for (let i=v0;i<b.V.length;i++) dm=Math.max(dm,len(sub(b.V[i],anc)));
+    for (let i=v0;i<b.V.length;i++) g.w.push(sp.jig?sp.jig*Math.pow(clamp01(len(sub(b.V[i],anc))/dm),1.5):0); }
+  for (const {b,sp,w} of G.values()){ const geo=makeGeo(b.V,b.T[0],true); let o; if (sp.rim===false){ o=new THREE.Mesh(geo,aniMat(sp.col)); o.frustumCulled=false; o.renderOrder=2; hupi.add(o); } else o=addPart(null,geo,aniMat(sp.col),1);
     const V=b.V, rr=new Float32Array(V.length*3); for (let i=0;i<V.length;i++){ rr[i*3]=V[i][0]; rr[i*3+1]=V[i][1]; rr[i*3+2]=V[i][2]; }
-    ANIP.push({o,geo,rest:rr,sp,piv:sp.piv||null,sh:new Float32Array(rr.length),shk:''}); }
+    const jw=w.some(x=>x>0)?Float32Array.from(w):null;
+    ANIP.push({o,geo,rest:rr,sp,piv:sp.piv||null,sh:new Float32Array(rr.length),shk:'',jw,js:jw?new Float32Array(rr.length):null,jv:jw?new Float32Array(rr.length):null}); }
   aniColorsTick(); }
 function flickS(t){ const ph=(t%2.2)/2.2; return ph<0.05?ph/0.05:ph<0.55?1-0.12*Math.abs(Math.sin(ph*40)):ph<0.62?1-(ph-0.55)/0.07:0; }
-function aniMesh(){ if (aniBuilt!==ANIK) buildAnimal(); if (ANIK<0) return; aniColorsTick();
+// 출렁임: 소품 정점마다 작은 스프링 — 뿌리는 고정(가중 0), 끝으로 갈수록 늦게 따라와요. 몸이 뛰면 관성으로 뒤처져요
+const _wp=new THREE.Vector3(), _wq=new THREE.Quaternion(), _ws=new THREE.Vector3(), _dl=new THREE.Vector3();
+function aniMesh(){ if (aniBuilt!==aniKey()) buildAnimal(); if (ANIK<0) return; aniColorsTick();
+  let dt=ANIJ.lt<0?0:Math.min(1/30,Math.max(0,time-ANIJ.lt)); ANIJ.lt=time; ANIJ.dt=dt; const rs=ANIJ.reset||dt===0; ANIJ.reset=false;
+  hupi.getWorldPosition(_wp); hupi.getWorldQuaternion(_wq); hupi.getWorldScale(_ws);
+  if (ANIJ.wp && !rs){ _dl.copy(_wp).sub(ANIJ.wp).applyQuaternion(_wq.invert()).divideScalar(Math.max(0.05,_ws.x)); } else _dl.set(0,0,0);
+  ANIJ.wp=(ANIJ.wp||new THREE.Vector3()).copy(_wp);
+  let mx=0; const KS=140, KD=9, sub_=dt>0?Math.max(1,Math.ceil(dt/0.0085)):0, h=sub_?dt/sub_:0;
   for (const p of ANIP){ const pa=p.geo.attributes.position.array, V=p.rest, n=V.length/3; let s=1;
     if (p.sp.anim==='flick'){ s=flickS(time); p.o.visible=s>0.03; if (!p.o.visible) continue; }
     const q=p.piv, sk=shapeKey(); if (s===1 && p.shk!==sk){ p.shk=sk; SHA=null; shapeCache(p.sh,V,n); }
@@ -1914,7 +1952,14 @@ function aniMesh(){ if (aniBuilt!==ANIK) buildAnimal(); if (ANIK<0) return; aniC
     for (let i=0;i<n;i++){ let x=V[i*3],y=V[i*3+1],z=V[i*3+2]; if (s!==1){ x=q[0]+(x-q[0])*s; y=q[1]+(y-q[1])*s; z=q[2]+(z-q[2])*s; }
       SHI=i; deform(x,y,z,time); pa[i*3]=DX; pa[i*3+1]=DY; pa[i*3+2]=-DZ; }
     SHA=null; SHI=-1;
-    p.geo.attributes.position.needsUpdate=true; } }
+    const W_=p.jw; if (W_){ const J=p.js, Jv=p.jv;
+      for (let i=0;i<n;i++){ const w=W_[i]; if (w<=0) continue; const j=i*3;
+        if (rs){ J[j]=pa[j]; J[j+1]=pa[j+1]; J[j+2]=pa[j+2]; Jv[j]=Jv[j+1]=Jv[j+2]=0; continue; }
+        J[j]-=_dl.x; J[j+1]-=_dl.y; J[j+2]-=_dl.z;
+        for (let k=0;k<3;k++){ let x=J[j+k], v=Jv[j+k]; const T=pa[j+k]; for (let t=0;t<sub_;t++){ v+=(KS*(T-x)-KD*v)*h; x+=v*h; }
+          const d=x-T; if (d>0.3) x=T+0.3; else if (d<-0.3) x=T-0.3; J[j+k]=x; Jv[j+k]=v; pa[j+k]=T+w*(x-T); const ad=Math.abs(w*(x-T)); if (ad>mx) mx=ad; } } }
+    p.geo.attributes.position.needsUpdate=true; } ANIJ.mx=mx; }
+window.__aniJig=(v)=>v?{mx:+(ANIJ.mx||0).toFixed(4),dl:+_dl.length().toFixed(4),sc:+_ws.x.toFixed(3),dt:ANIJ.dt}:+(ANIJ.mx||0).toFixed(4);
 function aniColors(s,D){ const c=D.cols; s['몸색']=hx(c.body); s['몸색섞기']=1; s['팔다리색']=hx(c.body); s['얼굴무늬색']=hx(c.light); s['무늬색']=hx(c.pat); s['귀안쪽색']=hx(c.inner); s['볼색']=hx(c.cheek); s['잉크색']=hx(c.ink); s['입안색']=hx(c.mouth); s['배경색']=hx(c.bg); s['배경그라데이션']=false; s['발바닥색']=hx(c.cheek); s['발톱색']=hx(c.light); s['손색상']=hx(c.cheek); }
 function applyFace(s,k){ s['얼굴']=k;
   if (k===0){ if (s['모양']===7) s['모양']=0; s['귀']=1; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; applyPalette(s,s['팔레트']>=PALETTES.length?0:s['팔레트']); }
@@ -2488,10 +2533,11 @@ const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('
 const hexOf=c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(clamp01(v)*255).toString(16).padStart(2,'0')).join('');
 let exprI=0, motI=0; const MOTS=Object.keys(MOTIONS).filter(n=>!['등장','퇴장','움찔','쓰다듬기 반응'].includes(n)); const EXS=EXPRS.filter(n=>n!=='기본');
 function chip(lab,val,fn,sw){ const b=document.createElement('button'); b.innerHTML=lab+(val!==undefined?'<i>'+val+'</i>':'')+(sw?'<span class="sw" style="background:'+sw+'"></span>':''); b.onclick=()=>{ unlockAudio(); lastTouch=time; fn(); save(); refreshAll(); renderChips(); }; chipsEl.appendChild(b); }
+const earLab=()=>S['얼굴']>=2&&ANI[S['얼굴']]&&S['귀']===ANI[S['얼굴']].ear?'동물 기본':EARS[S['귀']];
 function renderChips(){ chipsEl.innerHTML='';
   chip('얼굴',FACES[S['얼굴']],()=>applyFace(S,(S['얼굴']+1)%FACES.length));
   chip('팔레트',PAL_NAMES[S['팔레트']],()=>applyPalette(S,(S['팔레트']+1)%(S['얼굴']>=2?PAL_NAMES.length:PALETTES.length)),hexOf(S['몸색']));
-  chip('귀',EARS[S['귀']],()=>{ S['귀']=(S['귀']+1)%EARS.length; });
+  chip('귀',earLab(),()=>{ S['귀']=(S['귀']+1)%EARS.length; });
   chip('모양',SHAPES[S['모양']],()=>{ const m_=(S['모양']+1)%SHAPES.length; if (m_===7) applyFace(S,1); else { if (S['얼굴']) applyFace(S,0); S['모양']=m_; } });
   chip('눈',EYES[S['눈모양']],()=>{ S['눈모양']=(S['눈모양']+1)%EYES.length; });
   chip('입',MOUTHS[S['입모양']],()=>{ S['입모양']=(S['입모양']+1)%MOUTHS.length; });
@@ -2500,7 +2546,7 @@ function renderChips(){ chipsEl.innerHTML='';
   chip('팔다리',LIMBS[S['팔다리']],()=>{ S['팔다리']=(S['팔다리']+1)%LIMBS.length; });
   chip('외곽선',S['외곽선']?'켬':'끔',()=>{ S['외곽선']=!S['외곽선']; });
   chip('눈색',S['눈색']===0?'잉크':'흰 눈',()=>{ S['눈색']=1-S['눈색']; });
-  ttlSub.textContent=(S['얼굴']?FACES[S['얼굴']]:SHAPES[S['모양']])+' · '+PAL_NAMES[S['팔레트']]+' · 귀 '+EARS[S['귀']]; }
+  ttlSub.textContent=(S['얼굴']?FACES[S['얼굴']]:SHAPES[S['모양']])+' · '+PAL_NAMES[S['팔레트']]+' · 귀 '+earLab(); }
 renderChips();
 if (innerWidth<700) panel.classList.add('closed');
 cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.opacity=0.3; },{once:true});
