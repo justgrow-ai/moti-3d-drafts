@@ -1,0 +1,41 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#111111"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>orb</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:-apple-system,"SF Pro Text","Pretendard","Noto Sans KR",sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+canvas{display:block;touch-action:none;cursor:grab;position:fixed;inset:0;width:100%!important;height:100%!important}canvas:active{cursor:grabbing}
+.ink{color:#fff;mix-blend-mode:difference}
+#top{z-index:2;position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 16px) 20px 0;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+#top b{font-size:15px;letter-spacing:-.01em}#top small{display:block;font-size:12px;opacity:.55;margin-top:2px}
+#top a{pointer-events:auto;text-decoration:none;font-size:13px;opacity:.7;padding:8px 4px}
+#hint{z-index:2;position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 64px);transform:translateX(-50%);font-size:12px;letter-spacing:.01em;white-space:nowrap;opacity:.6;transition:opacity .8s;pointer-events:none}
+#hint.off{opacity:0}
+#bar{z-index:2;position:fixed;left:0;right:0;bottom:0;padding:0 12px calc(env(safe-area-inset-bottom) + 14px);display:flex;align-items:center;justify-content:space-between}
+#bar button{pointer-events:auto;background:none;border:0;font:inherit;font-size:22px;width:48px;height:44px;opacity:.65;cursor:pointer}
+#dots{display:flex;gap:6px;pointer-events:none}#dots i{width:5px;height:5px;border-radius:9px;background:currentColor;opacity:.3}#dots i.on{opacity:1;width:14px}
+#fade{z-index:3;position:fixed;inset:0;background:#111;opacity:1;transition:opacity .35s;pointer-events:none}#fade.in{opacity:0}
+body.shot #top,body.shot #bar,body.shot #hint{display:none}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head><body>
+<div id="top" class="ink"><div><b id="t"></b><small id="d"></small></div><a href="index.html" class="ink">갤러리</a></div>
+<div id="hint" class="ink">톡 누르기 · 꾹 누르기 · 당기기 · 쓰다듬기 · 연타 · 좌우 스와이프</div>
+<div id="bar" class="ink"><button id="prev" class="ink" aria-label="이전">‹</button><div id="dots"></div><button id="next" class="ink" aria-label="다음">›</button></div>
+<div id="fade"></div>
+<script type="module">
+import { ALL, A, B } from './src/variants.js';
+const q=new URLSearchParams(location.search); if(q.has('shot')||q.get('ui')==='0') document.body.classList.add('shot');
+const id=(q.get('v')||'A01').toUpperCase(); const i=Math.max(0,ALL.findIndex(v=>v.id===id)); const v=ALL[i];
+const series=v.id[0]==='A'?A:B, si=series.findIndex(x=>x.id===v.id);
+t.textContent=`${v.id} · ${v.name}`; d.textContent=v.id[0]==='A'?'눈만 있는 시안':'팔 달린 시안';
+dots.innerHTML=series.map((_,k)=>`<i class="${k===si?'on':''}"></i>`).join('');
+const go=k=>{ const n=ALL[(i+k+ALL.length)%ALL.length].id; fade.classList.remove('in'); setTimeout(()=>location.replace(`view.html?v=${n}`),220); };
+prev.onclick=()=>go(-1); next.onclick=()=>go(1);
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});
+document.addEventListener('orb-swipe',e=>go(e.detail));
+let hintT=setTimeout(()=>hint.classList.add('off'),6000); document.addEventListener('orb-touch',()=>{clearTimeout(hintT);hintT=setTimeout(()=>hint.classList.add('off'),1800);});
+await import('./src/orb.js');
+requestAnimationFrame(()=>fade.classList.add('in'));
+</script></body></html>

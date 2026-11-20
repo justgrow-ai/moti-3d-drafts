@@ -1,0 +1,10 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Moti 3D 캐릭터 시안</title>
+<style>body{margin:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:32px 24px;box-sizing:border-box;background:#f3f3f1;color:#0a0a0a;font-family:-apple-system,"SF Pro Text","Pretendard","Noto Sans KR",sans-serif}
+h1{font-size:24px;margin:0 0 6px;letter-spacing:-.02em}a{display:block;background:#fff;border-radius:20px;padding:20px 22px;text-decoration:none;color:inherit;max-width:520px}
+a b{font-size:16px}a small{display:block;color:#8a8a8a;font-size:13px;margin-top:4px}.soon{opacity:.45;pointer-events:none}</style></head><body>
+<h1>Moti 3D 캐릭터 시안</h1>
+<a href="v1/"><b>v1 · 구체·슬라임 20종</b><small>눈만 있는 10종 + 팔 달린 10종 · 터치 인터랙션</small></a>
+<a href="v2/" class="soon" id="v2"><b>v2 · 매트 바디 + 슬라임 팔</b><small>준비 중</small></a>
+<script>fetch('v2/index.html',{method:'HEAD'}).then(r=>{if(r.ok){const a=document.getElementById('v2');a.classList.remove('soon');a.querySelector('small').textContent='매트 재질 · 다양한 몸 · 필요할 때 뻗어 나오는 슬라임 팔';}}).catch(()=>{});</script>
+</body></html>
