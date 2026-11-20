@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#ece7df"><title>MOTI v2 · 매트 슬라임 몸 시안</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#ece7df;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;color:#3a3530;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+#stage{position:fixed;inset:0;z-index:0} #stage canvas{display:block;width:100%;height:100%}
+.ui{position:fixed;z-index:2;left:0;right:0;pointer-events:none}
+.top{top:0;padding:calc(env(safe-area-inset-top) + 14px) 16px 0;display:flex;align-items:flex-start;gap:10px}
+.ttl{flex:1;pointer-events:none} .ttl b{display:block;font-size:19px;letter-spacing:-.02em} .ttl span{font-size:12.5px;opacity:.62}
+.pill{pointer-events:auto;border:0;background:rgba(255,255,255,.66);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:8px 13px;font:600 13px inherit;color:#3a3530;font-family:inherit}
+.nav{display:flex;gap:6px}
+.bot{bottom:0;padding:0 12px calc(env(safe-area-inset-bottom) + 12px)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;pointer-events:auto;scrollbar-width:none} .chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:999px;padding:7px 11px;background:rgba(255,255,255,.55);font:600 12.5px inherit;font-family:inherit;color:#3a3530}
+.chip i{font-style:normal;opacity:.55;font-weight:500;margin-left:4px}
+.ges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;pointer-events:auto}
+.ges button{border:0;border-radius:18px;padding:12px 0 10px;background:rgba(255,255,255,.75);font:700 14px inherit;font-family:inherit;color:#3a3530;box-shadow:0 2px 10px rgba(60,40,20,.06)}
+.ges button small{display:block;font-size:18px;line-height:1.1;margin-bottom:3px}
+.ges button:active,.chip:active,.pill:active{transform:scale(.95)}
+.hint{text-align:center;font-size:11.5px;opacity:.5;margin:8px 0 0;transition:opacity .6s}
+#sheet{position:fixed;inset:0;z-index:5;background:rgba(236,231,223,.96);display:none;overflow:auto;padding:calc(env(safe-area-inset-top) + 16px) 14px 30px}
+#sheet.on{display:block} #sheet h3{margin:4px 4px 12px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid button{border:0;padding:0;background:#fff;border-radius:16px;overflow:hidden;font:600 11px inherit;font-family:inherit;color:#3a3530}
+.grid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:#e9e3da}
+.grid span{display:block;padding:5px 2px 7px}
+.grid button.cur{outline:2.5px solid #3a3530}
+@media (min-width:760px){.bot{max-width:560px;margin:0 auto}.grid{grid-template-columns:repeat(8,1fr)}}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head><body>
+<div id="stage"></div>
+<div class="ui top">
+  <div class="ttl"><b id="name">모찌</b><span id="mood"></span></div>
+  <div class="nav"><button class="pill" id="prev">‹</button><button class="pill" id="all">전체</button><button class="pill" id="next">›</button></div>
+</div>
+<div class="ui bot">
+  <div class="chips" id="chips"></div>
+  <div class="ges">
+    <button data-g="wave"><small>👋</small>인사</button>
+    <button data-g="cheer"><small>🙌</small>만세</button>
+    <button data-g="point"><small>👉</small>가리키기</button>
+    <button data-g="think"><small>🤔</small>고민</button>
+  </div>
+  <p class="hint" id="hint">톡 · 꾹 누르기 · 끌어당기기 · 문지르기 · 연타 · 흔들기 · 빈 곳 탭하면 팔을 뻗어요 · 옆으로 밀면 다음 몸</p>
+</div>
+<div id="sheet"><h3>몸 시안 16종 <button class="pill" id="close">닫기</button></h3><div class="grid" id="grid"></div></div>
+<script type="module">
+import './src/app.js';
+const O = window.ORB, $ = id => document.getElementById(id);
+const chips = $('chips');
+const defs = [
+  ['eye', '눈', O.EYES], ['mouth', '입', O.MOUTHS], ['brow', '눈썹', O.BROWS], ['cheek', '볼', ['없음', '있음']],
+];
+function renderChips() {
+  const S = O.S; chips.innerHTML = '';
+  for (const [k, lab, list] of defs) { const b = document.createElement('button'); b.className = 'chip'; b.innerHTML = `${lab}<i>${list[S.style[k]]}</i>`;
+    b.onclick = () => { O.setStyle(k, (S.style[k] + 1) % list.length); renderChips(); }; chips.appendChild(b); }
+  const c = document.createElement('button'); c.className = 'chip'; const ci = O.PALETTE.indexOf(S.color);
+  c.innerHTML = `색<i>${S.color ? '●' : '기본'}</i>`; if (S.color) c.querySelector('i').style.color = S.color;
+  c.onclick = () => { O.setColor(O.PALETTE[(Math.max(0, ci) + 1) % O.PALETTE.length]); renderChips(); }; chips.appendChild(c);
+  const r = document.createElement('button'); r.className = 'chip'; r.textContent = '기본으로'; r.onclick = () => { O.reset(); renderChips(); }; chips.appendChild(r);
+}
+document.addEventListener('orb-body', e => { const { B, i } = e.detail; $('name').textContent = `${B.id} / ${O.BODIES.length} · ${B.name}`; $('mood').textContent = B.mood; renderChips();
+  document.querySelectorAll('.grid button').forEach((b, j) => b.classList.toggle('cur', j === i)); });
+$('name').textContent = `${O.B.id} / ${O.BODIES.length} · ${O.B.name}`; $('mood').textContent = O.B.mood; renderChips();
+$('prev').onclick = () => O.next(-1); $('next').onclick = () => O.next(1);
+document.querySelectorAll('.ges button').forEach(b => b.onclick = () => { O.gesture(b.dataset.g); navigator.vibrate && navigator.vibrate(8); });
+const grid = $('grid'); O.BODIES.forEach((B, i) => { const b = document.createElement('button'); b.innerHTML = `<img src="shots/bodies/${B.id}.png" alt=""><span>${B.name}</span>`;
+  b.onclick = () => { O.setBody(i); $('sheet').classList.remove('on'); }; grid.appendChild(b); });
+$('all').onclick = () => $('sheet').classList.add('on'); $('close').onclick = () => $('sheet').classList.remove('on');
+document.addEventListener('orb-touch', () => { $('hint').style.opacity = .25; }, { once: true });
+</script>
+</body></html>
