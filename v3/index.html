@@ -89,15 +89,17 @@ const PALETTES=[ // 몸 · 귀안쪽/무늬 · 볼 · 잉크(외곽선·눈·입
   {n:'복숭아', body:'#ffb39b', inner:'#fff0e2', cheek:'#ff7b80', ink:'#3a2420', mouth:'#b9474c', bg:'#fff0e9'},
   {n:'시바', body:'#e9a15a', inner:'#fff3e1', cheek:'#ff9a86', ink:'#2e2018', mouth:'#b5483f', bg:'#f6ecdf'},
   {n:'하늘', body:'#8fc3ff', inner:'#ffffff', cheek:'#ffa0b0', ink:'#1f2c44', mouth:'#c75566', bg:'#eaf3ff'}];
-const PAL_NAMES=PALETTES.map(p=>p.n);
-function applyPalette(s,i){ const p=PALETTES[i]; if (!p) return s; s['팔레트']=i;
+const PAL_NAMES=[...PALETTES.map(p=>p.n),'동물 기본'];
+const FACES=['기본','시바견','고릴라','고양이','기린','티라노','용','뱀','말','소','사자','호랑이'];
+function applyPalette(s,i){ const p=PALETTES[i]; if (!p){ if (s['얼굴']>=2 && typeof ANI!=='undefined'){ s['팔레트']=PALETTES.length; aniColors(s,ANI[s['얼굴']]); return s; } i=0; return applyPalette(s,0); } s['팔레트']=i;
   s['몸색']=hx(p.body); s['몸색섞기']=1; s['팔다리색']=hx(p.body); s['배경색']=hx(p.bg); s['배경그라데이션']=false;
   s['얼굴무늬색']=hx(p.inner); s['귀안쪽색']=hx(p.inner); s['볼색']=hx(p.cheek); s['잉크색']=hx(p.ink); s['입안색']=hx(p.mouth);
-  s['발바닥색']=hx(p.cheek); s['발톱색']=hx(p.inner); s['손색상']=hx(p.cheek); return s; }
+  s['발바닥색']=hx(p.cheek); s['발톱색']=hx(p.inner); s['손색상']=hx(p.cheek);
+  if (s['얼굴']>=2){ const b=hx(p.body), k=hx(p.ink); s['무늬색']={r:b.r*0.45+k.r*0.55,g:b.g*0.45+k.g*0.55,b:b.b*0.45+k.b*0.55,a:1}; } return s; }
 function ver3Defaults(s){ applyPalette(s,0);
   s['표정모드']=0; s['입모양']=1; s['볼터치']=1; s['하이라이트']=true; s['눈색']=0; s['외곽선']=true; s['외곽선두께']=0.05;
   s['테두리빛세기']=0; s['빛통과']=0; s['클리어코트']=0; s['반사']=0; s['환경반사']=0; s['바닥그림자']=false; s['스튜디오배경']=false; s['안쪽빛남']=0; s['질감']=0; s['벨벳']=0;
-  s['쓰다듬기감지']=true; s['일렁임크기']=0.04; return s; }
+  s['쓰다듬기감지']=true; s['일렁임크기']=0.04; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; s['얼굴']=0; s['무늬색']=hx('#8a6a50'); return s; }
 const BG_PRESETS=[
   {n:'기본 (지금·어두운 남색)', c:hx('#0b0b12')},
   {n:'흰색', c:hx('#ffffff')},{n:'연회색', c:hx('#eceef1')},{n:'검정', c:hx('#000000')},
@@ -131,7 +133,9 @@ const MAT_PRESETS=[
 const MAT_NAMES=MAT_PRESETS.map(p=>p.n);
 const SCHEMA = [
  {h:'ver3 플랫', f:[
-  {k:'팔레트',t:'enum',o:PAL_NAMES,d:0,onSet:()=>applyPalette(S,S['팔레트']),tip:'몸·귀 안쪽·볼·잉크·배경 색을 한 번에 바꿔요'},
+  {k:'얼굴',t:'enum',o:FACES,d:0,onSet:()=>applyFace(S,S['얼굴']),tip:'동물 얼굴 (머리 모양·무늬·뿔·갈기 등). 동물마다 기본 색이 있고 팔레트로 바꿀 수 있어요'},
+  {k:'팔레트',t:'enum',o:PAL_NAMES,d:0,onSet:()=>applyPalette(S,S['팔레트']),tip:'몸·귀 안쪽·볼·잉크·배경 색을 한 번에 바꿔요 (동물 기본 = 동물 얼굴 고유 색)'},
+  {k:'무늬색',t:'color',d:C(0.54,0.42,0.31),tip:'동물 얼굴: 줄무늬·반점·갈기 색'},
   {k:'외곽선',t:'bool',d:true,tip:'몸·귀·팔다리 테두리에 어두운 선 (끄면 면 색만)'},
   {k:'외곽선두께',r:[0.01,0.14],d:0.05},
   {k:'눈색',t:'enum',o:['잉크 눈 (점 하이라이트)','흰 눈 + 검은자'],d:0},
@@ -330,13 +334,21 @@ function toUnityJSON(s){
   for (const k in FIELDS) if (!(k in o)) o[k]=clone(s[k]);
   return o;
 }
-const LS_KEY = 'moti-tuning-web-ver3';
+const LS_KEY = 'moti-tuning-web-ver3b';
 let S = defaults();
 try { const saved = localStorage.getItem(LS_KEY); if (saved) S = applyJSON(defaults(), JSON.parse(saved)); } catch(e){}
 let saveT = 0; function save(){ clearTimeout(saveT); saveT = setTimeout(()=>{ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }, 150); }
 
 // ============================================================ Unity 수학 (왼손 좌표계 그대로 계산)
-const R = 2.2, LAT = 96, LON = 128, TN = 8;
+const QS=new URLSearchParams(location.search), MOB=matchMedia('(pointer:coarse)').matches||Math.min(screen.width,screen.height)<700;
+const LOWQ=QS.get('q')==='low'||(MOB&&QS.get('q')!=='hi'), DEBUG=QS.has('debug');
+// 오류 한 곳이 전체를 멈추지 않게: 모아서 (?debug=1 이면) 화면 구석에 보여줘요
+const ERRS=[]; function reportErr(e,where){ const m=(where?where+': ':'')+((e&&e.message)||String(e)); const f=ERRS.find(x=>x.m===m); if (f){ f.n++; return; } ERRS.push({m,n:1}); if (ERRS.length>8) ERRS.shift(); console.error('[moti]',m,(e&&e.stack)||''); }
+addEventListener('error',e=>reportErr(e.error||e.message,'window')); addEventListener('unhandledrejection',e=>reportErr(e.reason,'promise'));
+const SAFE=(f,n)=>{ try{ f(); }catch(e){ reportErr(e,n); } };
+let NEED_N=false;   // 법선 쓰는 재질이 없어요
+const OLU={on:true, scale:1};   // 실루엣 외곽선 (마스크 해상도 배율)
+const R = 2.2, LAT = LOWQ?72:96, LON = LOWQ?96:128, TN = 8;   // 폰: 몸 정점 12.5k → 7k
 const D2R = Math.PI/180, R2D = 180/Math.PI;
 const clamp = (x,a,b)=>x<a?a:x>b?b:x, clamp01 = x=>clamp(x,0,1), lerp=(a,b,t)=>a+(b-a)*t;
 const v3 = (x=0,y=0,z=0)=>[x,y,z];
@@ -374,7 +386,15 @@ function makeGeo(V,T,dynamic){
 const view = document.getElementById('view');
 const renderer = new THREE.WebGLRenderer({antialias:true, stencil:true});
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const PRMAX=Math.min(devicePixelRatio, LOWQ?1.5:2); renderer.setPixelRatio(PRMAX);
+// 품질 자동 조절: FPS가 낮으면 해상도 → 부품 외곽선 → 물리 스텝 순서로 낮춰요 (?q=hi 고정, ?cap=1 끔)
+const QL={lvl:0, fps:60, fc:0, ft:performance.now(), low:0, good:0, downs:0, partOL:true, maxStep:3, auto:!QS.has('cap')&&QS.get('q')!=='hi',
+  levels:[{pr:PRMAX},{pr:Math.min(PRMAX,1.5)},{pr:Math.min(PRMAX,1.25)},{pr:1,ol:0.7},{pr:0.85,ol:0.6,maxStep:2}].filter((l,i,a)=>i===0||l.pr<a[i-1].pr||l.ol)};
+function applyQL(){ const L=QL.levels[QL.lvl]; renderer.setPixelRatio(L.pr); QL.maxStep=L.maxStep||3; OLU.scale=L.ol||1; if (typeof resize==='function') resize(); }
+let GL_LOST=false, GL_RESTORED=0, IDLEF=0;
+document.addEventListener('visibilitychange',()=>{ if (!document.hidden){ last=performance.now(); acc=0; } });
+renderer.domElement.addEventListener('webglcontextlost',e=>{ e.preventDefault(); GL_LOST=true; reportErr('WebGL context lost','gl'); },false);
+renderer.domElement.addEventListener('webglcontextrestored',()=>{ GL_LOST=false; GL_RESTORED++; last=performance.now(); acc=0; },false);
 view.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b12);
@@ -420,10 +440,11 @@ function stdMat(color, smooth, gradient, yOff, extra){   // ver3: 조명·반사
   m.customProgramCacheKey = () => (gradient ? 'flatBody' : 'flatStd') + (extra ? 'X' : '');
   return m; }
 const bodyMat = stdMat(0xffffff, 0.5, true);
-const OUTLINE={w:{value:0.05},c:{value:new THREE.Color(0.17,0.14,0.13)}};
+const OUTLINE={w:{value:0.05},c:{value:new THREE.Color(0.17,0.14,0.13)},px:{value:3},res:{value:new THREE.Vector2(1,1)}};
 const rimMat = new THREE.ShaderMaterial({   // ver3: 림 글로우 대신 뒤집은 껍질 외곽선 (단색)
-  uniforms:{uPush:{value:0},uPower:{value:3.2},uGain:{value:1.1},uA:{value:new THREE.Color()},uB:{value:new THREE.Color()},uTime:timeU,uOW:OUTLINE.w,uOC:OUTLINE.c},
-  vertexShader:`uniform float uOW; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); vec3 vn=normalize(normalMatrix*normal); mv.xyz+=vn*uOW*(0.6+0.4*clamp(-mv.z/14.0,0.0,2.0)); gl_Position=projectionMatrix*mv; }`,
+  uniforms:{uPush:{value:0},uPower:{value:3.2},uGain:{value:1.1},uA:{value:new THREE.Color()},uB:{value:new THREE.Color()},uTime:timeU,uOW:OUTLINE.w,uOC:OUTLINE.c,uPx:OUTLINE.px,uRes:OUTLINE.res},
+  vertexShader:`uniform float uPx; uniform vec2 uRes; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); vec3 vn=normalize(normalMatrix*normal); vec4 c=projectionMatrix*mv; vec4 cn=projectionMatrix*vec4(vn,0.0); vec2 sn=(cn.xy*c.w-c.xy*cn.w)*uRes; float l=length(sn); if (l>1e-6) c.xy+=sn/l*uPx*2.0/uRes*c.w; gl_Position=c; }`,
+  depthTest:false, depthWrite:false, stencilWrite:true, stencilRef:1, stencilFunc:THREE.NotEqualStencilFunc, stencilFail:THREE.KeepStencilOp, stencilZFail:THREE.KeepStencilOp, stencilZPass:THREE.KeepStencilOp,
   fragmentShader:`uniform vec3 uOC; void main(){ gl_FragColor=vec4(uOC,1.0); }`,
   side:THREE.BackSide });
 const eyeMat = (c, stencil) => { const m = new THREE.MeshBasicMaterial({color:c, depthTest:false, depthWrite:false, transparent:true, side:THREE.DoubleSide, fog:false});
@@ -459,7 +480,7 @@ const bodyGeo = makeGeo(bodyRestV, bodyIdx, true);
 const seams = (()=>{ const map=new Map(); for (let i=0;i<NV;i++){ const key=Math.round(rest[i*3]*1000)+','+Math.round(rest[i*3+1]*1000)+','+Math.round(rest[i*3+2]*1000); if(!map.has(key)) map.set(key,[]); map.get(key).push(i);} return [...map.values()].filter(l=>l.length>1); })();
 const body = new THREE.Mesh(bodyGeo, bodyMat); body.frustumCulled=false; hupi.add(body);
 const partRim=rimMat.clone(); partRim.uniforms={...rimMat.uniforms,uPush:{value:0}};
-const rim = new THREE.Mesh(bodyGeo, rimMat); rimMat.uniforms.uPush.value=0.033; rim.frustumCulled=false; hupi.add(rim);
+const rim = new THREE.Mesh(bodyGeo, rimMat); rimMat.uniforms.uPush.value=0.033; rim.frustumCulled=false; rim.renderOrder=10; hupi.add(rim);
 
 // ============================================================ 모양 (Heart + 새 모양들)
 let SX=0,SY=0,SZ=0, DX=0,DY=0,DZ=0;
@@ -495,11 +516,16 @@ function shapeP(k,u){
     case 3: case 6: { tmpR.length=0; for (const b of BALLS[k]) tmpR.push(sph(u,b[0],b[1])); r=smax(tmpR,0.07);
               if (k===3){ if (y<-0.05) r=smin(r,0.6/(-y),0.05); zs=0.85; } else zs=0.78; r*=1.08; break; }
     case 7: { const fw=1+0.1*Math.max(0,y); tmpR.length=0; tmpR.push(ell(u,1.05*fw,0.95,0.92)); for (const e of SHIBA) tmpR.push(ellR(u,e[0],e[1])); r=smax(tmpR,SHIBA_K); break; }
+    case 100: { const D=ANI[ANIK]; tmpR.length=0; tmpR.push(ell(u,D.base[0],D.base[1],D.base[2])); for (const e of D.sh) tmpR.push(ellR(u,e[0],e[1])); r=smax(tmpR,D.k||0.07); break; }
     case 8: { tmpR.length=0; tmpR.push(ell(u,1.08,0.95,0.88)); for (const b of BALLS[8]) tmpR.push(sph(u,b[0],b[1])); r=smax(tmpR,0.06); if (z<-0.05) r=smin(r,0.95/(-z),0.05); break; }
   }
   SX=x*r; SY=y*r; SZ=z*r*zs; }
+let SHA=null, SHI=-1;   // 정점별 모양 결과 캐시 (몸·소품)
+function shapeKey(){ return (ANIK>=0?'a'+ANIK:S['모양'])+'|'+S['모양정도']+'|'+S['위홈깊이']+'|'+S['아래뾰족']+'|'+S['앞뒤두께']; }
+function shapeCache(arr,src,n){ for (let i=0;i<n;i++){ shape(src[i*3],src[i*3+1],src[i*3+2]); arr[i*3]=SX; arr[i*3+1]=SY; arr[i*3+2]=SZ; } }
 function shape(px,py,pz){
-  const k=S['모양'], A=S['모양정도'];
+  if (SHA!==null){ const j=SHI*3; SX=SHA[j]; SY=SHA[j+1]; SZ=SHA[j+2]; return; }
+  const k=ANIK>=0?100:S['모양'], A=ANIK>=0?1:S['모양정도'];
   if (k===0 || A<=0){ SX=px; SY=py; SZ=pz; return; }
   if (k===2){ // Heart(p) — Unity 그대로
     const x=px/R, y=py/R, z=pz/R, up=Math.max(0,y), dn=Math.max(0,-y), lo=S['아래뾰족'];
@@ -584,7 +610,7 @@ vec4 minEye(vec2 p){
   else if (uMHi>0.5){ // ver3: 잉크 눈 위 단색 점 하나
     float rr=min(rx,ryF); float hr=0.24*rr; vec2 hc=vec2(0.34*rx,0.4*ryF*clamp(uMO,0.,1.));
     float dh=length(vec2(c.x,yb)-hc)-hr; float ah=fwidth(dh)*0.75+1e-4;
-    float hv=smoothstep(0.45,0.75,clamp(uMO,0.,1.))*(1.-smoothstep(0.3,0.6,abs(uMB)))*(1.-smoothstep(0.15,0.5,uMC));
+    float hv=step(0.6,uMO)*step(abs(uMB),0.45)*step(uMC,0.3);
     col=mix(col,vec3(1.),(1.-smoothstep(-ah,ah,dh))*hv); }
   if (uRing>0.5){ float rw=0.05*Z; col=mix(col,uPupilC,smoothstep(-rw-a,-rw+a,d)); }
   return vec4(col,al); }
@@ -706,10 +732,13 @@ function rebuildEyes(){ builtEye=S['눈모양']; const st=EYE_STYLE[builtEye];
 
 // ---- 입 (셰이더 한 장: 선 → 벌린 입 → 오 → 이빨 → 혀가 부드럽게 바뀌어요)
 const MOUTH_FS=`precision highp float; varying vec2 vP;
-uniform float uW,uC,uO,uR,uWave,uTeeth,uTongue,uVis,uTime,uLW; uniform vec3 uLine,uIn;
+uniform float uW,uC,uO,uR,uWave,uTeeth,uTongue,uVis,uTime,uLW,uOm; uniform vec3 uLine,uIn;
 vec4 acc; void over(vec3 c,float a){ a=clamp(a,0.,1.); float na=a+acc.a*(1.-a); if(na>1e-5) acc.rgb=(c*a+acc.rgb*acc.a*(1.-a))/na; acc.a=na; }
 float fill(float d,float aa){ return 1.-smoothstep(-aa,aa,d); }
-float baseY(float t){ return uC*t*t-uC*0.35+uWave*0.045*sin(t*9.42+uTime*4.); }
+float baseY(float t){ float q=2.*abs(t)-1.; return uC*t*t-uC*0.35+uWave*0.045*sin(t*9.42+uTime*4.)-uOm*0.075*(1.-q*q); }
+float yUf(float t){ float e=max(0.,1.-t*t); return baseY(t)+uO*mix(0.16,1.,uR)*pow(e,mix(0.9,0.5,uR)); }
+float yLf(float t){ float e=max(0.,1.-t*t); return baseY(t)-uO*pow(e,mix(0.7,0.5,uR)); }
+float sdSegM(vec2 p,vec2 a,vec2 b){ vec2 pa=p-a,ba=b-a; float h=clamp(dot(pa,ba)/max(dot(ba,ba),1e-8),0.,1.); return length(pa-ba*h); }
 void main(){ vec2 p=vP; float aa=max(fwidth(p.x),fwidth(p.y))*1.1; acc=vec4(0.);
   float W=max(uW,0.02), t=p.x/W, tc=clamp(t,-1.,1.), e=max(0.,1.-tc*tc);
   float b=baseY(tc);
@@ -727,11 +756,12 @@ void main(){ vec2 p=vP; float aa=max(fwidth(p.x),fwidth(p.y))*1.1; acc=vec4(0.);
     over(vec3(1.,0.55,0.6),tm); over(vec3(0.8,0.3,0.4),tm*(1.-smoothstep(0.006,0.014,abs(p.x)))*step(p.y,ty0+0.04)*0.7); }
   // 선 (입술 가장자리, 양 끝은 둥글게)
   float lw=uLW*(1.+uR*0.3);
-  float d=min(abs(p.y-yu),abs(p.y-yl)); d=abs(t)<=1.?d:1e3;
-  for (int s=0;s<2;s++){ float sg=s==0?-1.:1.; d=min(d,length(p-vec2(sg*W,baseY(sg)))); }
+  float d=1e3; vec2 pu=vec2(-W,yUf(-1.)), pl=pu; bool op=uO>0.004;
+  for (int i=1;i<=36;i++){ float tt=-cos(3.14159265*float(i)/36.); vec2 cu=vec2(tt*W,yUf(tt)); d=min(d,sdSegM(p,pu,cu)); pu=cu;
+    if (op){ vec2 cl=vec2(tt*W,yLf(tt)); d=min(d,sdSegM(p,pl,cl)); pl=cl; } }
   over(uLine,fill(d-lw,aa));
   gl_FragColor=vec4(acc.rgb,acc.a*uVis); }`;
-const mouthU={uW:{value:0.3},uC:{value:0},uO:{value:0},uR:{value:0},uWave:{value:0},uTeeth:{value:0},uTongue:{value:0},uVis:{value:0},uTime:timeU,uLW:{value:0.026},uLine:{value:new THREE.Color()},uIn:{value:new THREE.Color()}};
+const mouthU={uW:{value:0.3},uC:{value:0},uO:{value:0},uR:{value:0},uWave:{value:0},uTeeth:{value:0},uTongue:{value:0},uVis:{value:0},uTime:timeU,uLW:{value:0.026},uOm:{value:0},uLine:{value:new THREE.Color()},uIn:{value:new THREE.Color()}};
 const mouthQ=new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.2),new THREE.ShaderMaterial({uniforms:mouthU,vertexShader:EYE_VS,fragmentShader:MOUTH_FS,transparent:true,depthTest:false,depthWrite:false,side:THREE.DoubleSide}));
 mouthQ.renderOrder=3999; mouthQ.frustumCulled=false; const mouthG=new THREE.Group(); mouthG.add(mouthQ); hupi.add(mouthG);
 
@@ -1407,7 +1437,9 @@ function UpdateEyes(tt){
   UpdateMouth(tt,lt); }
 function UpdateMouth(tt,lt){
   const shiba=S['모양']===7 && S['모양정도']>0.3; let home, ang=0, sc=S['눈크기'];
+  const AD=ANIK>=0?ANI[ANIK]:null; mouthU.uOm.value=AD?(AD.om||0):0;
   if (shiba){ home=mul(faceU(0,-0.088),R); sc=0.5; }
+  else if (AD){ home=mul(norm(AD.mouth),R); sc=AD.ms; }
   else { const a=EYE[0].home, b=EYE[1].home; let dx=b[0]-a[0], dy=b[1]-a[1]; const dl=Math.hypot(dx,dy)||1; dx/=dl; dy/=dl; let px=-dy, py=dx; if (py>0){ px=-px; py=-py; }
     const off=0.62*S['눈크기']*Math.max(0.8,Math.min(1.3,dl/0.98)); let mx=(a[0]+b[0])/2+px*off+dx*Pc.mX, my=(a[1]+b[1])/2+py*off+dy*Pc.mX;
     home=[mx,my,-Math.sqrt(Math.max(0.01,R*R-mx*mx-my*my))]; ang=Math.atan2(dy,dx)*R2D*0.7; }
@@ -1475,7 +1507,7 @@ const earMat=stdMat(0xffffff,0.5,true,0,sh=>{ sh.uniforms.uEarC=earInnerU.c; sh.
   sh.fragmentShader='varying vec3 vEarN; varying vec3 vEarP; uniform vec3 uEarC; uniform float uEarOn; uniform float uEarSide;\n'+sh.fragmentShader.replace('diffuseColor.rgb *= 1.0-0.3*smoothstep(0.45,0.55,clamp(vGroove,0.0,1.0));','diffuseColor.rgb *= 1.0-0.3*smoothstep(0.45,0.55,clamp(vGroove,0.0,1.0));\n  { float fr_=normalize(vEarN).z*uEarSide; diffuseColor.rgb=mix(diffuseColor.rgb,uEarC,smoothstep(0.8,0.86,fr_)*uEarOn); }'); });
 function addPart(list, geo, mat, rimScale){
   const o=new THREE.Group(); hupi.add(o); const m=new THREE.Mesh(geo,mat); m.frustumCulled=false; o.add(m);
-  const r=new THREE.Mesh(geo,partRim); r.scale.setScalar(rimScale); r.frustumCulled=false; o.add(r); return o; }
+  const r=new THREE.Mesh(geo,partRim); r.renderOrder=10; r.frustumCulled=false; o.add(r); return o; }
 function clearParts(list){ for (const e of list){ hupi.remove(e.t); e.t.children[0].geometry.dispose(); if (e.ownMat) e.ownMat.dispose(); } list.length=0; }
 function AddBodyEar(k,mirror){
   const V=[],T=[],W=[]; let anchor, own=null;
@@ -1664,7 +1696,7 @@ function limbSpecsV2(k){
 const limbs=[]; let builtLK='', builtLimb=-1, builtTail=null, limbLift=0, sq=0, sqV=0, forceSq=null;
 const limbSkin=stdMat(0xffffff,0.5,false); limbSkin.vertexColors=true;
 const limbClaw=stdMat(0xffffff,0.75,false), limbPad=stdMat(0xffffff,0.45,false);
-const limbRim=rimMat.clone(); limbRim.uniforms.uTime=timeU; limbRim.uniforms.uPush.value=0; limbRim.uniforms.uOW=OUTLINE.w; limbRim.uniforms.uOC=OUTLINE.c;
+const limbRim=rimMat.clone(); limbRim.uniforms.uTime=timeU; limbRim.uniforms.uPush.value=0; limbRim.uniforms.uOW=OUTLINE.w; limbRim.uniforms.uOC=OUTLINE.c; limbRim.uniforms.uPx=OUTLINE.px; limbRim.uniforms.uRes=OUTLINE.res;
 function RebuildLimbs(){
   for (const e of limbs){ hupi.remove(e.t); e.geo.dispose(); } limbs.length=0;
   builtLimb=S['팔다리']; builtTail=S['꼬리']; limbLift=0;
@@ -1678,7 +1710,7 @@ function RebuildLimbs(){
     const pa=new THREE.BufferAttribute(pos,3); pa.setUsage(THREE.DynamicDrawUsage);
     geo.setAttribute('position',pa); geo.setAttribute('color',new THREE.BufferAttribute(col,3)); geo.setIndex(idx); geo.computeVertexNormals();
     const t=new THREE.Group(); hupi.add(t); const me=new THREE.Mesh(geo,[limbSkin,limbClaw,limbPad]); me.frustumCulled=false; t.add(me);
-    const rm=new THREE.Mesh(geo,limbRim); rm.frustumCulled=false; t.add(rm); // 같은 표면에 테두리빛 (부풀린 껍질 X → 부품 겹침에 빛줄이 안 생겨요)
+    const rm=new THREE.Mesh(geo,limbRim); rm.frustumCulled=false; rm.renderOrder=10; t.add(rm); // 같은 표면에 테두리빛 (부풀린 껍질 X → 부품 겹침에 빛줄이 안 생겨요)
     let dir=norm(sp.dir); if (mirror) dir=[-dir[0],dir[1],dir[2]];
     let minY=0; for (const v of V) minY=Math.min(minY,v[1]);
     // 뿌리 쪽 법선을 몸 표면 법선으로 섞을 가중치 (몸과 만나는 선의 명암 단차 제거)
@@ -1746,11 +1778,149 @@ const mouth=(()=>{ const strokes=[], N=14;
 function UpdateFace(tt){ const on=S['모양']===7 && S['모양정도']>0.05, A=S['모양정도'];
   maskU.amt.value=on?A*S['얼굴무늬']:0; maskU.brow.value=on&&S['눈썹점']?A*S['얼굴무늬']:0;
   const c=S['얼굴무늬색']; maskU.ura.value.setRGB(c.r,c.g,c.b); maskU.browC.value.setRGB(c.r*0.92,c.g*0.74,c.b*0.52);
+  ANIK=S['얼굴']>=2&&ANI[S['얼굴']]?S['얼굴']:-1; if (ANIK>=0){ maskU.amt.value=1; maskU.brow.value=1; const p_=S['무늬색']; maskU.browC.value.setRGB(p_.r,p_.g,p_.b); }
   nose.visible=on; mouth.me.visible=on && A>0.3 && Pc.mVis<0.08;
   if (!on) return; const {q,nn}=surf(mul(noseDir,R),tt); setTRS(nose,add(q,mul(nn,-0.02)),qLook(mul(nn,-1),UP),(0.35+0.65*A)*1.3); }
-function faceMesh(){ if (!mouth.me.visible) return; const pa=mouth.geo.attributes.position.array, V=mouth.rest;
+function faceMesh(){ SAFE(aniMesh,'animal'); if (!mouth.me.visible) return; const pa=mouth.geo.attributes.position.array, V=mouth.rest;
   for (let i=0;i<V.length;i++){ deform(V[i][0],V[i][1],V[i][2],time); pa[i*3]=DX; pa[i*3+1]=DY; pa[i*3+2]=-DZ; } mouth.geo.attributes.position.needsUpdate=true; }
 function applyShibaPreset(){ S['귀']=1; S['모양정도']=1; S['왼눈위치']={x:-0.6,y:0.5}; S['오른눈위치']={x:0.6,y:0.5}; S['눈크기']=0.85; S['눈간격']=1; S['눈높이']=0; }
+
+// ============================================================ ver3: 동물 얼굴 10종 (시바견 + 고릴라 … 호랑이)
+// 머리 모양 = 단위 구 위 타원체 합(smax), 무늬 = 정점 마스크 2채널(밝은 면 / 무늬), 소품 = 몸 표면 좌표로 만든 메시를 매 프레임 같은 변형으로 따라가요
+const SP=(d,h=0)=>mul(norm(d),R*(1+h));
+const circ=(x,y,cx,cy,rx,ry)=>{ const d=Math.hypot((x-cx)/rx,(y-cy)/(ry||rx)), e=Math.max(0.1,0.035/Math.min(rx,ry||rx)); return sstep(1+e,1-e,d); };   // 경계 폭을 정점 간격보다 넓게 → 매끈한 경계
+const band=(v,w)=>w<=0.004?0:sstep(w+0.035,w-0.035,Math.abs(v));
+const angD=(u,d)=>Math.acos(Math.max(-1,Math.min(1,dot(u,norm(d)))));
+const FIB=(n,seed)=>{ const P=[]; for (let i=0;i<n;i++){ const j=0.16*Math.sin(i*12.9898+seed*78.233), y=Math.max(-0.99,Math.min(0.99,1-2*(i+0.5)/n+j*0.3)), r=Math.sqrt(1-y*y), a=i*2.39996+seed+j; P.push([r*Math.cos(a),y,r*Math.sin(a)]); } return P; };
+const cell12=(u,P)=>{ let d1=9,d2=9; for (const p of P){ const d=Math.hypot(u[0]-p[0],u[1]-p[1],u[2]-p[2]); if (d<d1){ d2=d1; d1=d; } else if (d<d2) d2=d; } return [d1,d2]; };
+const GCELL=FIB(46,1.3), TSPOT=FIB(34,4.1);
+const bothS=f=>[-1,1].flatMap(f);
+const Ep=(u,h,r,col,o={})=>({t:'E',u,h,r,col,...o});
+const Tb=(pts,rad,col,o={})=>({t:'T',pts,rad,col,...o});
+const rel=(b,...ds)=>{ const out=[b]; for (const d of ds) out.push(add(b,d)); return out; };
+const FRONT=[0,0,-1];
+const roundEar=(s,d,h,r,o={})=>{ const u=norm([s*d[0],d[1],d[2]]); return [Ep(u,h,r,o.col||'body',{ay:u,az:FRONT}), Ep(u,h,[r[0]*0.62,r[1]*0.6,r[2]*0.6],'inner',{ay:u,az:FRONT,off:r[2]*0.75,rim:false,yo:-r[1]*0.08})]; };
+const sideEar=(s,d,h,r,tilt)=>{ const u=norm([s*d[0],d[1],d[2]]), ay=norm([s,tilt,0]); return [Ep(u,h,r,'body',{ay,az:FRONT}), Ep(u,h,[r[0]*0.6,r[1]*0.7,r[2]*0.5],'inner',{ay,az:FRONT,off:r[2]*0.8,rim:false})]; };
+const nostrils=(dx,y,z,r,col='ink')=>bothS(s=>[Ep([s*dx,y,z],0.012,r,col,{rim:false})]);
+const ANI=[];
+ANI[2]={ n:'고릴라', base:[1.1,0.96,0.92], sh:[[[0,0.24,-0.62],[0.66,0.15,0.36]],[[0,-0.3,-0.56],[0.54,0.38,0.46]]],
+  mask(u){ const [x,y,z]=u, f=-z; const fr=sstep(0.25,0.45,f);
+    const l=Math.max(circ(x,y,-0.25,0.12,0.29),circ(x,y,0.25,0.12,0.29),circ(x,y,0,-0.25,0.5,0.42))*fr;
+    const p=circ(x,y,0,0.33,0.6,0.085)*fr*sstep(0.2,0.3,y+0.0); return [l,p]; },
+  eye:[0.56,0.24,0.8], mouth:[0,-0.44,-0.9], ms:0.85, ear:4,
+  cols:{body:'#5e5856',light:'#cdb7a2',pat:'#9c8777',inner:'#cdb7a2',cheek:'#ff9c8a',ink:'#231f1d',mouth:'#b5483f',bg:'#eef0e8'},
+  props:[Ep([0,-0.1,-1],0.0,[0.3,0.12,0.1],'#3d3734',{rim:false}), ...nostrils(0.085,-0.12,-1,[0.06,0.045,0.04],'#1b1817')] };
+ANI[3]={ n:'고양이', base:[1.1,0.94,0.92], sh:bothS(s=>[[[s*0.12,-0.3,-0.84],[0.18,0.14,0.16]]]),
+  mask(u){ const [x,y,z]=u, f=-z, fr=sstep(0.45,0.6,f);
+    const l=Math.max(circ(x,y,-0.12,-0.3,0.2,0.16),circ(x,y,0.12,-0.3,0.2,0.16),circ(x,y,0,-0.42,0.15,0.11))*fr;
+    const fh=sstep(0.3,0.45,f), p=Math.max(band(x,0.032)*sstep(0.44,0.48,y)*sstep(0.74,0.7,y), Math.max(band(x-0.15-(y-0.5)*0.2,0.026),band(x+0.15+(y-0.5)*0.2,0.026))*sstep(0.47,0.51,y)*sstep(0.68,0.64,y))*fh; return [l,p]; },
+  eye:[0.6,0.3,0.86], mouth:[0,-0.35,-0.94], ms:0.62, om:1, ear:2,
+  cols:{body:'#aab4bb',light:'#fbf7f1',pat:'#7f8a92',inner:'#ffb6b6',cheek:'#ffa3a3',ink:'#262a2e',mouth:'#c4544a',bg:'#eef3f5'},
+  props:[Ep([0,-0.2,-1],0.03,[0.1,0.07,0.06],'#ff8f9a',{rim:false}),
+    ...bothS(s=>[0,1,2].map(k=>{ const b=SP([s*0.33,-0.22-k*0.07,-0.92],-0.01); return Tb(rel(b,[s*0.5,0.03-k*0.04,0.05],[s*0.95,0.07-k*0.11,0.2]),[0.022,0.018,0.01],'ink',{rim:false}); }))] };
+ANI[4]={ n:'기린', base:[1.0,1.0,0.95], sh:[[[0,-0.4,-0.7],[0.44,0.4,0.56]]],
+  mask(u){ const [x,y,z]=u; const l=sstep(0.52,0.44,angD(u,[0,-0.52,-0.85]));
+    const [d1,d2]=cell12(u,GCELL); const p=sstep(0.045,0.075,d2-d1)*sstep(0.5,0.62,angD(u,[0,0.1,-1]))*(1-l); return [l,p]; },
+  eye:[0.66,0.5,0.8], mouth:[0,-0.66,-0.75], ms:0.55, ear:0,
+  cols:{body:'#f7c75a',light:'#f5e2bf',pat:'#c27a3a',inner:'#f3b28d',cheek:'#ff9f86',ink:'#2e2018',mouth:'#b5483f',bg:'#fbf3dc'},
+  props:[...bothS(s=>{ const b=SP([s*0.3,0.95,0.02],-0.06), top=add(b,[s*0.1,0.62,0.04]); return [Tb([b,add(b,[s*0.05,0.32,0.02]),top],[0.1,0.09,0.085],'body'), Ep(norm(top),0,[0.13,0.13,0.13],'#8a4f24',{p:top})]; }),
+    ...bothS(s=>sideEar(s,[0.82,0.5,-0.02],0.1,[0.13,0.32,0.07],0.12)), ...nostrils(0.12,-0.5,-0.86,[0.05,0.06,0.04])] };
+ANI[5]={ n:'티라노', base:[1.02,0.95,0.94], sh:[[[0,-0.15,-0.7],[0.72,0.48,0.62]],[[0,-0.22,-1.0],[0.52,0.36,0.38]]],
+  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.3,-0.36,y-0.1*x*x)*sstep(0.05,0.25,f);
+    const [d1]=cell12(u,TSPOT); const p=sstep(0.14,0.11,d1)*Math.max(sstep(-0.25,0.0,z),sstep(0.6,0.7,y))*(1-l); return [l,p]; },
+  eye:[0.66,0.66,0.8], mouth:[0,-0.36,-0.93], ms:1.3, ear:0,
+  cols:{body:'#86c96f',light:'#eef3b5',pat:'#5d9d4f',inner:'#eef3b5',cheek:'#ff9e8a',ink:'#1f2a1c',mouth:'#c4544a',bg:'#eef6e3'},
+  props:[...bothS(s=>[Ep([s*0.31,0.5,-0.8],0.02,[0.15,0.09,0.09],'pat')]), ...nostrils(0.13,-0.06,-1,[0.06,0.04,0.04]),
+    ...[-0.34,-0.2,-0.07,0.07,0.2,0.34].map(x=>{ const t=x/(0.3*1.3), by=(0.16*t*t-0.056)*1.3-0.03; const b=SP([x/R,-0.36+by/R,-0.93],-0.01); return Tb([b,add(b,[0,-0.17,-0.04])],[0.07,0.01],'#ffffff'); })] };
+ANI[6]={ n:'용', base:[1.0,0.97,0.95], sh:[[[0,-0.22,-0.75],[0.5,0.36,0.58]],...bothS(s=>[[[s*0.15,-0.12,-1.1],[0.11,0.1,0.1]]])],
+  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.32,-0.4,y)*sstep(0.0,0.2,f);
+    const th=Math.acos(Math.max(-1,Math.min(1,y))), ph=Math.atan2(z,x), cs=0.3, row=Math.floor(th/cs), fx=ph*Math.sin(th)/cs+(row%2)*0.5;
+    const lx=fx-Math.floor(fx)-0.5, ly=th/cs-row-0.5; const p=sstep(0.34,0.28,Math.hypot(lx,ly))*sstep(-0.4,-0.2,z)*sstep(-0.3,-0.1,y)*(1-l); return [l,p]; },
+  eye:[0.62,0.55,0.82], mouth:[0,-0.42,-0.9], ms:1.0, ear:0,
+  cols:{body:'#ef6b57',light:'#ffe2a8',pat:'#c94b3e',inner:'#ffe2a8',cheek:'#ffb08f',ink:'#2e1a17',mouth:'#9e2f2a',bg:'#fdeee6'},
+  props:[...bothS(s=>{ const b=SP([s*0.34,0.86,0.2],-0.05); return [Tb(rel(b,[s*0.16,0.5,0.18],[s*0.26,0.86,0.5]),[0.18,0.12,0.03],'#ffd36b')]; }),
+    ...bothS(s=>{ const b=SP([s*0.3,-0.18,-1.0],-0.02); return [Tb(rel(b,[s*0.4,-0.08,0.0],[s*0.8,0.04,0.12],[s*1.05,0.32,0.25]),[0.045,0.036,0.026,0.012],'#ffd36b')]; }),
+    ...[[0,0.92,0.38],[0,0.62,0.78],[0,0.22,0.97]].map(d=>{ const b=SP(d,-0.03); return Tb([b,add(b,mul(norm(d),0.36))],[0.13,0.01],'#ffd36b'); }),
+    ...nostrils(0.15,-0.1,-1,[0.045,0.035,0.035])] };
+ANI[7]={ n:'뱀', base:[1.12,0.86,0.98], sh:[[[0,-0.06,-0.5],[0.78,0.52,0.56]]],
+  mask(u){ const [x,y,z]=u, f=-z; const l=sstep(-0.38,-0.46,y)*sstep(-0.2,0.2,f);
+    const s=Math.atan2(y,-z); let p=0; for (const k of [0.72,1.12,1.52,1.92,2.32,2.72]) p=Math.max(p,sstep(1.08,0.92,Math.abs(x)/0.21+Math.abs(s-k)/0.2));
+    for (const k of [0.25,0.75,1.25,1.75,2.25]) for (const sx of [-1,1]) p=Math.max(p,sstep(1.08,0.92,Math.hypot((x-sx*0.74)/0.09,(Math.atan2(y,-z)-k+0.2)/0.11)));
+    return [l,p*(1-l)]; },
+  eye:[0.7,0.4,0.9], mouth:[0,-0.4,-0.92], ms:1.15, ear:0,
+  cols:{body:'#f3c24f',light:'#fff1c7',pat:'#b06a2e',inner:'#fff1c7',cheek:'#ffa08a',ink:'#2e2018',mouth:'#b5483f',bg:'#f8f1dc'},
+  props:(()=>{ const b=SP([0,-0.43,-0.9],-0.05), m1=add(b,[0,-0.26,-0.16]), m2=add(b,[0,-0.44,-0.16]);
+    return [Tb([b,m1,m2],[0.075,0.065,0.055],'#e8454d',{anim:'flick',piv:b}), ...bothS(s=>[Tb([m2,add(m2,[s*0.13,-0.15,0])],[0.055,0.018],'#e8454d',{anim:'flick',piv:b})]), ...nostrils(0.12,-0.02,-1,[0.04,0.03,0.03])]; })() };
+ANI[8]={ n:'말', base:[0.96,1.0,0.95], sh:[[[0,-0.44,-0.62],[0.5,0.48,0.58]]],
+  mask(u){ const [x,y,z]=u, f=-z; const l=Math.max(sstep(0.47,0.4,angD(u,[0,-0.6,-0.8])), band(x,0.06)*sstep(0.35,0.5,f)*sstep(-0.3,-0.2,y)*sstep(0.62,0.55,y)); return [l,0]; },
+  eye:[0.74,0.42,0.8], mouth:[0,-0.8,-0.6], ms:0.58, ear:1,
+  cols:{body:'#be7f4f',light:'#f4e0c4',pat:'#5a3a29',inner:'#f4b49a',cheek:'#ff9e86',ink:'#2b1d15',mouth:'#a8453d',bg:'#f6ede2'},
+  props:[...[-1,0,1].map(k=>{ const u=norm([k*0.15,0.84-Math.abs(k)*0.05,-0.52]); return Ep(u,0.01,[0.15,0.36,0.07],'pat',{ay:[k*0.55,1,0.4],az:u}); }), ...[[0,0.97,-0.1],[0,0.9,0.42],[0,0.62,0.78],[0,0.25,0.97]].map(d=>Ep(d,0.0,[0.2,0.34,0.16],'pat',{lat:10,lon:14})),
+    ...bothS(s=>[Ep([s*0.17,-0.54,-0.83],0.015,[0.05,0.085,0.04],'ink',{rim:false})])] };
+ANI[9]={ n:'소', base:[1.08,0.95,0.93], sh:[[[0,-0.4,-0.68],[0.64,0.38,0.46]]],
+  mask(u){ const [x,y,z]=u, f=-z; const l=circ(x,y,0,-0.45,0.52,0.3)*sstep(0.35,0.5,f); let p=0; const ph=Math.atan2(z,x);
+    for (const [d,r] of [[[0.55,0.7,-0.45],0.24],[[-0.75,0.35,0.55],0.42],[[0.1,0.95,0.25],0.3],[[0.6,-0.1,0.8],0.4],[[-0.3,-0.45,0.84],0.3]]) p=Math.max(p,sstep(1.06,0.94,angD(u,d)/(r*(1+0.13*Math.sin(5*ph+3*y)))));
+    return [l,p*(1-l)]; },
+  eye:[0.6,0.38,0.82], mouth:[0,-0.64,-0.77], ms:0.62, ear:0,
+  cols:{body:'#fbfaf6',light:'#f8bcb2',pat:'#2f2a28',inner:'#f8bcb2',cheek:'#ffa59a',ink:'#2b2523',mouth:'#b5483f',bg:'#eef5ec'},
+  props:[...bothS(s=>{ const b=SP([s*0.4,0.88,-0.05],-0.04); return [Tb(rel(b,[s*0.2,0.1,0],[s*0.3,0.32,-0.02]),[0.1,0.075,0.03],'#f3e3c2')]; }),
+    ...bothS(s=>sideEar(s,[0.86,0.42,-0.05],0.1,[0.14,0.34,0.07],-0.25)), ...nostrils(0.17,-0.44,-0.88,[0.06,0.045,0.04],'#c46e66')] };
+ANI[10]={ n:'사자', base:[1.0,0.97,0.93], sh:[...bothS(s=>[[[s*0.14,-0.28,-0.85],[0.21,0.16,0.17]]]),[[0,-0.44,-0.78],[0.2,0.13,0.15]]],
+  mask(u){ const [x,y,z]=u, f=-z; return [Math.max(circ(x,y,-0.14,-0.28,0.22,0.17),circ(x,y,0.14,-0.28,0.22,0.17),circ(x,y,0,-0.44,0.17,0.12))*sstep(0.45,0.6,f),0]; },
+  eye:[0.56,0.3,0.82], mouth:[0,-0.36,-0.93], ms:0.6, om:0.8, ear:0,
+  cols:{body:'#f6bb52',light:'#fff2d4',pat:'#c9702e',inner:'#fff2d4',cheek:'#ff9e7c',ink:'#2e1d12',mouth:'#b5483f',bg:'#fbf1df'},
+  props:[...Array.from({length:14},(_,k)=>{ const a=k/14*Math.PI*2, s=Math.sin(60*D2R); return Ep([s*Math.cos(a),s*Math.sin(a),-Math.cos(60*D2R)],0.02,[0.46,0.46,0.3],'pat',{lat:9,lon:14}); }),
+    ...Array.from({length:10},(_,k)=>{ const a=(k+0.5)/10*Math.PI*2, s=Math.sin(100*D2R); return Ep([s*Math.cos(a),s*Math.sin(a),-Math.cos(100*D2R)],0.0,[0.52,0.52,0.32],'pat',{lat:9,lon:14}); }),
+    ...bothS(s=>roundEar(s,[0.4,0.88,-0.26],0.2,[0.25,0.22,0.08])), Ep([0,-0.18,-1],0.03,[0.14,0.1,0.07],'#6b3f2c',{rim:false})] };
+ANI[11]={ n:'호랑이', base:[1.08,0.95,0.92], sh:[...bothS(s=>[[[s*0.13,-0.3,-0.85],[0.2,0.15,0.16]]]),...bothS(s=>[[[s*0.55,-0.28,-0.5],[0.44,0.36,0.42]]])],
+  mask(u){ const [x,y,z]=u, f=-z, ax=Math.abs(x);
+    const l=Math.max(Math.max(circ(x,y,-0.2,-0.3,0.3,0.24),circ(x,y,0.2,-0.3,0.3,0.24),circ(x,y,0,-0.45,0.25,0.14))*sstep(0.35,0.5,f), Math.max(circ(x,y,-0.26,0.43,0.075,0.055),circ(x,y,0.26,0.43,0.075,0.055))*sstep(0.5,0.6,f));
+    let p=Math.max(band(x,0.035*(1-(y-0.5)*1.5))*sstep(0.5,0.54,y)*sstep(0.82,0.78,y), Math.max(band(x-0.15-(y-0.52)*0.25,0.026),band(x+0.15+(y-0.52)*0.25,0.026))*sstep(0.54,0.58,y)*sstep(0.74,0.7,y))*sstep(0.3,0.45,f);
+    for (const k of [0.3,0.06,-0.18]) p=Math.max(p,band(y-k-(ax-0.6)*0.12,0.065*sstep(0.58,0.9,ax)));
+    const ph=Math.atan2(x,z), v=((ph/(2*Math.PI)*10)%1+1)%1-0.5; p=Math.max(p,band(v,0.13*sstep(-0.5,0.3,y))*sstep(0.1,0.3,z));
+    return [l,p*(1-l)]; },
+  eye:[0.58,0.34,0.84], mouth:[0,-0.36,-0.93], ms:0.62, om:0.8, ear:0,
+  cols:{body:'#f68f35',light:'#fff6ea',pat:'#2b2320',inner:'#fff6ea',cheek:'#ff8f7a',ink:'#2b2320',mouth:'#b5483f',bg:'#fff3e3'},
+  props:[...bothS(s=>roundEar(s,[0.55,0.78,-0.15],0.14,[0.26,0.24,0.08])), Ep([0,-0.2,-1],0.03,[0.12,0.085,0.07],'#ff8f9a',{rim:false})] };
+
+let ANIK=-1, aniBuilt=-2; const ANIP=[], ANIMAT={};
+const ANIKEY={body:'몸색',light:'얼굴무늬색',pat:'무늬색',ink:'잉크색',inner:'귀안쪽색'};
+function aniMat(key){ if (!ANIMAT[key]){ ANIMAT[key]=new THREE.MeshBasicMaterial({color:0xffffff,fog:false}); if (key[0]==='#'){ const c=hx(key); ANIMAT[key].color.setRGB(c.r,c.g,c.b); } } return ANIMAT[key]; }
+function aniColorsTick(){ for (const k in ANIKEY){ const m=ANIMAT[k]; if (m){ const c=S[ANIKEY[k]]; m.color.setRGB(c.r,c.g,c.b); } } }
+function frame3(u,ay,az){ let Y,Z;
+  if (!ay){ Z=u; Y=sub(UP,mul(Z,dot(UP,Z))); if (len(Y)<0.25) Y=sub(FRONT,mul(Z,dot(FRONT,Z))); Y=norm(Y); }
+  else { Y=norm(ay); Z=sub(az,mul(Y,dot(az,Y))); if (len(Z)<1e-3) Z=sub(UP,mul(Y,dot(UP,Y))); Z=norm(Z); }
+  return [cross(Y,Z),Y,Z]; }
+const SHIBA_MK=bodyGeo.attributes.aMask.array.slice();
+// 소품은 색(+애니메이션)별로 한 덩어리 지오메트리로 합쳐 그려요 (사자 갈기 24개 → 드로우콜 1개)
+function buildAnimal(){ for (const p of ANIP){ hupi.remove(p.o); p.geo.dispose(); } ANIP.length=0; aniBuilt=ANIK;
+  const mk=bodyGeo.attributes.aMask.array;
+  if (ANIK<0) mk.set(SHIBA_MK); else { const f=ANI[ANIK].mask; for (let i=0;i<NV;i++){ const m=f(norm([rest[i*3],rest[i*3+1],rest[i*3+2]])); mk[i*2]=clamp01(m[0]); mk[i*2+1]=clamp01(m[1]); } }
+  bodyGeo.attributes.aMask.needsUpdate=true; if (ANIK<0) return;
+  const G=new Map();
+  for (const sp of ANI[ANIK].props){ const key=sp.col+'|'+(sp.anim||'')+'|'+(sp.rim===false?1:0); if (!G.has(key)) G.set(key,{b:LB(),sp}); const b=G.get(key).b;
+    if (sp.t==='E'){ const u=norm(sp.u); const [X,Y,Z]=frame3(u,sp.ay,sp.az); let c=sp.p||SP(u,sp.h||0); if (sp.off) c=add(c,mul(Z,sp.off)); if (sp.yo) c=add(c,mul(Y,sp.yo)); ellip(b,c,sp.r,{ax:X,ay:Y,az:Z,lat:sp.lat||(LOWQ?9:12),lon:sp.lon||(LOWQ?13:18)}); }
+    else tube(b,sp.pts,sp.rad,{bone:0,sub:sp.sub||(LOWQ?4:6),su:sp.su||(LOWQ?8:10),cap:3}); }
+  for (const {b,sp} of G.values()){ const geo=makeGeo(b.V,b.T[0],true); let o; if (sp.rim===false){ o=new THREE.Mesh(geo,aniMat(sp.col)); o.frustumCulled=false; o.renderOrder=2; hupi.add(o); } else o=addPart(null,geo,aniMat(sp.col),1);
+    const V=b.V, rr=new Float32Array(V.length*3); for (let i=0;i<V.length;i++){ rr[i*3]=V[i][0]; rr[i*3+1]=V[i][1]; rr[i*3+2]=V[i][2]; }
+    ANIP.push({o,geo,rest:rr,sp,piv:sp.piv||null,sh:new Float32Array(rr.length),shk:''}); }
+  aniColorsTick(); }
+function flickS(t){ const ph=(t%2.2)/2.2; return ph<0.05?ph/0.05:ph<0.55?1-0.12*Math.abs(Math.sin(ph*40)):ph<0.62?1-(ph-0.55)/0.07:0; }
+function aniMesh(){ if (aniBuilt!==ANIK) buildAnimal(); if (ANIK<0) return; aniColorsTick();
+  for (const p of ANIP){ const pa=p.geo.attributes.position.array, V=p.rest, n=V.length/3; let s=1;
+    if (p.sp.anim==='flick'){ s=flickS(time); p.o.visible=s>0.03; if (!p.o.visible) continue; }
+    const q=p.piv, sk=shapeKey(); if (s===1 && p.shk!==sk){ p.shk=sk; SHA=null; shapeCache(p.sh,V,n); }
+    if (s===1) SHA=p.sh;
+    for (let i=0;i<n;i++){ let x=V[i*3],y=V[i*3+1],z=V[i*3+2]; if (s!==1){ x=q[0]+(x-q[0])*s; y=q[1]+(y-q[1])*s; z=q[2]+(z-q[2])*s; }
+      SHI=i; deform(x,y,z,time); pa[i*3]=DX; pa[i*3+1]=DY; pa[i*3+2]=-DZ; }
+    SHA=null; SHI=-1;
+    p.geo.attributes.position.needsUpdate=true; } }
+function aniColors(s,D){ const c=D.cols; s['몸색']=hx(c.body); s['몸색섞기']=1; s['팔다리색']=hx(c.body); s['얼굴무늬색']=hx(c.light); s['무늬색']=hx(c.pat); s['귀안쪽색']=hx(c.inner); s['볼색']=hx(c.cheek); s['잉크색']=hx(c.ink); s['입안색']=hx(c.mouth); s['배경색']=hx(c.bg); s['배경그라데이션']=false; s['발바닥색']=hx(c.cheek); s['발톱색']=hx(c.light); s['손색상']=hx(c.cheek); }
+function applyFace(s,k){ s['얼굴']=k;
+  if (k===0){ if (s['모양']===7) s['모양']=0; s['귀']=1; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; applyPalette(s,s['팔레트']>=PALETTES.length?0:s['팔레트']); }
+  else if (k===1){ s['모양']=7; applyShibaPreset(); applyPalette(s,3); }
+  else { const D=ANI[k]; s['모양']=0; s['귀']=D.ear; s['왼눈위치']={x:-D.eye[0],y:D.eye[1]}; s['오른눈위치']={x:D.eye[0],y:D.eye[1]}; s['눈크기']=D.eye[2]; s['눈간격']=1; s['눈높이']=0; s['팔레트']=PALETTES.length; aniColors(s,D); }
+  return s; }
 
 // ============================================================ 그림자, 파티클
 const shadow = new THREE.Mesh(discGeo(1.6), shadowMat); shadow.renderOrder=3000; root.add(shadow);
@@ -1786,7 +1956,7 @@ function Sfx(kind,vol,pitch){ const buf=kind==='boing'?boingBuf:kind==='pop'?pop
 // ============================================================ 입력
 let W=1,H=1; const M={x:0,y:0,held:false,down:false,up:false,wheel:0};
 const cvs=renderer.domElement;
-const toUnityMouse=e=>{ const r=cvs.getBoundingClientRect(); M.x=e.clientX-r.left; M.y=r.height-(e.clientY-r.top); };
+const toUnityMouse=e=>{ const r=cvs.getBoundingClientRect(); M.init=true; M.x=e.clientX-r.left; M.y=r.height-(e.clientY-r.top); };
 cvs.addEventListener('pointerdown',e=>{ unlockAudio(); toUnityMouse(e); M.held=true; M.down=true; cvs.setPointerCapture(e.pointerId); });
 window.addEventListener('pointermove',e=>toUnityMouse(e));
 window.addEventListener('pointerup',e=>{ if (M.held){ toUnityMouse(e); M.held=false; M.up=true; } });
@@ -2136,7 +2306,7 @@ function step(){
   UpdateActions(tt);
   const s=1+Math.sin(BPH)*S['숨쉬기부풀기']+boing, fy=FX.sy, gw=clamp01(1-FX.off[1]/0.8);
   hPos=add(add(basePos,[0,Math.sin(BPH)*S['숨쉬기위아래']+jump,0]),[FX.off[0],FX.off[1]+((fy-1)*R*0.95-FX.press*R*0.55)*gw,FX.off[2]]);
-  hRot=qMul(qMul(MOT_Q,qEuler(FX.rx,FX.ry,FX.rz)),qEuler(0,-Math.sin(tt/1.4)*0.25*R2D*idleYaw,(0.12-tilt)*R2D));
+  hRot=qMul(qMul(MOT_Q,qEuler(FX.rx,FX.ry,FX.rz)),qEuler(0,-Math.sin(tt/1.4)*0.25*R2D*idleYaw,(-tilt)*R2D));
   const ws=FX.sx/Math.sqrt(Math.max(0.3,fy)); hScl=[ws/s,s*fy,ws/s]; setTRS(hupi,hPos,hRot,hScl); gDown=qRot(qInv(hRot),[0,-1,0]);
   UpdateChain(); grabSim();
 
@@ -2205,37 +2375,64 @@ function limbRootW(){ const key=builtLK+'|'+S['팔크기']+'|'+S['다리크기']
     for (let i=0;i<NV;i++){ const x=rest[i*3], y=rest[i*3+1], z=rest[i*3+2], l=Math.hypot(x,y,z)||1, c=(x*d[0]+y*d[1]+z*d[2])/l; if (c<0.3) continue;
       const dd=R*Math.sqrt(Math.max(0,1-c*c)), w=1-sstep(r0*0.9,r0*1.6+0.1,dd); if (w>LRW[i]) LRW[i]=w; } }
   return LRW; }
+const BSH=new Float32Array(NV*3); let BSHK='', BB=[0,0,0,0,0,0];
 function bodyMesh(){
   const pa=bodyGeo.attributes.position.array, LW=limbRootW();
+  const sk=shapeKey(); if (sk!==BSHK){ BSHK=sk; SHA=null; shapeCache(BSH,rest,NV); }
+  let x0=1e9,y0=1e9,z0=1e9,x1=-1e9,y1=-1e9,z1=-1e9;
   const ta=bodyGeo.attributes.aTint.array, ga=bodyGeo.attributes.aGroove.array, fa=bodyGeo.attributes.aFil.array; let tch=false, gch=false, fch=false;
-  for (let i=0;i<NV;i++){ GVI=GRH&&GRH.active?i:-1; deform(rest[i*3],rest[i*3+1],rest[i*3+2],time); pa[i*3]=DX; pa[i*3+1]=DY; pa[i*3+2]=-DZ; if (ta[i]!==PW){ ta[i]=PW; tch=true; } if (ga[i]!==PG){ ga[i]=PG; gch=true; } if (fa[i]!==PF){ fa[i]=PF; fch=true; } }
-  GVI=-1;
+  SHA=BSH; for (let i=0;i<NV;i++){ GVI=GRH&&GRH.active?i:-1; SHI=i; deform(rest[i*3],rest[i*3+1],rest[i*3+2],time); pa[i*3]=DX; pa[i*3+1]=DY; pa[i*3+2]=-DZ; if (DX<x0) x0=DX; if (DX>x1) x1=DX; if (DY<y0) y0=DY; if (DY>y1) y1=DY; if (DZ<z0) z0=DZ; if (DZ>z1) z1=DZ; if (ta[i]!==PW){ ta[i]=PW; tch=true; } if (ga[i]!==PG){ ga[i]=PG; gch=true; } if (fa[i]!==PF){ fa[i]=PF; fch=true; } }
+  GVI=-1; SHA=null; SHI=-1; BB[0]=x0; BB[1]=y0; BB[2]=-z1; BB[3]=x1; BB[4]=y1; BB[5]=-z0;
   if (LW.__k!==LRWkey){ LW.__k=LRWkey; bodyGeo.attributes.aLR.array.set(LW); bodyGeo.attributes.aLR.needsUpdate=true; }
   if (fch) bodyGeo.attributes.aFil.needsUpdate=true;
   if (gch) bodyGeo.attributes.aGroove.needsUpdate=true;
   if (tch) bodyGeo.attributes.aTint.needsUpdate=true;
-  bodyGeo.attributes.position.needsUpdate=true; bodyGeo.computeVertexNormals();
+  bodyGeo.attributes.position.needsUpdate=true; bodyNormals(); return;
   const n=bodyGeo.attributes.normal.array;
   for (const g of seams){ let x=0,y=0,z=0; for (const k of g){ x+=n[k*3]; y+=n[k*3+1]; z+=n[k*3+2]; } const l=Math.hypot(x,y,z)||1; x/=l; y/=l; z/=l; for (const k of g){ n[k*3]=x; n[k*3+1]=y; n[k*3+2]=z; } }
   bodyGeo.attributes.normal.needsUpdate=true; }
 
-function resize(){ W=view.clientWidth; H=view.clientHeight; renderer.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix(); dist=DIST0(); }
+// 몸 법선: 위도·경도 격자 이웃 차분으로 바로 계산 (computeVertexNormals + 이음매 평균보다 훨씬 가벼워요, 외곽선 껍질용)
+let NSG=0;
+function bodyNormals(){ const P=bodyGeo.attributes.position.array, N=bodyGeo.attributes.normal.array, W1=LON+1;
+  for (let i=1;i<LAT;i++){ const ra=(i-1)*W1, rb=(i+1)*W1, r0=i*W1;
+    for (let j=0;j<=LON;j++){ const ja=j===0?LON-1:j-1, jb=j>=LON-1?(j+1)-LON:j+1, a=(ra+j)*3, b=(rb+j)*3, c=(r0+ja)*3, d=(r0+jb)*3;
+      const ux=P[b]-P[a], uy=P[b+1]-P[a+1], uz=P[b+2]-P[a+2], vx=P[d]-P[c], vy=P[d+1]-P[c+1], vz=P[d+2]-P[c+2];
+      let nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx; const l=NSG/(Math.hypot(nx,ny,nz)||1); const k=(r0+j)*3; N[k]=nx*l; N[k+1]=ny*l; N[k+2]=nz*l; } }
+  for (const [i,i2] of [[0,1],[LAT,LAT-1]]){ let cx=0,cy=0,cz=0; for (let j=0;j<LON;j++){ const k=(i2*W1+j)*3; cx+=P[k]; cy+=P[k+1]; cz+=P[k+2]; } const k0=i*W1*3; let nx=P[k0]-cx/LON, ny=P[k0+1]-cy/LON, nz=P[k0+2]-cz/LON; const l=1/(Math.hypot(nx,ny,nz)||1);
+    for (let j=0;j<=LON;j++){ const k=(i*W1+j)*3; N[k]=nx*l; N[k+1]=ny*l; N[k+2]=nz*l; } }
+  bodyGeo.attributes.normal.needsUpdate=true; }
+{ NSG=1; bodyNormals(); const N=bodyGeo.attributes.normal.array, P=bodyGeo.attributes.position.array, k=((LAT>>1)*(LON+1))*3; NSG=(N[k]*P[k]+N[k+1]*P[k+1]+N[k+2]*P[k+2])<0?-1:1; }
+function resize(){ W=view.clientWidth; H=view.clientHeight; if (!M.init){ M.x=W/2; M.y=H*0.5; } renderer.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix(); dist=DIST0(); }
 new ResizeObserver(resize).observe(view); resize();
 
 let acc=0, paused=false, last=performance.now(); const perf={cpu:0, frames:0};
+const DBGEL=DEBUG?Object.assign(document.createElement('div'),{id:'dbg'}):null;
+if (DBGEL){ DBGEL.style.cssText='position:absolute;left:8px;top:54px;z-index:20;font:11px/1.35 ui-monospace,monospace;color:#2b2320;background:rgba(255,255,255,.8);padding:5px 7px;border-radius:8px;pointer-events:none;white-space:pre;max-width:70vw;overflow:hidden'; view.appendChild(DBGEL); }
+function qlTick(now){ QL.fc++; if (now-QL.ft<1000) return; QL.fps=QL.fc*1000/(now-QL.ft); QL.fc=0; QL.ft=now;
+  if (QL.auto && !document.hidden){ if (QL.fps<42){ QL.low++; QL.good=0; } else if (QL.fps>57){ QL.good++; QL.low=0; } else { QL.low=0; QL.good=0; }
+    if (QL.low>=2 && QL.lvl<QL.levels.length-1){ QL.lvl++; QL.downs++; QL.low=0; applyQL(); }
+    else if (QL.good>=8 && QL.lvl>0 && QL.downs<3){ QL.lvl--; QL.good=0; applyQL(); } }
+  if (DBGEL){ const m=renderer.info.memory; DBGEL.textContent='fps '+QL.fps.toFixed(0)+' · cpu '+perf.cpu.toFixed(1)+'ms · pr '+renderer.getPixelRatio().toFixed(2)+' · 품질 '+QL.lvl+'/'+(QL.levels.length-1)+(LOWQ?' (폰)':'')
+      +'\n정점 '+NV+' · geo '+m.geometries+' · tex '+m.textures+' · draw '+renderer.info.render.calls+(GL_RESTORED?' · GL 복구 '+GL_RESTORED:'')+(GL_LOST?' · GL 끊김':'')
+      +(ERRS.length?'\n'+ERRS.map(e=>'⚠ '+e.m.slice(0,90)+(e.n>1?' ×'+e.n:'')).join('\n'):''); } }
 function frame(now){
+  if (!CAP) requestAnimationFrame(frame);
+  if (GL_LOST){ last=now; return; }
   const dt=Math.min(0.1,(now-last)/1000); last=now; acc+=dt; let n=0;
   const t0=performance.now();
   if (paused) acc=0;
-  while (acc>=1/60-1e-4 && n<4){ step(); acc-=1/60; n++; }
-  if (n===4) acc=0;
-  if (n>0){ bodyMesh(); bodyEarMesh(); skinLimbs(); faceMesh(); }
+  try { while (acc>=1/60-1e-4 && n<QL.maxStep){ step(); acc-=1/60; n++; } } catch(e){ reportErr(e,'step'); acc=0; }
+  if (n>=QL.maxStep) acc=0;
+  const idle=!M.held&&!PTR.size&&!MOT&&!(EX&&!EX.out)&&!GR.pins.length&&time-lastTouch>3&&Math.abs(jumpV)<1e-3; IDLEF=idle?IDLEF+1:0;
+  const drew=n>0&&(!idle||(IDLEF&1)===0||QS.has('cap'));
+  if (drew){ SAFE(bodyMesh,'body'); SAFE(bodyEarMesh,'ears'); SAFE(skinLimbs,'limbs'); SAFE(faceMesh,'face'); }
   perf.cpu=perf.cpu*0.9+(performance.now()-t0)*0.1; perf.frames++;
-  renderer.render(scene,cam); if (!CAP) requestAnimationFrame(frame); }
+  if (drew) SAFE(renderFrame,'render'); qlTick(now); }
 step(); bodyMesh(); bodyEarMesh(); skinLimbs(); faceMesh();
 const CAP=new URLSearchParams(location.search).has('cap');
 if (!CAP) requestAnimationFrame(frame);
-window.__adv=(n=1)=>{ for (let i=0;i<n;i++) step(); bodyMesh(); bodyEarMesh(); skinLimbs(); faceMesh(); renderer.render(scene,cam); };
+window.__adv=(n=1)=>{ for (let i=0;i<n;i++) step(); bodyMesh(); bodyEarMesh(); skinLimbs(); faceMesh(); renderFrame(); };
 
 // ============================================================ 옵션 패널
 const panel=document.getElementById('panel'), fieldsEl=document.getElementById('fields'), refreshers=[];
@@ -2261,7 +2458,7 @@ for (const g of SCHEMA){
   if (g.btns) btnGrid(det,g.btns);
   for (const f of g.f){
     if (f.t==='enum'){ const r=rowEl(f.k,f.tip); const s=document.createElement('select'); f.o.forEach((o,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=o; s.appendChild(op); });
-      s.addEventListener('change',()=>{ S[f.k]=+s.value; if (f.onSet){ f.onSet(); refreshAll(); } if (f.k==='모양' && S['모양']===7) { applyShibaPreset(); refreshAll(); } if (f.k==='표정'){ unlockAudio(); playExpr(EXPRS[S['표정']]); } save(); }); r.appendChild(s); det.appendChild(r); refreshers.push(()=>s.value=S[f.k]); }
+      s.addEventListener('change',()=>{ S[f.k]=+s.value; if (f.onSet){ f.onSet(); refreshAll(); } if (f.k==='모양'){ if (S['모양']===7) applyFace(S,1); else if (S['얼굴']) { const m_=S['모양']; applyFace(S,0); S['모양']=m_; } refreshAll(); } if (f.k==='표정'){ unlockAudio(); playExpr(EXPRS[S['표정']]); } save(); }); r.appendChild(s); det.appendChild(r); refreshers.push(()=>s.value=S[f.k]); }
     else if (f.t==='color'){ const r=rowEl(f.k,f.tip); const c=document.createElement('input'); c.type='color'; c.addEventListener('input',()=>{ S[f.k]=fromHex(c.value); save(); }); r.appendChild(c); det.appendChild(r); refreshers.push(()=>c.value=toHex(S[f.k])); }
     else if (f.t==='bool'){ const r=rowEl(f.k,f.tip); const c=document.createElement('input'); c.type='checkbox'; c.addEventListener('change',()=>{ S[f.k]=c.checked; save(); }); r.appendChild(c); det.appendChild(r); refreshers.push(()=>c.checked=!!S[f.k]); }
     else if (f.t==='vec2'){ for (const ax of ['x','y']) slider(det,f.k+' '+ax.toUpperCase(),f.tip,-2,2,()=>S[f.k][ax],v=>S[f.k][ax]=v,{r:[-2,2]}); }
@@ -2278,15 +2475,24 @@ const fi=document.getElementById('fImport');
 document.getElementById('bImport').onclick=()=>fi.click();
 fi.onchange=async()=>{ const f=fi.files[0]; if (!f) return; try{ S=applyJSON(defaults(),JSON.parse(await f.text())); save(); refreshAll(); }catch(e){ alert('JSON을 읽지 못했어요: '+e.message); } fi.value=''; };
 
+
+// ============================================================ ver3: 실루엣 외곽선 — 면을 먼저 그리며 스텐실에 표시하고, 모든 부위의 껍질(잉크)은 깊이 무시 + 스텐실 바깥에만
+// → 몸·귀·팔다리·소품이 합쳐진 바깥 윤곽에만 선이 남고 안쪽(겹침·접힘) 선은 0개. 두께는 화면 픽셀 기준.
+const _dbs=new THREE.Vector2();
+function markFill(m){ if (Array.isArray(m)){ for (const x of m) markFill(x); return; } if (!m || m.userData.fill || m.transparent || m===rimMat || m===partRim || m===limbRim) return; m.stencilWrite=true; m.stencilRef=1; m.stencilFunc=THREE.AlwaysStencilFunc; m.stencilZPass=THREE.ReplaceStencilOp; m.stencilFail=THREE.KeepStencilOp; m.stencilZFail=THREE.ReplaceStencilOp; m.userData.fill=1; }
+// 면(몸·귀·팔다리·소품)은 스텐실 1을 쓰고, 외곽선 껍질은 스텐실이 비어 있는 곳(= 바깥)에만 칠해요
+function renderFrame(){ root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); renderer.render(scene,cam); }
+
 // ============================================================ ver3: 아래 칩 바 (폰에서 바로 비교)
 const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('ttlSub');
 const hexOf=c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(clamp01(v)*255).toString(16).padStart(2,'0')).join('');
 let exprI=0, motI=0; const MOTS=Object.keys(MOTIONS).filter(n=>!['등장','퇴장','움찔','쓰다듬기 반응'].includes(n)); const EXS=EXPRS.filter(n=>n!=='기본');
 function chip(lab,val,fn,sw){ const b=document.createElement('button'); b.innerHTML=lab+(val!==undefined?'<i>'+val+'</i>':'')+(sw?'<span class="sw" style="background:'+sw+'"></span>':''); b.onclick=()=>{ unlockAudio(); lastTouch=time; fn(); save(); refreshAll(); renderChips(); }; chipsEl.appendChild(b); }
 function renderChips(){ chipsEl.innerHTML='';
-  chip('팔레트',PAL_NAMES[S['팔레트']],()=>applyPalette(S,(S['팔레트']+1)%PALETTES.length),hexOf(S['몸색']));
+  chip('얼굴',FACES[S['얼굴']],()=>applyFace(S,(S['얼굴']+1)%FACES.length));
+  chip('팔레트',PAL_NAMES[S['팔레트']],()=>applyPalette(S,(S['팔레트']+1)%(S['얼굴']>=2?PAL_NAMES.length:PALETTES.length)),hexOf(S['몸색']));
   chip('귀',EARS[S['귀']],()=>{ S['귀']=(S['귀']+1)%EARS.length; });
-  chip('모양',SHAPES[S['모양']],()=>{ S['모양']=(S['모양']+1)%SHAPES.length; if (S['모양']===7) applyShibaPreset(); });
+  chip('모양',SHAPES[S['모양']],()=>{ const m_=(S['모양']+1)%SHAPES.length; if (m_===7) applyFace(S,1); else { if (S['얼굴']) applyFace(S,0); S['모양']=m_; } });
   chip('눈',EYES[S['눈모양']],()=>{ S['눈모양']=(S['눈모양']+1)%EYES.length; });
   chip('입',MOUTHS[S['입모양']],()=>{ S['입모양']=(S['입모양']+1)%MOUTHS.length; });
   chip('표정 ▶',EXS[exprI%EXS.length],()=>{ playExpr(EXS[exprI%EXS.length],'once'); exprI++; });
@@ -2294,12 +2500,14 @@ function renderChips(){ chipsEl.innerHTML='';
   chip('팔다리',LIMBS[S['팔다리']],()=>{ S['팔다리']=(S['팔다리']+1)%LIMBS.length; });
   chip('외곽선',S['외곽선']?'켬':'끔',()=>{ S['외곽선']=!S['외곽선']; });
   chip('눈색',S['눈색']===0?'잉크':'흰 눈',()=>{ S['눈색']=1-S['눈색']; });
-  ttlSub.textContent=PAL_NAMES[S['팔레트']]+' · '+SHAPES[S['모양']]+' · 귀 '+EARS[S['귀']]; }
+  ttlSub.textContent=(S['얼굴']?FACES[S['얼굴']]:SHAPES[S['모양']])+' · '+PAL_NAMES[S['팔레트']]+' · 귀 '+EARS[S['귀']]; }
 renderChips();
 if (innerWidth<700) panel.classList.add('closed');
 cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.opacity=0.3; },{once:true});
 cvs.addEventListener('contextmenu',e=>e.preventDefault());
-window.__v3={ pal(i){ applyPalette(S,i); refreshAll(); renderChips(); }, set(o){ for (const k in o){ S[k]=o[k]; if (k==='모양'&&o[k]===7) applyShibaPreset(); if (k==='팔레트') applyPalette(S,o[k]); } refreshAll(); renderChips(); }, renderChips, st:()=>({hold:+HOLDP.toFixed(2), pins:GR.pins.length, mot:MOT?MOT.name:null, ex:EX&&!EX.out?EX.name:null, gaze:EYE[0].pl.map(v=>+v.toFixed(2)), base:basePos.map(v=>+v.toFixed(2))}) };
+window.__v3={ pal(i){ applyPalette(S,i); refreshAll(); renderChips(); }, set(o){ for (const k in o){ S[k]=o[k]; if (k==='얼굴') applyFace(S,o[k]); if (k==='모양'&&o[k]===7) applyFace(S,1); if (k==='팔레트') applyPalette(S,o[k]); } refreshAll(); renderChips(); }, face:(k)=>{ applyFace(S,k); refreshAll(); renderChips(); },
+  facePts(){ const P_=o=>{ const v=new THREE.Vector3(); o.getWorldPosition(v); v.project(cam); return [+((v.x+1)/2*W).toFixed(1),+((1-v.y)/2*H).toFixed(1)]; }; return {eyeL:P_(EYE[0].g),eyeR:P_(EYE[1].g),mouth:P_(mouthG)}; },
+  q:()=>({lvl:QL.lvl,pr:renderer.getPixelRatio(),fps:+QL.fps.toFixed(1),lost:GL_LOST,restored:GL_RESTORED,errs:ERRS.slice(),mem:{...renderer.info.memory},calls:renderer.info.render.calls,NV,LOWQ}), rot:()=>({hRot:hRot.map(v=>+v.toFixed(4)),hScl:hScl.map(v=>+v.toFixed(3)),yaw:+yaw.toFixed(3),pitch:+pitch.toFixed(3),tilt:+tilt.toFixed(4),cam:[cam.position.x,cam.position.y,cam.position.z].map(v=>+v.toFixed(3)),camQ:[cam.quaternion.x,cam.quaternion.y,cam.quaternion.z,cam.quaternion.w].map(v=>+v.toFixed(4)),root:[root.position.x,root.position.y,root.position.z,root.quaternion.x,root.quaternion.y,root.quaternion.z,root.quaternion.w].map(v=>+v.toFixed(4)),hupiQ:[hupi.quaternion.x,hupi.quaternion.y,hupi.quaternion.z,hupi.quaternion.w].map(v=>+v.toFixed(4))}), loseGL(){ const x=renderer.getContext().getExtension('WEBGL_lose_context'); x.loseContext(); setTimeout(()=>x.restoreContext(),600); }, renderChips, st:()=>({hold:+HOLDP.toFixed(2), pins:GR.pins.length, mot:MOT?MOT.name:null, ex:EX&&!EX.out?EX.name:null, gaze:EYE[0].pl.map(v=>+v.toFixed(2)), base:basePos.map(v=>+v.toFixed(2))}) };
 
 // 테스트용 훅
 window.__moti={ get S(){return S;}, look(kind,i){ S[{bg:'배경',light:'조명',mat:'재질'}[kind]]=i; lookPreset(kind); refreshAll(); }, lookReset(){ const D=defaults(); for (const g of SCHEMA) if (g.h==='화면·재질') for (const f of g.f) S[f.k]=clone(D[f.k]); refreshAll(); }, tipSharp(){ const P=bodyGeo.attributes.position.array, W=LON+1; const out=[];
