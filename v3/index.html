@@ -191,6 +191,7 @@ const SCHEMA = [
   {k:'외곽선',t:'bool',d:true,tip:'몸 바깥 테두리에 선 (끄면 면 색만)'},
   {k:'외곽선두께',r:[0.01,0.14],d:0.05},
   {k:'외곽선색',t:'color',d:C(0.17,0.14,0.13),tip:'바깥 테두리 선 색 (눈 색과 따로)'},
+  {k:'렌즈왜곡',t:'bool',d:true,tip:'부딪히는 순간 캐릭터 주변만 볼록렌즈처럼 휘고 색이 번지며 둥근 테두리가 번쩍 (끄면 비용 0)'},
   {k:'엉덩이',t:'bool',d:true,tip:'뒤 아래쪽에 동글동글한 엉덩이 (몸 살이 그대로 부풀어요). 끄면 천천히 원래 몸으로'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
@@ -1044,7 +1045,7 @@ function UpdateGlyphs(){ for (let i=glyphs.length-1;i>=0;i--){ const g=glyphs[i]
 // ---- 몸 모션 (젤리 체인 물리 위에 얹어서 말랑하게)
 const FX={off:[0,0,0],rx:0,ry:0,rz:0,sy:1,sx:1,press:0,wob:0,walk:0,walkPh:0};
 let MOT=null, MOT_Q=[0,0,0,1], gDown=[0,-1,0], wobPh=0;
-const land=(k=1)=>{ sqV+=0.26*k*S['착지찌그러짐']; boingV-=0.07*k; Sfx('bump',0.5+0.4*k,S['부딪힘소리높이']); if (k>0.6) Sfx('boing',0.35*k,S['튀는소리높이']*1.05); Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.4)|0,0.7); };
+const land=(k=1)=>{ Lens(0.45+0.5*k,0,-1); sqV+=0.26*k*S['착지찌그러짐']; boingV-=0.07*k; Sfx('bump',0.5+0.4*k,S['부딪힘소리높이']); if (k>0.6) Sfx('boing',0.35*k,S['튀는소리높이']*1.05); Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.4)|0,0.7); };
 const launch=(p=1)=>Sfx('boing',0.8,S['튀는소리높이']*p);
 const settle=(k,a=0.3,f=16,d=6)=>1-a*Math.exp(-k*d)*Math.cos(k*f);
 function slerpQ(a,b,t){ let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]; let bb=b; if (d<0){ d=-d; bb=b.map(x=>-x); }
@@ -1227,7 +1228,7 @@ const MOTPATCH={
     else if (t<0.95){ const u=(t-0.05)/0.9; F.off[1]=2.0*k*Math.sin(PI*Math.pow(u,0.72)); F.sy=1+0.36*Math.exp(-u*7)-0.04*pulse(u,0.45,0.1); F.sx=2-F.sy; F.off[0]=0.05*N1(t*40,M.sd); F.rz=6*M.d*sin(t*30)*Math.exp(-t*3); }
     else { const q=t-0.95; F.sy=settle(q,0.3,15,5.5); F.sx=1+0.1*Math.exp(-q*6); } }},
  // ---- 새 모션
- '입 쩌억':{dur:2.7,face:[[0,'놀람'],[1.9,'뿌듯']],ev:[[0.38,()=>Sfx('whoosh',0.3,0.55)],[1.66,()=>{ Sfx('bump',0.7,1.5); Sfx('pop',0.4,0.9); }],[1.95,()=>Sfx('pop',0.25,1.4)],[2.15,()=>Sfx('pop',0.22,1.5)]],
+ '입 쩌억':{dur:2.7,face:[[0,'놀람'],[1.9,'뿌듯']],ev:[[0.38,()=>Sfx('whoosh',0.3,0.55)],[1.66,()=>{ Sfx('bump',0.7,1.5); Lens(0.6,0,0); Sfx('pop',0.4,0.9); }],[1.95,()=>Sfx('pop',0.25,1.4)],[2.15,()=>Sfx('pop',0.22,1.5)]],
   eye(t,A,N,M,sh){ const w=sstep(0.45,0.8,t)*(1-sstep(1.55,1.72,t)); if (sh){ EYW(A,'o',0.3,w); EYW(A,'k',0.35,w); EYW(A,'z',0.95,w); } A.gy+=(0.35-A.gy)*w; },
   f(t,F,k,M){ let j=0;
     if (t<0.38){ const c=eio(seg(t,0,0.38)); F.rx=-7*c; F.sy=1-0.08*c; F.sx=1+0.04*c; j=0.06*c; }   // 턱 당기며 숨 모으기
@@ -1238,7 +1239,7 @@ const MOTPATCH={
     MJAW=j*Math.min(1.25,k); },
   end(){ MJAW=0; }},
  '풍선':{dur:7.2,face:[[0,'뿌듯'],[2.6,'당황'],[4.35,'놀람'],[6.1,'어지러움']],
-  ev:[[0.05,()=>Sfx('whoosh',0.3,0.45)],...[0.5,1.12,1.74].map((s,i)=>[s,()=>Sfx('boing',0.45,0.55+0.18*i)]),[2.6,()=>Sfx('bump',0.3,0.6)],[3.3,()=>Sfx('bump',0.3,0.55)],[4.35,()=>Sfx('pop',0.7,0.7)],[4.4,()=>Sfx('whoosh',0.6,0.5)],[4.9,()=>Sfx('whoosh',0.45,0.7)],[5.5,()=>Sfx('whoosh',0.35,0.9)],[6.05,()=>land(0.9)]],
+  ev:[[0.05,()=>Sfx('whoosh',0.3,0.45)],...[0.5,1.12,1.74].map((s,i)=>[s,()=>Sfx('boing',0.45,0.55+0.18*i)]),[2.6,()=>{ Sfx('bump',0.3,0.6); Lens(0.9,0,0); }],[3.3,()=>{ Sfx('bump',0.3,0.55); Lens(0.75,0,0); }],[4.35,()=>Sfx('pop',0.7,0.7)],[4.4,()=>Sfx('whoosh',0.6,0.5)],[4.9,()=>Sfx('whoosh',0.45,0.7)],[5.5,()=>Sfx('whoosh',0.35,0.9)],[6.05,()=>land(0.9)]],
   eye(t,A,N,M,sh){ const w=sstep(2.3,2.7,t)*(1-sstep(4.3,4.45,t)), b=sstep(0.05,0.3,t)*(1-sstep(0.45,0.6,t)); if (sh){ EYW(A,'o',0.12,Math.max(w,b)); EYW(A,'k',0.5,w); EYW(A,'z',0.9,w); } },
   f(t,F,k,M){ let b=1, c=0;
     if (t<0.5){ const u=seg(t,0,0.5), cc=eio(u); F.sy=1-0.1*cc; F.sx=1+0.06*cc; F.rx=-5*cc; }   // 숨 크게 들이쉬기 준비
@@ -1253,7 +1254,7 @@ const MOTPATCH={
   init(M){ M.bmax=3.5; },
   end(){ BALB=1; BALC=0; MJAW=0; }},
  '복제':{dur:7.8,face:[[0,'뿌듯'],[0.5,'당황'],[2.75,'놀람'],[3.2,'크게 웃음'],[5.0,'놀람'],[6.3,'웃음']],
-  ev:[[0.45,()=>Sfx('boing',0.4,0.5)],[1.3,()=>Sfx('boing',0.3,0.42)],[0.62,()=>Sfx('pop',0.4,1.8)],[2.72,()=>{ Sfx('pop',0.8,1.0); Sfx('boing',0.6,1.25); }],[3.05,()=>Sfx('pop',0.4,1.6)],[3.5,()=>Sfx('boing',0.3,1.3)],[3.9,()=>Sfx('boing',0.3,1.4)],[5.0,()=>Sfx('whoosh',0.4,0.8)],[5.62,()=>{ Sfx('bump',0.7,0.8); Sfx('boing',0.5,0.7); }]],
+  ev:[[0.45,()=>Sfx('boing',0.4,0.5)],[1.3,()=>Sfx('boing',0.3,0.42)],[0.62,()=>Sfx('pop',0.4,1.8)],[2.72,()=>{ Sfx('pop',0.8,1.0); Sfx('boing',0.6,1.25); }],[3.05,()=>Sfx('pop',0.4,1.6)],[3.5,()=>Sfx('boing',0.3,1.3)],[3.9,()=>Sfx('boing',0.3,1.4)],[5.0,()=>Sfx('whoosh',0.4,0.8)],[5.62,()=>{ Sfx('bump',0.7,0.8); Lens(0.85,0,0); Sfx('boing',0.5,0.7); }]],
   init(M){ const v=2*Math.tan(cam.fov*D2R/2)*DIST0()*Math.min(1,cam.aspect); M.vw=v; },
   f(t,F,k,M){ const Rw=R*0.8; let d=0, pull=0, pinch=0, s=1, face=0, dy=0, on=true;
     const dT=3.05*Rw;   // 뜯어지는 거리
@@ -2611,14 +2612,14 @@ function step(){
   else {
     vel[1]-=S['중력']; basePos=add(basePos,vel);
     if (basePos[1]<floor && vel[1]<0){ basePos[1]=floor;
-      if (Math.abs(vel[1])>0.04){ const hit=clamp01(Math.abs(vel[1])/0.4); Sfx('bump',0.25+0.75*hit,S['부딪힘소리높이']); if (hit>0.3) Sfx('boing',hit*0.6,S['튀는소리높이']*1.1);
+      if (Math.abs(vel[1])>0.04){ const hit=clamp01(Math.abs(vel[1])/0.4); Lens((hit-0.15)/0.55,0,-1); Sfx('bump',0.25+0.75*hit,S['부딪힘소리높이']); if (hit>0.3) Sfx('boing',hit*0.6,S['튀는소리높이']*1.1);
         sqV+=Math.min(0.3,Math.abs(vel[1])*0.9)*S['착지찌그러짐'];
         vel[1]*=-S['바닥탄력']; boingV-=Math.min(0.12,Math.abs(vel[1])*0.4); if (Math.abs(vel[1])>0.08) Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.47)|0,0.7); }
       else vel[1]=0;
       vel[0]*=0.85; }
     if (basePos[1]<floor) basePos[1]=floor;
-    if (basePos[1]>ceil){ Sfx('bump',0.3+clamp01(Math.abs(vel[1])/0.4)*0.7,S['부딪힘소리높이']*1.15); basePos[1]=ceil; vel[1]*=-0.6; }
-    if (Math.abs(basePos[0])>wall){ Sfx('bump',0.3+clamp01(Math.abs(vel[0])/0.4)*0.7,S['부딪힘소리높이']*1.1); basePos[0]=Math.sign(basePos[0])*wall; vel[0]*=-0.7; boingV-=0.05; tilt+=vel[0]*0.5; }
+    if (basePos[1]>ceil){ Lens((Math.abs(vel[1])/0.4-0.15)/0.55,0,1); Sfx('bump',0.3+clamp01(Math.abs(vel[1])/0.4)*0.7,S['부딪힘소리높이']*1.15); basePos[1]=ceil; vel[1]*=-0.6; }
+    if (Math.abs(basePos[0])>wall){ Lens((Math.abs(vel[0])/0.4-0.15)/0.55,Math.sign(basePos[0]),0); Sfx('bump',0.3+clamp01(Math.abs(vel[0])/0.4)*0.7,S['부딪힘소리높이']*1.1); basePos[0]=Math.sign(basePos[0])*wall; vel[0]*=-0.7; boingV-=0.05; tilt+=vel[0]*0.5; }
     if (basePos[1]===floor) vel[0]*=0.97;
     basePos[2]=0; vel[2]=0; }
   prevBase=[...basePos];
@@ -2837,8 +2838,50 @@ var BUTT=1, BJ=0, BJV=0, BPV=0, BPS=1; let BZ=1, BC=[0.3,-0.45,0.58], BRHO=0.44,
 function buttTick(){ BUTT+=((S['엉덩이']?1:0)-BUTT)*0.12; if (Math.abs(BUTT-(S['엉덩이']?1:0))<0.002) BUTT=S['엉덩이']?1:0;
   const vy=vel[1], ds=(FX.sy||1)-BPS; BPS=FX.sy||1; const kick=(vy-BPV)*2.2+ds*1.6; BPV=vy;
   BJV+=-BJ*0.32+clamp(kick,-0.6,0.6); BJV*=0.82; BJ=clamp(BJ+BJV,-1,1); }
+// 렌즈 효과 상태: 충돌 세기 s, 시작 시각, 충돌 방향(화면 기준). 꺼져 있거나 끝나면 평소처럼 바로 그려요(추가 비용 0)
+const LZ={s:0,t0:-9,ix:0,iy:0,rt:null,q:null,bg:new THREE.Scene(),dur:0.62, active(){ return !!S['렌즈왜곡'] && this.s>0.01 && time-this.t0<this.dur; }};
+function Lens(s,ix,iy){ s=clamp01(s); if (s<0.03||!S['렌즈왜곡']) return; const t=time-LZ.t0, rem=t<LZ.dur?LZ.s*Math.exp(-4*t):0; if (s<rem) return; LZ.s=s; LZ.t0=time; LZ.ix=ix; LZ.iy=iy; }
+window.__lens=(s,ix,iy)=>Lens(s,ix||0,iy||0); window.__lz=LZ; window.__vel=(x,y)=>{ vel=[x,y,0]; };
+const _lp=new THREE.Vector3();
+function lensRect(){ // 캐릭터(+복제)를 두르는 화면 위 사각형 (px, 아래가 0)
+  const proj=(x,y,z)=>{ _lp.set(x,y,z).project(cam); return [(_lp.x*0.5+0.5)*_dbs.x,(_lp.y*0.5+0.5)*_dbs.y]; };
+  const hp=hupi.position, sc=Math.max(hupi.scale.x,hupi.scale.y,hupi.scale.z), dz=Math.max(1,cam.position.distanceTo(hp));
+  const rpx=R*sc*1.05/(dz*Math.tan(cam.fov*0.5*D2R))*_dbs.y*0.5; let c=proj(hp.x,hp.y,hp.z), x0=c[0]-rpx*1.4, x1=c[0]+rpx*1.4, y0=c[1]-rpx*1.3, y1=c[1]+rpx*1.5;
+  if (CL.on && !window.__noclone){ const c2=proj(hp.x+CL.d,hp.y+CL.dy,hp.z); x0=Math.min(x0,c2[0]-rpx*1.4); x1=Math.max(x1,c2[0]+rpx*1.4); y0=Math.min(y0,c2[1]-rpx*1.3); y1=Math.max(y1,c2[1]+rpx*1.5); }
+  const m=10*renderer.getPixelRatio(); x0=Math.max(m,x0); y0=Math.max(m,y0); x1=Math.min(_dbs.x-m,x1); y1=Math.min(_dbs.y-m,y1);
+  return [(x0+x1)/2,(y0+y1)/2,Math.max(8,(x1-x0)/2),Math.max(8,(y1-y0)/2)]; }
+function lensInit(){ LZ.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,stencilBuffer:true,samples:LOWQ?0:4});
+  const mat=new THREE.ShaderMaterial({uniforms:{tC:{value:LZ.rt.texture},uRes:{value:new THREE.Vector2()},uRect:{value:new THREE.Vector4()},uK:{value:0},uCA:{value:0},uG:{value:0},uSc:{value:1},uImp:{value:new THREE.Vector2()},uPR:{value:1}},
+    vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
+    fragmentShader:`precision highp float; uniform sampler2D tC; uniform vec2 uRes,uImp; uniform vec4 uRect; uniform float uK,uCA,uG,uSc,uPR; varying vec2 vUv;
+float sdRR(vec2 p,vec2 b,float r){ vec2 q=abs(p)-b+r; return length(max(q,0.))+min(max(q.x,q.y),0.)-r; }
+void main(){ vec2 px=vUv*uRes, h=uRect.zw*uSc, c=uRect.xy;
+  vec2 q=(px-c)/h; vec2 aq=abs(q); float n=pow(pow(aq.x,4.)+pow(aq.y,4.),.25); float w=max(0.,1.-n*n);   // 둥근 사각형 안에서만 1→0 (밖은 그대로)
+  vec2 qc=q-uImp*.2*w; vec2 qs=q-qc*uK*w;                      // 볼록(가운데 확대) ↔ 오목 출렁, 테두리에선 0이라 이음매 없음
+  float wc=1.-smoothstep(.8,1.02,n); vec2 s=c+qs*h; vec2 d=qs*h.x*uCA*wc;   // 색수차: 가장자리로 갈수록 빨강·파랑이 벌어져요
+  vec2 bl=vec2(-d.y,d.x)*.25;                                              // 살짝 흐릿함
+  vec4 g=.5*texture2D(tC,s/uRes)+.25*texture2D(tC,(s+bl)/uRes)+.25*texture2D(tC,(s-bl)/uRes); vec4 r=texture2D(tC,(s+d)/uRes); vec4 b=texture2D(tC,(s-d)/uRes);
+  vec3 ch=vec3(r.r, g.g, b.b);
+  float dd=sdRR(px-c,h,min(h.x,h.y)*.28)/uPR;                     // 테두리까지 거리(css px)
+  float core=exp(-abs(dd)/3.), halo=dd>0.?exp(-dd/20.):exp(dd/7.);
+  float ga=clamp(uG*(1.1*core+.9*halo),0.,1.);
+  vec3 gc=mix(vec3(1.,.22,.06),vec3(1.,.85,.15),smoothstep(0.,26.,dd)); gc=mix(gc,vec3(1.,.95,.7),core*.5);
+  gl_FragColor=vec4(mix(ch,gc,ga),1.); }`,
+    depthTest:false,depthWrite:false});
+  const qm=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat); qm.frustumCulled=false; LZ.q=new THREE.Scene(); LZ.q.add(qm); LZ.u=mat.uniforms; LZ.oc=new THREE.OrthographicCamera(-1,1,1,-1,0,1); }
+const _lcc=new THREE.Color();
+function lensRender(){ if (!LZ.rt) lensInit(); const t=time-LZ.t0, s=LZ.s, u=LZ.u;
+  if (LZ.rt.width!==_dbs.x||LZ.rt.height!==_dbs.y) LZ.rt.setSize(_dbs.x,_dbs.y);
+  renderer.setRenderTarget(LZ.rt); renderer.render(scene,cam); renderClone(); renderer.setRenderTarget(null);   // 배경은 단색이라 휘어도 그대로 보여요 → 캐릭터만 휘는 것처럼
+  const e=Math.exp(-5.2*t), pr=renderer.getPixelRatio();
+  u.uRes.value.copy(_dbs); const r=lensRect(); u.uRect.value.set(r[0],r[1],r[2],r[3]); u.uPR.value=pr; u.uImp.value.set(LZ.ix,LZ.iy);
+  u.uK.value=s*0.5*e*Math.cos(t*20);                                   // 볼록 → 오목 → 볼록… 쫀득하게 감쇠
+  u.uCA.value=s*0.02*Math.exp(-4.5*t);
+  u.uG.value=s*Math.min(1,t/0.035)*Math.exp(-5*t)*1.15;
+  u.uSc.value=1+0.07*s*e*Math.sin(t*20+0.6);
+  renderer.render(LZ.q,LZ.oc); }
 function prTick(){ buttTick(); const b=FX.big||1, cl=!!(MOT&&MOT.name==='복제'); let w=PRK; if (b>1.6) w=0.5; else if (b>1.2 && PRK>0.72) w=0.72; else if (cl) w=Math.min(w,window.__clk||0.62); else if (b<1.1) w=1; if (w!==PRK){ PRK=w; applyQL(); } }
-function renderFrame(){ prTick(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); renderer.render(scene,cam); renderClone(); }
+function renderFrame(){ prTick(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); if (LZ.active()) lensRender(); else { renderer.render(scene,cam); renderClone(); } }
 
 // ============================================================ ver3: 아래 칩 바 (폰에서 바로 비교)
 const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('ttlSub');
