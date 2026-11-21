@@ -97,7 +97,7 @@ function applyPalette(s,i){ const p=PALETTES[i]; if (!p){ if (s['얼굴']>=2 && 
   s['발바닥색']=hx(p.cheek); s['발톱색']=hx(p.inner); s['손색상']=hx(p.cheek);
   if (s['얼굴']>=2){ const b=hx(p.body), k=hx(p.ink); s['무늬색']={r:b.r*0.45+k.r*0.55,g:b.g*0.45+k.g*0.55,b:b.b*0.45+k.b*0.55,a:1}; } return s; }
 function ver3Defaults(s){ applyPalette(s,0);
-  s['표정모드']=0; s['입모양']=1; s['볼터치']=1; s['하이라이트']=true; s['눈스타일']=0; s['팔다리']=0; s['손항상']=false; s['외곽선']=true; s['외곽선두께']=0.05;
+  s['표정모드']=0; s['입모양']=1; s['볼터치']=1; s['하이라이트']=true; s['눈스타일']=0; s['팔다리']=0; s['손항상']=false; s['귀']=0; s['외곽선']=true; s['외곽선두께']=0.05;
   s['테두리빛세기']=0; s['빛통과']=0; s['클리어코트']=0; s['반사']=0; s['환경반사']=0; s['바닥그림자']=false; s['스튜디오배경']=false; s['안쪽빛남']=0; s['질감']=0; s['벨벳']=0;
   s['쓰다듬기감지']=true; s['일렁임크기']=0.04; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; s['얼굴']=0; s['무늬색']=hx('#8a6a50'); return s; }
 const BG_PRESETS=[
@@ -145,12 +145,13 @@ const SCHEMA = [
   {k:'늘어남',r:[0,1],d:0.65,tip:'클수록 쭈욱 늘어나요'},
   {k:'뒤따라옴',r:[0,1],d:0.6,tip:'클수록 몸이 늦게, 출렁이며 따라와요'},
   {k:'무게감',r:[0,1],d:0.5,tip:'클수록 무겁게 처지고 관성이 커요'},
-  {k:'치즈지수',r:[0,1.5],d:1,tip:'늘어난 부분이 얼마나 가늘어지는지 (치즈처럼)'},
+  {k:'덩어리감',r:[0,1],d:0.6,tip:'잡아 늘릴 때: 낮을수록 침처럼 가는 실로 늘어나다 끊어지고, 높을수록 굵게 덩어리져 늘어나요'},
+  {k:'치즈지수',hide:1,r:[0,1.5],d:1,tip:'늘어난 부분이 얼마나 가늘어지는지 (치즈처럼)'},
   {k:'복원력',r:[0,1],d:0.5,tip:'놓았을 때 원래 모양으로 돌아오는 힘'},
   {k:'끊김',t:'bool',d:false,tip:'너무 멀리 늘이면 톡 끊어지며 놓쳐요'},
   {k:'끊김거리',r:[3,14],d:8},
-  {k:'잡는범위',r:[0.08,0.6],d:0.22,tip:'손가락이 잡는 면적 (몸 반지름 대비). 클수록 넓고 뭉툭하게 잡혀요'},
-  {k:'끝둥글기',r:[0,1],d:0.75,tip:'잡힌 끝이 얼마나 둥글고 통통하게 남는지 (0 = 뾰족, 1 = 반죽처럼 둥글게)'}]},
+  {k:'잡는범위',hide:1,r:[0.08,0.6],d:0.22,tip:'손가락이 잡는 면적 (몸 반지름 대비). 클수록 넓고 뭉툭하게 잡혀요'},
+  {k:'끝둥글기',hide:1,r:[0,1],d:0.75,tip:'잡힌 끝이 얼마나 둥글고 통통하게 남는지 (0 = 뾰족, 1 = 반죽처럼 둥글게)'}]},
  {h:'화면·재질', hide:1, f:[
   {k:'배경',t:'enum',o:BG_NAMES,d:0,onSet:()=>lookPreset('bg'),tip:'배경 색 미리 정해 둔 것. 고르면 아래 색들이 바뀌어요'},
   {k:'배경색',t:'color',d:C(11/255,11/255,18/255),tip:'단색 배경 색 (직접 고르기)'},
@@ -240,7 +241,7 @@ const SCHEMA = [
   {k:'눈꺼풀기울기',r:[-1,1],d:0,tip:'+ 화난 눈 / - 슬픈 눈'},
   {k:'입모양',t:'enum',o:MOUTHS,d:0,tip:'기본 얼굴의 입'},
   {k:'눈썹각도',r:[-1,1],d:0,tip:'+ 화남 / - 슬픔 (눈썹표시가 항상일 때 기본 얼굴에 보여요)'},
-  {k:'볼터치',r:[0,1],d:0}]},
+  {k:'볼터치',hide:1,r:[0,1],d:0}]},
  {h:'모션', tab:'act', btns:'motion', f:[{k:'모션크기',r:[0.3,1.5],d:1},{k:'모션속도',r:[0.5,2],d:1},{k:'모션표정',t:'bool',d:true,tip:'모션에 어울리는 표정을 같이 해요'},{k:'탭반응',t:'enum',o:['통통 점프','움찔'],d:1,tip:'몸을 짧게 톡 눌렀을 때: 예전처럼 통통 점프, 또는 찌른 반대쪽으로 움찔'},{k:'쓰다듬기감지',t:'bool',d:true,tip:'마우스를 누르지 않고 몸 위에서 좌우로 살살 움직이면 쓰다듬기 반응'},{k:'시작때등장',t:'bool',d:true,tip:'페이지를 열 때 납작한 웅덩이에서 모여 일어서며 등장'}]},
  {h:'팔·손', hide:1, tab:'act', btns:'hand', f:[
   {k:'손쪽',t:'enum',o:['왼손 (화면 오른쪽)','오른손 (화면 왼쪽)','양손'],d:1,tip:'캐릭터 자기 기준이에요: 왼손은 정면에서 볼 때 화면 오른쪽, 오른손은 화면 왼쪽'},
@@ -1640,7 +1641,7 @@ function UpdateEyes(tt){
     u.uDil.value=Math.max(0.2,Pc.dil)*S['눈동자크기']; u.uWide.value=Pc.wide;
     u.uHeart.value=clamp01(Pc.heart); u.uSpiral.value=clamp01(Pc.spiral); u.uXX.value=clamp01(Pc.xx); u.uSpark.value=clamp01(Pc.spark); u.uTear.value=clamp01(Pc.tear);
     u.uBrow.value=clamp01(Pc.brow); u.uBrowY.value=Pc.browY+(i===1?Pc.bYR:0); u.uBrowA.value=Pc.browA; u.uBrowC.value=Pc.browC;
-    u.uBlush.value=clamp01(Pc.blush); u.uSweat.value=clamp01(Pc.sweat); u.uVein.value=clamp01(Pc.vein); u.uFade.value=EYF;
+    u.uBlush.value=S['얼굴']===0?0:clamp01(Pc.blush); u.uSweat.value=clamp01(Pc.sweat); u.uVein.value=clamp01(Pc.vein); u.uFade.value=EYF;
     u.uWhite.value.setRGB(wc.r,wc.g,wc.b); u.uPupilC.value.setRGB(pc.r,pc.g,pc.b); u.uLight.value.setRGB(lt[0],lt[1],lt[2]); u.uBlushC.value.setRGB(bk.r,bk.g,bk.b); u.uRing.value=S['눈스타일']===1?1:0; }
   const mini=MINI(); let A=null, mbl=0; if (mini){ A=mAnim(); for (const b of blinkQ) { const v=mBlinkCl(tt-b); if (Math.abs(v)>Math.abs(mbl)) mbl=v; } if (!A.blink) mbl=0; }
   for (let i=0;i<2;i++){ const u=EYE[i].u; u.uMin.value=mini?1:0; if (!mini) continue;
@@ -1996,7 +1997,7 @@ const mouth=(()=>{ const strokes=[], N=14;
       const p=mul(u,R*1.004); V.push(add(p,mul(sd,w)),sub(p,mul(sd,w))); if (i) { const a=b0+(i-1)*2; T.push(a,a+2,a+1, a+1,a+2,a+3); } } }
   const geo=makeGeo(V,T,true); const me=new THREE.Mesh(geo,mouthMat); me.frustumCulled=false; me.renderOrder=10; hupi.add(me); me.visible=false; return {me,geo,rest:V}; })();
 function UpdateFace(tt){ const on=S['모양']===7 && S['모양정도']>0.05, A=S['모양정도'];
-  maskU.amt.value=on?A*S['얼굴무늬']:0; maskU.brow.value=on&&S['눈썹점']?A*S['얼굴무늬']:0;
+  maskU.amt.value=on&&S['얼굴']!==0?A*S['얼굴무늬']:0; maskU.brow.value=on&&S['얼굴']!==0&&S['눈썹점']?A*S['얼굴무늬']:0;
   const c=S['얼굴무늬색']; maskU.ura.value.setRGB(c.r,c.g,c.b); maskU.browC.value.setRGB(c.r*0.92,c.g*0.74,c.b*0.52);
   ANIK=S['얼굴']>=2&&ANI[S['얼굴']]?S['얼굴']:-1; if (ANIK>=0){ maskU.amt.value=1; maskU.brow.value=1; const p_=S['무늬색']; maskU.browC.value.setRGB(p_.r,p_.g,p_.b); }
   nose.visible=on; mouth.me.visible=on && A>0.3 && Pc.mVis<0.08;
@@ -2209,7 +2210,7 @@ function aniMesh(){ if (aniBuilt!==aniKey()) buildAnimal(); mzTick(); if (ANIK<0
 window.__aniJig=(v)=>v?{mx:+(ANIJ.mx||0).toFixed(4),dl:+_dl.length().toFixed(4),sc:+_ws.x.toFixed(3),dt:ANIJ.dt}:+(ANIJ.mx||0).toFixed(4);
 function aniColors(s,D){ const c=D.cols; s['몸색']=hx(c.body); s['몸색섞기']=1; s['팔다리색']=hx(c.body); s['얼굴무늬색']=hx(c.light); s['무늬색']=hx(c.pat); s['귀안쪽색']=hx(c.inner); s['볼색']=hx(c.cheek); s['외곽선색']=hx(c.ink); s['눈색']=hx(c.ink); s['입안색']=hx(c.mouth); s['배경색']=hx(c.bg); s['배경그라데이션']=false; s['발바닥색']=hx(c.cheek); s['발톱색']=hx(c.light); s['손색상']=hx(c.cheek); }
 function applyFace(s,k){ s['얼굴']=k;
-  if (k===0){ if (s['모양']===7) s['모양']=0; s['귀']=1; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; applyPalette(s,s['팔레트']>=PALETTES.length?0:s['팔레트']); }
+  if (k===0){ if (s['모양']===7) s['모양']=0; s['귀']=0; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; applyPalette(s,s['팔레트']>=PALETTES.length?0:s['팔레트']); }
   else if (k===1){ s['모양']=7; applyShibaPreset(); applyPalette(s,3); }
   else { const D=ANI[k]; s['모양']=0; s['귀']=D.ear; s['왼눈위치']={x:-D.eye[0],y:D.eye[1]}; s['오른눈위치']={x:D.eye[0],y:D.eye[1]}; s['눈크기']=D.eye[2]; s['눈간격']=1; s['눈높이']=0; s['팔레트']=PALETTES.length; aniColors(s,D); }
   return s; }
@@ -2326,7 +2327,9 @@ function grabTip(px,py,pz){
     if (wm>0){ const ab=sub(M_.B,M_.A), L2=dot(ab,ab)||1e-6, t=clamp01(((DX-M_.A[0])*ab[0]+(DY-M_.A[1])*ab[1]+(DZ-M_.A[2])*ab[2])/L2);
       const qx=M_.A[0]+ab[0]*t, qy=M_.A[1]+ab[1]*t, qz=M_.A[2]+ab[2]*t, rx=DX-qx, ry=DY-qy, rz=DZ-qz, rl=Math.sqrt(rx*rx+ry*ry+rz*rz);
       if (rl>M_.rS){ const k=wm*(M_.rS/rl-1); DX+=rx*k; DY+=ry*k; DZ+=rz*k; } } } }
-function grabAddPin(rp,worldHit,id,sticky){ // rp: 휴지 구 위의 점 (Unity 국소)
+// 덩어리감 하나로 잡는 면적·끝 공·가늘어짐·최소 굵기·자동 끊김을 함께 정해요
+function lumpApply(){ const L=clamp01(S['덩어리감']??0.6); S['잡는범위']=lerp(0.06,0.3,L); S['끝둥글기']=Math.pow(L,1.3); S['치즈지수']=lerp(2.6,0.6,L); GR.smin=lerp(0.015,0.1,L); GR.brk=L<0.3?lerp(5,8,L/0.3):0; GR.fol=L<0.7?lerp(0.08,1,L/0.7):1; GR.pw=L<0.7?lerp(0.015,1,Math.pow(L/0.7,1.5)):1; GR.thr=L<0.7?1-L/0.7:0; }
+function grabAddPin(rp,worldHit,id,sticky){ lumpApply(); // rp: 휴지 구 위의 점 (Unity 국소)
   const g0=mul(norm(rp),R), parts=[]; const d=GR.X0.map((x,i)=>[Math.hypot(x[0]-g0[0],x[1]-g0[1],x[2]-g0[2]),i]).sort((a,b)=>a[0]-b[0]);
   const rg=Math.max(0.15,S['잡는범위']*R), fall=GR.h*(1.1+0.6*S['끝둥글기']);
   for (const [dd,i] of d){ if (dd>rg+fall && parts.length>=3) break; const t=clamp01((dd-rg)/fall); parts.push({i,w:1-t*t*(3-2*t)}); }
@@ -2343,6 +2346,7 @@ function grabSim(){
   // 프레임 가속(몸 전체가 끌려가며 생기는 관성) → 입자에 반대 힘
   const hp=[...hPos]; if (!GR.hp1){ GR.hp1=hp; GR.hp2=hp; } const aW=[hp[0]-2*GR.hp1[0]+GR.hp2[0],hp[1]-2*GR.hp1[1]+GR.hp2[1],hp[2]-2*GR.hp1[2]+GR.hp2[2]]; GR.hp2=GR.hp1; GR.hp1=hp;
   if (!GR.active) return;
+  lumpApply();
   const wt=S['무게감'], st=S['늘어남'], lag=S['뒤따라옴'], ch=S['치즈지수'], rs=S['복원력'], gs=S['잡는힘'];
   let aL=ITV(aW); { const l=len(aL); if (l>0.12) aL=mul(aL,0.12/l); } const inert=0.35+0.9*wt, multi=GR.pins.length>=2;
   const gL=mul(gDown, (0.0025+0.006*wt)*GR.held);
@@ -2352,7 +2356,7 @@ function grabSim(){
   for (let i=0;i<n;i++){ for (let a=0;a<3;a++){ V[i*3+a]=V[i*3+a]*damp-aL[a]*inert+gL[a]; P[i*3+a]=X[i*3+a]+V[i*3+a]; } }
   // 핀 목표 (국소)
   for (const p of GR.pins){ p.local=ITV(sub(p.world,hPos)); }
-  const pinIt=()=>{ for (const p of GR.pins){ for (const q of p.parts){ const i=q.i, w=Math.min(1,q.w*gs*1.15), off=sub(X0[i],p.g0);
+  const pinIt=()=>{ for (const p of GR.pins){ for (const q of p.parts){ const i=q.i, w=Math.min(1,q.w*gs*1.15*(GR.pw??1)), off=sub(X0[i],p.g0);
       for (let a=0;a<3;a++) P[i*3+a]+=(p.local[a]+off[a]-P[i*3+a])*w; } } };
   const CI=GR.CI, CJ=GR.CJ, CL=GR.CL, m=CI.length;
   for (let it=0;it<8;it++){
@@ -2372,7 +2376,7 @@ function grabSim(){
   if (multi){ // 두 점 집기: 양 끝은 각자 손가락에 붙은 덩어리, 가운데는 치즈처럼 가늘게
     const pa=GR.pins[0], pb=GR.pins[1], A=pa.local, B=pb.local, a0=pa.g0, b0=pb.g0, L0=Math.max(0.3,len(sub(b0,a0))), L=Math.max(0.01,len(sub(B,A)));
     const u0=mul(sub(b0,a0),1/L0), u=mul(sub(B,A),1/L), Q=qFromTo(u0,u), wb=clamp((pa.rg+pa.fall)*(0.8+0.5*S['끝둥글기']),0.5,L0*0.3), m0=Math.max(0.05,L0-2*wb), m1=Math.max(0.05,L-2*wb);
-    const thin=clamp(Math.pow(L0*1.05/Math.max(L0*1.05,L),1.6+2.2*ch),0.07,1), kg=lerp(0.3,0.1,lag)*(0.6+0.8*rs);
+    const thin=clamp(Math.pow(L0*1.05/Math.max(L0*1.05,L),1.6+2.2*ch),Math.min(0.07,GR.smin||0.07),1), kg=lerp(0.3,0.1,lag)*(0.6+0.8*rs);
     for (let i=0;i<n;i++){ const r=X0[i], ra=sub(r,a0), d0=dot(ra,u0), l=sub(ra,mul(u0,d0));
       let d, ls=1; if (d0<=wb) d=d0; else if (d0>=L0-wb) d=L-(L0-d0); else { const t=(d0-wb)/m0; d=wb+t*m1; ls=1-(1-thin)*Math.pow(Math.sin(PI*t),0.35); }
       if (d0<=wb||d0>=L0-wb) ls=1+0.1*S['끝둥글기']*(1-thin)*Math.max(0,1-Math.abs(d0<=wb?d0:L0-d0)/wb);
@@ -2396,7 +2400,7 @@ function grabSim(){
       const ca=[M[0]*fa[0]+M[3]*fa[1]+M[6]*fa[2],M[1]*fa[0]+M[4]*fa[1]+M[7]*fa[2],M[2]*fa[0]+M[5]*fa[1]+M[8]*fa[2]]; const l=len(ca); if (l<1e-9) break; ax=mul(ca,1/l); }
     AXv[xi]=ax[0]; AXv[xi+1]=ax[1]; AXv[xi+2]=ax[2];
     const Fa=[M[0]*ax[0]+M[1]*ax[1]+M[2]*ax[2],M[3]*ax[0]+M[4]*ax[1]+M[5]*ax[2],M[6]*ax[0]+M[7]*ax[1]+M[8]*ax[2]], lam=len(Fa);
-    let s=clamp(Math.pow(Math.max(1,lam),-0.5*ch),0.1,1); const pw=GR.PW[i]; if (pw>0){ const rd=S['끝둥글기']; s=lerp(s,1+0.12*rd*Math.min(1,lam-1),Math.min(1,pw*(0.4+0.8*rd))); }
+    let s=clamp(Math.pow(Math.max(1,lam),-0.5*ch),GR.smin||0.1,1); const pw=GR.PW[i]; if (pw>0){ const rd=S['끝둥글기']; s=lerp(s,1+0.12*rd*Math.min(1,lam-1),Math.min(1,pw*(0.4+0.8*rd))); }
     let ok=true; for (let k=0;k<9;k++){ const v=s*M[k]+(1-s)*Fa[(k/3)|0]*ax[k%3]; if (!isFinite(v)) ok=false; F[i*9+k]=v; }
     const f=F.subarray(i*9,i*9+9), det=f[0]*(f[4]*f[8]-f[5]*f[7])-f[1]*(f[3]*f[8]-f[5]*f[6])+f[2]*(f[3]*f[7]-f[4]*f[6]);
     if (!ok) { for (let k=0;k<9;k++) F[i*9+k]=k%4===0?1:0; }
@@ -2404,7 +2408,7 @@ function grabSim(){
   // 집은 점 보정: 그리는 표면의 그 점이 손가락에 정확히
   GR.cor.length=0;
   for (const p of GR.pins){ GR.skip=true; deform(p.g0[0],p.g0[1],p.g0[2],time); GR.skip=false; const base=[DX,DY,DZ]; p.gP=[CHX,CHY,CHZ];
-    grabDisp(CHX,CHY,CHZ); const now=[base[0]+GDX,base[1]+GDY,base[2]+GDZ]; const dd=sub(p.local,now); const rd=S['끝둥글기']; GR.cor.push({p:p.gP,d:dd,a:Math.min(1,gs*1.1),rc:p.rg*(0.5+0.5*rd),rf:p.rg*(1.2+1.6*rd)+0.5+0.4*Math.min(3,len(dd))}); }
+    grabDisp(CHX,CHY,CHZ); const now=[base[0]+GDX,base[1]+GDY,base[2]+GDZ]; const dd=sub(p.local,now); const rd=S['끝둥글기']; GR.cor.push({p:p.gP,d:dd,a:Math.min(1,gs*1.1),rc:lerp(p.rg*(0.5+0.5*rd),0.13,GR.thr||0),rf:lerp(p.rg*(1.2+1.6*rd)+0.5+0.4*Math.min(3,len(dd)),0.12,GR.thr||0)}); }
   // 끝 공 모양 정보
   { const rd=S['끝둥글기']; let cm=[0,0,0]; for (let i=0;i<n;i++){ cm[0]+=X[i*3]; cm[1]+=X[i*3+1]; cm[2]+=X[i*3+2]; } cm=mul(cm,1/n);
     for (const p of GR.pins){ const out=sub(p.local,cm), lo=len(out), st=len(sub(p.local,p.g0)); const dir=lo>1e-4?mul(out,1/lo):norm(p.g0);
@@ -2418,7 +2422,7 @@ function grabSim(){
     const rS=clamp(R*0.55*Math.pow(sL*1.25/Math.max(sL*1.25,Lc),0.9+1.0*ch),0.1,R*0.55);
     GR.mid={A:pa.tip.C,B:pb.tip.C,su:pa.tip.su,sL,a0:pa.g0,rS,amt:Math.min(1,ch)*clamp01((Lc/sL-1.2)/0.7)}; }
   // 끊김
-  if (S['끊김']) for (const p of [...GR.pins]){ if (len(sub(p.local,c))>S['끊김거리']){ grabRelease(p); Sfx('pop',0.9,0.8); Sfx('boing',0.8,1.4); boingV-=0.08; } }
+  const BD=GR.brk?(S['끊김']?Math.min(GR.brk,S['끊김거리']):GR.brk):S['끊김거리']; if (S['끊김']||GR.brk) for (const p of [...GR.pins]){ if (len(sub(p.local,c))>BD){ grabRelease(p); Sfx('pop',0.9,0.8); Sfx('boing',0.8,1.4); boingV-=0.08; } }
   // 잠잠해지면 끄기
   if (!GR.pins.length && mx<0.004){ let vm=0; for (let i=0;i<n*3;i++) vm=Math.max(vm,Math.abs(V[i])); if (vm<0.001){ for (let i=0;i<n*3;i++){ X[i]=GR.XR[i]; V[i]=0; } GR.q=[0,0,0,1]; GR.active=false; GR.cor.length=0; } }
 }
@@ -2471,7 +2475,7 @@ function grabInput(tt){
         if (!p.moved && tt-p.t0<0.25 && !p.pin.sticky && !GR.pins.length && !tapReact(p)){ boingV-=S['클릭띠용']; clickJumpAt=tt+0.14; } } } }
   // 몸 전체는 손가락을 늦게 따라와요 (용수철 + 감쇠)
   if (GR.pins.length){ let c=[0,0,0]; for (const p of GR.pins) c=add(c,p.world); c=mul(c,1/GR.pins.length); const tgt=add(c,GR.baseOff);
-    const lag=S['뒤따라옴'], wt=S['무게감'], k=lerp(0.07,0.01,lag)/(0.6+wt*0.8), cd=lerp(0.4,0.2,lag);
+    const lag=S['뒤따라옴'], wt=S['무게감'], k=lerp(0.07,0.01,lag)/(0.6+wt*0.8)*(GR.fol??1), cd=lerp(0.4,0.2,lag);
     GR.bv=add(mul(GR.bv,1-cd),mul(sub(tgt,basePos),k)); basePos=add(basePos,GR.bv); dragging=true; mouseDown=true;
     // 빙글빙글 감지 → 어지러운 눈
     const v=sub(c,hPos), an=Math.atan2(v[1],v[0]); if (GR.spinA!==null){ let da=an-GR.spinA; if (da>PI) da-=2*PI; if (da<-PI) da+=2*PI; GR.spinW=GR.spinW*0.9+da*0.1; } GR.spinA=an;
