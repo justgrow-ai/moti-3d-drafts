@@ -56,7 +56,7 @@
 </head>
 <body>
 <div id="wrap">
-  <div id="view"><div id="ttl">Moti ver3 · 플랫<small id="ttlSub"></small></div><button id="toggle">옵션</button><div id="bar"><div class="chips" id="chips"></div><div id="hint">톡 · 꾹 · 잡아당기기 · 쓰다듬기 · 옆 빈 곳을 슥 밀면 스핀</div></div></div>
+  <div id="view"><div id="ttl">Moti ver3 · 동물형<small id="ttlSub"></small></div><button id="toggle">옵션</button><div id="bar"><div class="chips" id="chips"></div><div id="hint">톡 · 꾹 · 잡아당기기 · 쓰다듬기 · 옆 빈 곳을 슥 밀면 스핀</div></div></div>
   <div id="panel">
     <div class="top"><h1>Moti 옵션</h1>
       <div class="btns"><button id="bReset">기본값으로</button><button id="bExport">JSON 내보내기</button><button id="bImport">JSON 가져오기</button></div>
@@ -93,11 +93,11 @@ const PAL_NAMES=[...PALETTES.map(p=>p.n),'동물 기본'];
 const FACES=['기본','시바견','고릴라','고양이','기린','티라노','용','뱀','말','소','사자','호랑이','티라노 2'];
 function applyPalette(s,i){ const p=PALETTES[i]; if (!p){ if (s['얼굴']>=2 && typeof ANI!=='undefined'){ s['팔레트']=PALETTES.length; aniColors(s,ANI[s['얼굴']]); return s; } i=0; return applyPalette(s,0); } s['팔레트']=i;
   s['몸색']=hx(p.body); s['몸색섞기']=1; s['팔다리색']=hx(p.body); s['배경색']=hx(p.bg); s['배경그라데이션']=false;
-  s['얼굴무늬색']=hx(p.inner); s['귀안쪽색']=hx(p.inner); s['볼색']=hx(p.cheek); s['잉크색']=hx(p.ink); s['입안색']=hx(p.mouth);
+  s['얼굴무늬색']=hx(p.inner); s['귀안쪽색']=hx(p.inner); s['볼색']=hx(p.cheek); s['외곽선색']=hx(p.ink); s['눈색']=hx(p.ink); s['입안색']=hx(p.mouth);
   s['발바닥색']=hx(p.cheek); s['발톱색']=hx(p.inner); s['손색상']=hx(p.cheek);
   if (s['얼굴']>=2){ const b=hx(p.body), k=hx(p.ink); s['무늬색']={r:b.r*0.45+k.r*0.55,g:b.g*0.45+k.g*0.55,b:b.b*0.45+k.b*0.55,a:1}; } return s; }
 function ver3Defaults(s){ applyPalette(s,0);
-  s['표정모드']=0; s['입모양']=1; s['볼터치']=1; s['하이라이트']=true; s['눈색']=0; s['외곽선']=true; s['외곽선두께']=0.05;
+  s['표정모드']=0; s['입모양']=1; s['볼터치']=1; s['하이라이트']=true; s['눈스타일']=0; s['팔다리']=0; s['손항상']=false; s['외곽선']=true; s['외곽선두께']=0.05;
   s['테두리빛세기']=0; s['빛통과']=0; s['클리어코트']=0; s['반사']=0; s['환경반사']=0; s['바닥그림자']=false; s['스튜디오배경']=false; s['안쪽빛남']=0; s['질감']=0; s['벨벳']=0;
   s['쓰다듬기감지']=true; s['일렁임크기']=0.04; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; s['얼굴']=0; s['무늬색']=hx('#8a6a50'); return s; }
 const BG_PRESETS=[
@@ -132,16 +132,13 @@ const MAT_PRESETS=[
   {n:'직접 고르기'}];
 const MAT_NAMES=MAT_PRESETS.map(p=>p.n);
 const SCHEMA = [
- {h:'ver3 플랫', f:[
+ {h:'동물형', f:[
   {k:'얼굴',t:'enum',o:FACES,d:0,onSet:()=>applyFace(S,S['얼굴']),tip:'동물 얼굴 (머리 모양·무늬·뿔·갈기 등). 동물마다 기본 색이 있고 팔레트로 바꿀 수 있어요'},
-  {k:'팔레트',t:'enum',o:PAL_NAMES,d:0,onSet:()=>applyPalette(S,S['팔레트']),tip:'몸·귀 안쪽·볼·잉크·배경 색을 한 번에 바꿔요 (동물 기본 = 동물 얼굴 고유 색)'},
-  {k:'무늬색',t:'color',d:C(0.54,0.42,0.31),tip:'동물 얼굴: 줄무늬·반점·갈기 색'},
-  {k:'외곽선',t:'bool',d:true,tip:'몸·귀·팔다리 테두리에 어두운 선 (끄면 면 색만)'},
-  {k:'외곽선두께',r:[0.01,0.14],d:0.05},
-  {k:'눈색',t:'enum',o:['잉크 눈 (점 하이라이트)','흰 눈 + 검은자'],d:0},
-  {k:'잉크색',t:'color',d:C(0.17,0.14,0.13),tip:'외곽선 · 눈 · 입 선'},
-  {k:'귀안쪽색',t:'color',d:C(1,0.68,0.55)},{k:'귀안쪽',t:'bool',d:true,tip:'귀 앞면 안쪽을 다른 색으로'},
-  {k:'볼색',t:'color',d:C(1,0.56,0.47)},{k:'입안색',t:'color',d:C(0.77,0.33,0.29)}]},
+  {k:'팔레트',hide:1,t:'enum',o:PAL_NAMES,d:0,onSet:()=>applyPalette(S,S['팔레트']),tip:'몸·귀 안쪽·볼·잉크·배경 색을 한 번에 바꿔요 (동물 기본 = 동물 얼굴 고유 색)'},
+  {k:'무늬색',hide:1,t:'color',d:C(0.54,0.42,0.31),tip:'동물 얼굴: 줄무늬·반점·갈기 색'},
+  {k:'눈스타일',hide:1,t:'enum',o:['잉크 눈 (점 하이라이트)','흰 눈 + 검은자'],d:0},
+  {k:'귀안쪽색',hide:1,t:'color',d:C(1,0.68,0.55)},{k:'귀안쪽',hide:1,t:'bool',d:true},
+  {k:'볼색',hide:1,t:'color',d:C(1,0.56,0.47)},{k:'입안색',hide:1,t:'color',d:C(0.77,0.33,0.29)}]},
  {h:'ver2 잡기', f:[
   {k:'잡기모드',t:'bool',d:true,tip:'켜면 손가락(마우스)으로 몸을 집어 늘려요. 끄면 예전처럼 통째로 끌어요'},
   {k:'잡는힘',r:[0.3,1],d:1,tip:'집은 점이 손가락에 붙는 힘 (1 = 절대 안 미끄러짐)'},
@@ -154,7 +151,7 @@ const SCHEMA = [
   {k:'끊김거리',r:[3,14],d:8},
   {k:'잡는범위',r:[0.08,0.6],d:0.22,tip:'손가락이 잡는 면적 (몸 반지름 대비). 클수록 넓고 뭉툭하게 잡혀요'},
   {k:'끝둥글기',r:[0,1],d:0.75,tip:'잡힌 끝이 얼마나 둥글고 통통하게 남는지 (0 = 뾰족, 1 = 반죽처럼 둥글게)'}]},
- {h:'화면·재질', f:[
+ {h:'화면·재질', hide:1, f:[
   {k:'배경',t:'enum',o:BG_NAMES,d:0,onSet:()=>lookPreset('bg'),tip:'배경 색 미리 정해 둔 것. 고르면 아래 색들이 바뀌어요'},
   {k:'배경색',t:'color',d:C(11/255,11/255,18/255),tip:'단색 배경 색 (직접 고르기)'},
   {k:'배경그라데이션',t:'bool',d:false,tip:'켜면 위→아래 두 색 그라데이션 배경'},
@@ -183,13 +180,16 @@ const SCHEMA = [
   {k:'팔다리도같이',t:'bool',d:true,tip:'팔·다리·손도 몸과 같은 재질로'}]},
  {h:'모양', f:[
   {k:'모양',t:'enum',o:SHAPES,d:0},
-  {k:'모양정도',r:[0,1],d:0.7,tip:'0이면 동그라미, 1이면 고른 모양 (Unity의 하트정도)'},
-  {k:'위홈깊이',r:[0,1],d:0.5,tip:'하트: 위쪽 가운데 들어간 홈 깊이'},
+  {k:'모양정도',hide:1,r:[0,1],d:0.7,tip:'0이면 동그라미, 1이면 고른 모양 (Unity의 하트정도)'},
+  {k:'위홈깊이',hide:1,r:[0,1],d:0.5,tip:'하트: 위쪽 가운데 들어간 홈 깊이'},
   {k:'아래뾰족',r:[0,1],d:0.5,tip:'하트: 아래쪽이 얼마나 뾰족한지'},
   {k:'앞뒤두께',r:[0.6,1],d:0.88,tip:'하트: 앞뒤 두께, 낮을수록 납작해요'},
-  {k:'얼굴무늬',r:[0,1],d:1,tip:'개 얼굴: 주둥이·볼·턱의 크림색 무늬(우라지로) 진하기'},
-  {k:'얼굴무늬색',t:'color',d:C(0.94,0.85,0.72)},
-  {k:'눈썹점',t:'bool',d:true,tip:'개 얼굴: 눈 위 작은 점 두 개'}]},
+  {k:'얼굴무늬',hide:1,r:[0,1],d:1,tip:'개 얼굴: 주둥이·볼·턱의 크림색 무늬(우라지로) 진하기'},
+  {k:'얼굴무늬색',hide:1,t:'color',d:C(0.94,0.85,0.72)},
+  {k:'눈썹점',hide:1,t:'bool',d:true,tip:'개 얼굴: 눈 위 작은 점 두 개'},
+  {k:'외곽선',t:'bool',d:true,tip:'몸 바깥 테두리에 선 (끄면 면 색만)'},
+  {k:'외곽선두께',r:[0.01,0.14],d:0.05},
+  {k:'외곽선색',t:'color',d:C(0.17,0.14,0.13),tip:'바깥 테두리 선 색 (눈 색과 따로)'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -200,16 +200,17 @@ const SCHEMA = [
   {k:'왼눈위치',t:'vec2',d:{x:-0.2,y:0.6}},
   {k:'오른눈위치',t:'vec2',d:{x:0.7,y:0.2}},
   {k:'깜빡임간격',r:[0.5,10],d:4},
-  {k:'흰자색',t:'color',d:C(0.72,0.72,0.74)},
-  {k:'눈동자색',t:'color',d:C(0.12,0.12,0.12)}]},
- {h:'귀', f:[
+  {k:'눈색',t:'color',d:C(0.17,0.14,0.13),tip:'눈 · 입 선 · 수염 같은 얼굴 선 색 (외곽선 색과 따로)'},
+  {k:'흰자색',hide:1,t:'color',d:C(0.72,0.72,0.74)},
+  {k:'눈동자색',hide:1,t:'color',d:C(0.12,0.12,0.12)}]},
+ {h:'귀', hide:1, f:[
   {k:'귀',t:'enum',o:EARS,d:1},
   {k:'귀크기',r:[0.4,2],d:1},
   {k:'귀간격',r:[0.5,1.6],d:1,tip:'1보다 크면 귀가 바깥쪽으로 벌어져요'},
   {k:'귀출렁임',r:[0,2],d:1,tip:'움직일 때 귀가 흔들리는 정도'},
   {k:'녹용색',t:'color',d:C(0.85,0.70,0.55)},
   {k:'벼슬색',t:'color',d:C(1,0.42,0.48)}]},
- {h:'팔다리', f:[
+ {h:'팔다리', hide:1, f:[
   {k:'팔다리',t:'enum',o:LIMBS,d:0},
   {k:'팔크기',r:[0.4,2],d:1},
   {k:'다리크기',r:[0.4,2],d:1},
@@ -241,7 +242,7 @@ const SCHEMA = [
   {k:'눈썹각도',r:[-1,1],d:0,tip:'+ 화남 / - 슬픔 (눈썹표시가 항상일 때 기본 얼굴에 보여요)'},
   {k:'볼터치',r:[0,1],d:0}]},
  {h:'모션', tab:'act', btns:'motion', f:[{k:'모션크기',r:[0.3,1.5],d:1},{k:'모션속도',r:[0.5,2],d:1},{k:'모션표정',t:'bool',d:true,tip:'모션에 어울리는 표정을 같이 해요'},{k:'탭반응',t:'enum',o:['통통 점프','움찔'],d:1,tip:'몸을 짧게 톡 눌렀을 때: 예전처럼 통통 점프, 또는 찌른 반대쪽으로 움찔'},{k:'쓰다듬기감지',t:'bool',d:true,tip:'마우스를 누르지 않고 몸 위에서 좌우로 살살 움직이면 쓰다듬기 반응'},{k:'시작때등장',t:'bool',d:true,tip:'페이지를 열 때 납작한 웅덩이에서 모여 일어서며 등장'}]},
- {h:'팔·손', tab:'act', btns:'hand', f:[
+ {h:'팔·손', hide:1, tab:'act', btns:'hand', f:[
   {k:'손쪽',t:'enum',o:['왼손 (화면 오른쪽)','오른손 (화면 왼쪽)','양손'],d:1,tip:'캐릭터 자기 기준이에요: 왼손은 정면에서 볼 때 화면 오른쪽, 오른손은 화면 왼쪽'},
   {k:'손방향',t:'enum',o:['옆으로','앞으로','위로'],d:0},
   {k:'뿌리굵기',r:[0.12,0.9],d:0.3,tip:'팔이 몸에서 나오는 이음새 굵기'},
@@ -285,7 +286,7 @@ const SCHEMA = [
  {h:'몸 일렁임', f:[
   {k:'일렁임크기',r:[0,0.3],d:0.06},{k:'일렁임속도',r:[0,4],d:1},
   {k:'숨쉬기위아래',r:[0,0.3],d:0.12},{k:'숨쉬기부풀기',r:[0,0.08],d:0.015}]},
- {h:'테두리 빛', f:[
+ {h:'테두리 빛', hide:1, f:[
   {k:'테두리빛두께',r:[0.5,8],d:3.2,tip:'낮을수록 빛이 안쪽까지 넓게 퍼져요'},
   {k:'테두리빛세기',r:[0,3],d:1.1,tip:'림 글로우 (테두리 빛) — 화면·재질에도 같은 값이 있어요'},
   {k:'테두리색1',t:'color',d:C(0.35,0.65,1)},{k:'테두리색2',t:'color',d:C(1,0.45,0.6)}]},
@@ -1057,7 +1058,7 @@ function hopArc(u,h){ // 한 번 폴짝: 0~0.28 웅크림(예감) → 0.28~0.78 
 const G0=()=>({off:[0,0,0],rx:0,ry:0,rz:0,sy:1,sx:1,press:0,wob:0,walk:0,walkPh:0});
 const cpG=g=>({...g,off:[...g.off]});
 function mixG(G,H,w){ for (let i=0;i<3;i++) G.off[i]+=(H.off[i]-G.off[i])*w; for (const k of ['rx','ry','rz','sy','sx','press','wob','walk']) G[k]+=(H[k]-G[k])*w; }
-const MOTIONS={
+const MOTIONS_={
  '백덤블링':{dur:2.1,face:[[0,'놀람'],[1.42,'뿌듯']],ev:[[0.38,()=>{ launch(0.9); Sfx('whoosh',0.5,1); }],[1.38,()=>land(1)]],
   f(t,F,k){ if (t<0.38){ const c=ease(seg(t,0,0.38)); F.sy=1-0.3*c; F.rx=7*c; }
     else if (t<1.38){ const u=seg(t,0.38,1.38); F.off[1]=3.4*k*4*u*(1-u); F.sy=lerp(1.28,1,seg(u,0,0.35))*(u>0.85?1-0.1*seg(u,0.85,1):1); F.rx=-360*eio(u); F.off[2]=0.25*sin(u*PI); }
@@ -1152,6 +1153,7 @@ const MOTIONS={
   f(t,F,k){ const w=ENV(t,0.15,0.5,3.0,3.8); F.rz=4*k*w*sin((t-0.5)*9)*sstep(0.9,1.1,t)*(1-sstep(2.5,2.8,t)); F.sy=1+0.04*w; F.off[1]=0.05*w; },
   end(M){ S['손동작']=M.g; S['손방향']=M.hd; podRetract(); }},
 };
+const MOTIONS=MOTIONS_; delete MOTIONS['손 인사'];   // pt723u: 팔·손 없앰
 
 // ---- ver3.2: 모션 공통 — 값 노이즈, 회차마다 조금씩 다른 크기·빠르기, 따라오는 스프링(관성·오버슈트)
 const hsh_=n=>{ const s=Math.sin(n*127.1+311.7)*43758.5453; return s-Math.floor(s); };
@@ -1326,7 +1328,7 @@ const PODS=[mkPod(-1),mkPod(1)];
 let PODON=false, PW=0, PG=0, PF=0, MUSON=false, MUSF=1;
 const POD={get act(){ return PODS.some(p=>p.act); }, get pods(){ return PODS; }};
 function podHands(){ const w=S['손쪽']; return w===0?[PODS[1]]:w===1?[PODS[0]]:PODS; } // 캐릭터 자기 기준: 왼손=PODS[1](화면 오른쪽), 오른손=PODS[0](화면 왼쪽)
-function podReach(){ unlockAudio(); const hs=podHands();
+function podReach(){ return; unlockAudio(); const hs=podHands();
   if (S['손항상'] && hs.some(p=>p.act)){ for (const p of hs) p.t=Math.max(p.t,0.9); return; }
   for (const p of hs){ if (p.act && p.t>0.9 && p.t<0.9+S['유지시간']){ p.t=0.9; continue; } p.act=true; p.t=0; p.pt=0; p.on=true; p.prev=null; p.L=[0,0,0]; p.Lv=[0,0,0]; } }
 function podRetract(){ for (const p of PODS) if (p.act) p.t=Math.max(p.t,0.9+S['유지시간']); }
@@ -1625,7 +1627,7 @@ function UpdateEyes(tt){
   if (tt>nextBlink){ blinkStart=tt; nextBlink=tt+rnd(S['깜빡임간격']*0.6,S['깜빡임간격']*1.4); blinkQ=[tt]; if (Math.random()<0.22) blinkQ.push(tt+0.3); }
   let bl=0; for (const b of blinkQ) bl=Math.max(bl,blinkCl(tt-b));
   let nd=[M.x/W*2-1, M.y/H*2-1]; const ndl=Math.hypot(nd[0],nd[1]); if (ndl>1) nd=[nd[0]/ndl,nd[1]/ndl];
-  const ink3=S['잉크색'], wc={r:1,g:1,b:1}, pc=ink3, lt=S['눈색']===0?[ink3.r,ink3.g,ink3.b]:[1,1,1]; const bk=S['볼색'];   // ver3: 잉크 눈 / 흰 눈
+  const ink3=S['눈색'], wc={r:1,g:1,b:1}, pc=ink3, lt=S['눈스타일']===0?[ink3.r,ink3.g,ink3.b]:[1,1,1]; const bk=S['볼색'];   // ver3: 잉크 눈 / 흰 눈
   const st=builtEye, sleepy=st===5;
   for (let i=0;i<2;i++){ const e=EYE[i], u=e.u; const {q,nn}=surf(e.home,tt);
     gluePlane(e.me,e.home,S['눈크기'],0,tt,0.012,q,nn);
@@ -1639,12 +1641,12 @@ function UpdateEyes(tt){
     u.uHeart.value=clamp01(Pc.heart); u.uSpiral.value=clamp01(Pc.spiral); u.uXX.value=clamp01(Pc.xx); u.uSpark.value=clamp01(Pc.spark); u.uTear.value=clamp01(Pc.tear);
     u.uBrow.value=clamp01(Pc.brow); u.uBrowY.value=Pc.browY+(i===1?Pc.bYR:0); u.uBrowA.value=Pc.browA; u.uBrowC.value=Pc.browC;
     u.uBlush.value=clamp01(Pc.blush); u.uSweat.value=clamp01(Pc.sweat); u.uVein.value=clamp01(Pc.vein); u.uFade.value=EYF;
-    u.uWhite.value.setRGB(wc.r,wc.g,wc.b); u.uPupilC.value.setRGB(pc.r,pc.g,pc.b); u.uLight.value.setRGB(lt[0],lt[1],lt[2]); u.uBlushC.value.setRGB(bk.r,bk.g,bk.b); u.uRing.value=S['눈색']===1?1:0; }
+    u.uWhite.value.setRGB(wc.r,wc.g,wc.b); u.uPupilC.value.setRGB(pc.r,pc.g,pc.b); u.uLight.value.setRGB(lt[0],lt[1],lt[2]); u.uBlushC.value.setRGB(bk.r,bk.g,bk.b); u.uRing.value=S['눈스타일']===1?1:0; }
   const mini=MINI(); let A=null, mbl=0; if (mini){ A=mAnim(); for (const b of blinkQ) { const v=mBlinkCl(tt-b); if (Math.abs(v)>Math.abs(mbl)) mbl=v; } if (!A.blink) mbl=0; }
   for (let i=0;i<2;i++){ const u=EYE[i].u; u.uMin.value=mini?1:0; if (!mini) continue;
     const o=A.o[i]; u.uMO.value=Math.max(0,o*(1-mbl)); u.uMB.value=A.b[i]; u.uMC.value=c01(A.c[i]); u.uMK.value=clamp(A.k[i],-1.2,1.2);
     u.uMZ.value=Math.max(0.2,A.z[i]); u.uMSX.value=A.sx[i]*(1+0.1*Math.max(0,mbl)); u.uMR.value=A.r[i];
-    const s0=EYE_STYLE[st].wr, pl=EYE[i].pl, pup=S['눈색']===1&&EYE_STYLE[st].w?1:0, sh=pup?0.35:1;   // 검은자가 있으면 시선은 주로 검은자가 움직여요
+    const s0=EYE_STYLE[st].wr, pl=EYE[i].pl, pup=S['눈스타일']===1&&EYE_STYLE[st].w?1:0, sh=pup?0.35:1;   // 검은자가 있으면 시선은 주로 검은자가 움직여요
     u.uMOff.value.set(pl[0]*0.35*sh+A.gx*0.15*sh*Math.max(0.6,s0[0]/0.42)+A.x[i], pl[1]*0.3*sh+A.gy*0.12*sh*Math.max(0.6,s0[1]/0.42)+A.y[i]);
     u.uMPup.value=pup; u.uMHi.value=S['하이라이트']?1:0; u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
     if (pup) u.uGaze.value.set(pl[0]+A.gx*s0[0]*0.6+A.px[i]*s0[0], pl[1]+A.gy*s0[1]*0.55+A.py[i]*s0[1]);
@@ -1664,7 +1666,7 @@ function UpdateMouth(tt,lt){
   mouthG.visible = (((!MINI()||S['입모양']>0) && Pc.mVis>0.01 && !(AD&&AD.nm)) || MJAW>0.02) && dot(qRot(hRot,nn), norm(sub(camU,TP(q)))) > -0.02;
   const U=mouthU; U.uW.value=Math.max(0.03,Pc.mW); U.uC.value=Pc.mC; U.uO.value=Math.max(0,Pc.mO); U.uR.value=clamp01(Pc.mR); U.uWave.value=Pc.mWave; U.uTeeth.value=clamp01(Pc.mTeeth); U.uTongue.value=clamp01(Pc.mTongue); U.uVis.value=clamp01(Pc.mVis);
   if (MJAW>0.002){ const j=Math.min(1,MJAW); U.uW.value=lerp(U.uW.value,0.56,j); U.uO.value=lerp(U.uO.value,0.47,j); U.uR.value=lerp(U.uR.value,0.5,j); U.uC.value=lerp(U.uC.value,0.02,j); U.uTongue.value=lerp(U.uTongue.value,0.9,j); U.uWave.value*=1-j; U.uVis.value=Math.max(U.uVis.value,sstep(0,0.12,MJAW)); if (AD&&AD.teeth) U.uTeeth.value=Math.max(U.uTeeth.value,0.45*j); }
-  if (shiba){ U.uLine.value.setRGB(0.07,0.06,0.07); U.uIn.value.setRGB(0.26,0.06,0.1); U.uLW.value=0.04; } else { const k_=S['잉크색'], m_=S['입안색']; U.uLine.value.setRGB(k_.r,k_.g,k_.b); U.uIn.value.setRGB(m_.r,m_.g,m_.b); U.uLW.value=0.034; } }
+  if (shiba){ U.uLine.value.setRGB(0.07,0.06,0.07); U.uIn.value.setRGB(0.26,0.06,0.1); U.uLW.value=0.04; } else { const k_=S['눈색'], m_=S['입안색']; U.uLine.value.setRGB(k_.r,k_.g,k_.b); U.uIn.value.setRGB(m_.r,m_.g,m_.b); U.uLW.value=0.034; } }
 
 // ============================================================ 귀 (버전 3 → 이제 모든 모양에 붙어요)
 function Sweep(V,T,start,a0,curl,len_,w,d,flat,curlPow=1){
@@ -2152,7 +2154,7 @@ maskU.mzP={value:new THREE.Vector4(0,0,0,2)}; maskU.mzQ={value:new THREE.Vector4
 { const a=new Float32Array(NV*3); for (let i=0;i<NV;i++){ const d=norm([rest[i*3],rest[i*3+1],rest[i*3+2]]); a[i*3]=d[0]; a[i*3+1]=d[1]; a[i*3+2]=d[2]; } bodyGeo.setAttribute('aRd',new THREE.BufferAttribute(a,3)); }
 function mzTick(){ const D=ANIK>=0?ANI[ANIK]:null, m=D&&D.mz; maskU.mzOn.value=m?1:0; if (!m) return; const p=m[0], q=m[1]||[0,0,0,-2]; maskU.mzP.value.set(p[0],p[1],p[2],p[3]); maskU.mzQ.value.set(q[0],q[1],q[2],q[3]); }
 let ANIK=-1, aniBuilt=-2; const ANIP=[], ANIMAT={};
-const ANIKEY={body:'몸색',light:'얼굴무늬색',pat:'무늬색',ink:'잉크색',inner:'귀안쪽색'};
+const ANIKEY={body:'몸색',light:'얼굴무늬색',pat:'무늬색',ink:'눈색',inner:'귀안쪽색'};
 function aniMat(key){ if (!ANIMAT[key]){ ANIMAT[key]=new THREE.MeshBasicMaterial({color:0xffffff,fog:false}); if (key[0]==='#'){ const c=hx(key); ANIMAT[key].color.setRGB(c.r,c.g,c.b); } } return ANIMAT[key]; }
 function aniColorsTick(){ for (const k in ANIKEY){ const m=ANIMAT[k]; if (m){ const c=S[ANIKEY[k]]; m.color.setRGB(c.r,c.g,c.b); } } }
 function frame3(u,ay,az){ let Y,Z;
@@ -2205,7 +2207,7 @@ function aniMesh(){ if (aniBuilt!==aniKey()) buildAnimal(); mzTick(); if (ANIK<0
           const d=x-T; if (d>0.3) x=T+0.3; else if (d<-0.3) x=T-0.3; J[j+k]=x; Jv[j+k]=v; pa[j+k]=T+w*(x-T); const ad=Math.abs(w*(x-T)); if (ad>mx) mx=ad; } } }
     p.geo.attributes.position.needsUpdate=true; } ANIJ.mx=mx; }
 window.__aniJig=(v)=>v?{mx:+(ANIJ.mx||0).toFixed(4),dl:+_dl.length().toFixed(4),sc:+_ws.x.toFixed(3),dt:ANIJ.dt}:+(ANIJ.mx||0).toFixed(4);
-function aniColors(s,D){ const c=D.cols; s['몸색']=hx(c.body); s['몸색섞기']=1; s['팔다리색']=hx(c.body); s['얼굴무늬색']=hx(c.light); s['무늬색']=hx(c.pat); s['귀안쪽색']=hx(c.inner); s['볼색']=hx(c.cheek); s['잉크색']=hx(c.ink); s['입안색']=hx(c.mouth); s['배경색']=hx(c.bg); s['배경그라데이션']=false; s['발바닥색']=hx(c.cheek); s['발톱색']=hx(c.light); s['손색상']=hx(c.cheek); }
+function aniColors(s,D){ const c=D.cols; s['몸색']=hx(c.body); s['몸색섞기']=1; s['팔다리색']=hx(c.body); s['얼굴무늬색']=hx(c.light); s['무늬색']=hx(c.pat); s['귀안쪽색']=hx(c.inner); s['볼색']=hx(c.cheek); s['외곽선색']=hx(c.ink); s['눈색']=hx(c.ink); s['입안색']=hx(c.mouth); s['배경색']=hx(c.bg); s['배경그라데이션']=false; s['발바닥색']=hx(c.cheek); s['발톱색']=hx(c.light); s['손색상']=hx(c.cheek); }
 function applyFace(s,k){ s['얼굴']=k;
   if (k===0){ if (s['모양']===7) s['모양']=0; s['귀']=1; s['왼눈위치']={x:-0.46,y:0.32}; s['오른눈위치']={x:0.46,y:0.32}; s['눈크기']=1.0; s['눈간격']=1; s['눈높이']=0; applyPalette(s,s['팔레트']>=PALETTES.length?0:s['팔레트']); }
   else if (k===1){ s['모양']=7; applyShibaPreset(); applyPalette(s,3); }
@@ -2538,7 +2540,7 @@ function lookApply(){
   if (!S['팔다리도같이']){ limbSkin.metalness=0; limbSkin.clearcoat=0; limbSkin.sheen=0; limbSkin.envMapIntensity=1; limbPad.metalness=0; limbPad.clearcoat=0; limbPad.sheen=0; limbPad.envMapIntensity=1; }
   for (const e of ears) if (e.ownMat){ e.ownMat.envMapIntensity=0; }
   // ver3: 외곽선 · 귀 안쪽 · 잉크
-  const ink=S['잉크색'], ol=!!S['외곽선']; OUTLINE.c.value.setRGB(ink.r,ink.g,ink.b); OUTLINE.w.value=S['외곽선두께'];
+  const ink=S['외곽선색'], ol=!!S['외곽선']; OUTLINE.c.value.setRGB(ink.r,ink.g,ink.b); OUTLINE.w.value=S['외곽선두께'];
   rimMat.visible=ol; partRim.visible=ol; limbRim.visible=ol;
   const ei=S['귀안쪽색']; earInnerU.c.value.setRGB(ei.r,ei.g,ei.b); earInnerU.on.value=0; earInnerMat.color.setRGB(ei.r,ei.g,ei.b); earInnerMat.visible=!!S['귀안쪽'];
   const ub=S['얼굴무늬색']; maskU.ura.value.setRGB(ub.r,ub.g,ub.b);
@@ -2778,10 +2780,13 @@ function btnGrid(det,kind){ const gd=document.createElement('div'); gd.className
   det.appendChild(gd);
   if (kind==='hand'){ const h=document.createElement('div'); h.className='hint'; h.textContent='몸 젤리가 가늘게 늘어나 팔이 되고, 더 뻗으면 엄지 → 손가락 순서로 갈라져 나와요. 손동작 버튼을 누르면 그 자세로 손을 뻗어요. 팔다리가 있으면 팔 위쪽에서 나와요.'; det.appendChild(h); } }
 setInterval(()=>{ for (const a of actBtns) a.b.classList.toggle('on', a.kind==='expr'?(!!EX&&!EX.out&&EX.name===a.nm):a.kind==='motion'?(!!MOT&&MOT.name===a.nm):(a.nm==='손 뻗기'?POD.act:GESTURES.includes(a.nm)&&GESTURES[S['손동작']]===a.nm)); },150);
-for (const g of SCHEMA){
-  const det=document.createElement('details'); det.open=['모양','눈','귀','팔다리','표정','모션','팔·손'].includes(g.h); const sm=document.createElement('summary'); sm.textContent=g.h; det.appendChild(sm);
+{ let sv={}; try{ sv=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{}; }catch(e){}
+  const D=defaults(), keep={}; for (const g of SCHEMA) for (const f of g.f){ if (g.hide||f.hide) S[f.k]=clone(D[f.k]); else if (f.k in sv && f.k!=='얼굴') keep[f.k]=S[f.k]; }
+  applyFace(S,S['얼굴']); Object.assign(S,keep); S['팔다리']=0; S['손항상']=false; save(); }
+for (const g of SCHEMA){ if (g.hide) continue;
+  const det=document.createElement('details'); det.open=['동물형','모양','눈','표정','모션'].includes(g.h); const sm=document.createElement('summary'); sm.textContent=g.h; det.appendChild(sm);
   if (g.btns) btnGrid(det,g.btns);
-  for (const f of g.f){
+  for (const f of g.f){ if (f.hide) continue;
     if (f.t==='enum'){ const r=rowEl(f.k,f.tip); const s=document.createElement('select'); f.o.forEach((o,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=o; s.appendChild(op); });
       s.addEventListener('change',()=>{ S[f.k]=+s.value; if (f.onSet){ f.onSet(); refreshAll(); } if (f.k==='모양'){ if (S['모양']===7) applyFace(S,1); else if (S['얼굴']) { const m_=S['모양']; applyFace(S,0); S['모양']=m_; } refreshAll(); } if (f.k==='표정'){ unlockAudio(); playExpr(EXPRS[S['표정']]); } save(); }); r.appendChild(s); det.appendChild(r); refreshers.push(()=>s.value=S[f.k]); }
     else if (f.t==='color'){ const r=rowEl(f.k,f.tip); const c=document.createElement('input'); c.type='color'; c.addEventListener('input',()=>{ S[f.k]=fromHex(c.value); save(); }); r.appendChild(c); det.appendChild(r); refreshers.push(()=>c.value=toHex(S[f.k])); }
@@ -2832,17 +2837,13 @@ function renderChips(){ chipsEl.innerHTML='';
   chip('🎈 풍선',undefined,()=>playMotion('풍선'));
   chip('🤸 백덤블링',undefined,()=>playMotion('백덤블링'));
   chip('얼굴',FACES[S['얼굴']],()=>applyFace(S,(S['얼굴']+1)%FACES.length));
-  chip('팔레트',PAL_NAMES[S['팔레트']],()=>applyPalette(S,(S['팔레트']+1)%(S['얼굴']>=2?PAL_NAMES.length:PALETTES.length)),hexOf(S['몸색']));
-  chip('귀',earLab(),()=>{ S['귀']=(S['귀']+1)%EARS.length; });
   chip('모양',SHAPES[S['모양']],()=>{ const m_=(S['모양']+1)%SHAPES.length; if (m_===7) applyFace(S,1); else { if (S['얼굴']) applyFace(S,0); S['모양']=m_; } });
   chip('눈',EYES[S['눈모양']],()=>{ S['눈모양']=(S['눈모양']+1)%EYES.length; });
   chip('입',MOUTHS[S['입모양']],()=>{ S['입모양']=(S['입모양']+1)%MOUTHS.length; });
   chip('표정 ▶',EXS[exprI%EXS.length],()=>{ playExpr(EXS[exprI%EXS.length],'once'); exprI++; });
   chip('모션 ▶',MOTS[motI%MOTS.length],()=>{ playMotion(MOTS[motI%MOTS.length]); motI++; });
-  chip('팔다리',LIMBS[S['팔다리']],()=>{ S['팔다리']=(S['팔다리']+1)%LIMBS.length; });
   chip('외곽선',S['외곽선']?'켬':'끔',()=>{ S['외곽선']=!S['외곽선']; });
-  chip('눈색',S['눈색']===0?'잉크':'흰 눈',()=>{ S['눈색']=1-S['눈색']; });
-  ttlSub.textContent=(S['얼굴']?FACES[S['얼굴']]:SHAPES[S['모양']])+' · '+PAL_NAMES[S['팔레트']]+' · 귀 '+earLab(); }
+  ttlSub.textContent=S['얼굴']?FACES[S['얼굴']]:SHAPES[S['모양']]; }
 renderChips();
 if (innerWidth<700) panel.classList.add('closed');
 cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.opacity=0.3; },{once:true});
