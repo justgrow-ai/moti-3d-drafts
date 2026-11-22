@@ -3747,8 +3747,8 @@ function zoomReset(){ const far=Math.abs(Math.log(ZM.z)); ZM.t=1; ZM.boing=true;
 // 모든 크기·밝기·반지름은 시간에 대해 부드러운 곡선(smoothstep 합)이라 갑자기 확 커지는 순간이 없어요. 몸은 빛 안에 숨어 있다가(빛이 다 찬 뒤에 완성) 빛이 빠지면서 보여요.
 var SU={on:false,t:0,T:6,N:0,F:null,sg:null,post:0,postT:-1,lastPop:0,meshes:null,mass:null,sgAttr:null,M:0,Rm:0,MA:0,sb:1,sgv:0,dbg:null};
 function suCap(){ return TIER>=3?48:TIER===2?96:240; }
-const SU_U={uMC:{value:new THREE.Vector3()},uQ:{value:1},uMA:{value:0},uMB:{value:1},uBl:{value:0.6},uGl:{value:0.6},uBodyC:null};
-const SU_GLSL=`uniform vec3 uMC; uniform float uQ; uniform float uMA; uniform float uMB; uniform float uBl; uniform float uGl; uniform vec3 uBodyC;
+const SU_U={uMC:{value:new THREE.Vector3()},uQ:{value:1},uMA:{value:0},uMB:{value:1},uBl:{value:0.6},uGl:{value:0.6},uBodyC:null,uH:{value:0},uQc:{value:0.1},uCA:{value:0}};
+const SU_GLSL=`uniform vec3 uMC; uniform float uQ; uniform float uMA; uniform float uMB; uniform float uBl; uniform float uGl; uniform vec3 uBodyC; uniform float uH; uniform float uQc; uniform float uCA;
 float suCore(float r){ float e0=mix(0.92,0.35,uBl); return 1.-smoothstep(e0,1.+0.25*uBl,r); }`;
 function suInit(){ if (SU.meshes) return; SU_U.uBodyC=bodyColU.c; const cap=240;
   // 파편 = 화면을 향한 부드러운 빛 방울 (가장자리가 흐릿하게 번짐). 큰 빛 덩어리 뒤에 있는 방울은 그 빛에 가려져요
@@ -3774,7 +3774,15 @@ varying vec2 vUv; void main(){ vec4 mv=viewMatrix*vec4(uMC,1.); mv.xy+=position.
     fragmentShader:SU_GLSL+`
 varying vec2 vUv; void main(){ float r=length(vUv)/0.62; float core=suCore(r); float halo=exp(-r*r*mix(5.,1.6,uBl))*0.45;
   float a=clamp(core+halo*(1.-core),0.,1.)*uMA; vec3 warm=vec3(1.,0.93,0.8);
-  vec3 c=mix(uBodyC,warm,clamp((0.12+0.45*(1.-smoothstep(0.,1.,r)))*uGl/0.6,0.,0.8))*uMB; gl_FragColor=vec4(min(c,vec3(1.)),a); }`});
+  vec3 c=mix(uBodyC,warm,clamp((0.12+0.45*(1.-smoothstep(0.,1.,r)))*uGl/0.6,0.,0.8))*uMB; c=mix(c,vec3(1.,0.97,0.9),uH*(0.55+0.45*(1.-r))); gl_FragColor=vec4(min(c,vec3(1.)),a); }`});
+  // 압축된 뜨거운 점 = 가운데 아주 작고 하얗게 뜨거운 빛 + 좁은 번짐 (작을수록 세고, 커지면 지금 밝기로 풀려요)
+  const cm=new THREE.ShaderMaterial({uniforms:SU_U,transparent:true,depthTest:false,depthWrite:false,fog:false,blending:THREE.AdditiveBlending,
+    vertexShader:SU_GLSL+`
+varying vec2 vUv; void main(){ vec4 mv=viewMatrix*vec4(uMC,1.); mv.xy+=position.xy*uQc; vUv=position.xy; gl_Position=projectionMatrix*mv; }`,
+    fragmentShader:SU_GLSL+`
+varying vec2 vUv; void main(){ float r=length(vUv); if (r>1.) discard; float pt=exp(-r*r*28.); float bl=exp(-r*r*9.)*0.55+exp(-r*3.5)*0.25*(1.-r);
+  vec3 c=vec3(1.,0.96,0.86)*pt*1.6+mix(uBodyC,vec3(1.,0.9,0.72),0.6)*bl*1.3; gl_FragColor=vec4(c*uCA,1.); }`});
+  SU.core=new THREE.Mesh(new THREE.PlaneGeometry(2,2),cm); SU.core.frustumCulled=false; SU.core.visible=false; SU.core.renderOrder=4700; scene.add(SU.core);
   SU.mass=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mm); SU.mass.frustumCulled=false; SU.mass.visible=false; SU.mass.renderOrder=4500; scene.add(SU.mass);
   if (!bodyGeo.attributes.aSg){ SU.sgAttr=new THREE.BufferAttribute(new Float32Array(NV),1); bodyGeo.setAttribute('aSg',SU.sgAttr); } else SU.sgAttr=bodyGeo.attributes.aSg;
   SU.sg=SU.sgAttr.array; }
@@ -3793,22 +3801,25 @@ function triggerSummon(){ suInit(); if (SU.on) return; unlockAudio(); lastTouch=
   // 도착 순서 = 안쪽 궤도부터 (바깥쪽은 더 오래 돌아요). 도착 시각은 넓게 퍼져 있어 덩어리가 한 번에 커지지 않고 계속 조금씩 쌓여요
   const L0=0.3*T, L1=Math.min(0.9*T,L0+0.58*T/av);
   const ord=[...F].sort((a,b)=>(a.r0*CL[a.cl].rk)-(b.r0*CL[b.cl].rk)+(Math.random()-0.5)*0.12);
-  ord.forEach((p,i)=>{ p.land=L0+(L1-L0)*Math.pow((i+0.5)/N,0.9); const dsp=(0.32+0.18*Math.random())*T/Math.sqrt(av); p.ts=Math.max(p.tin+0.35,p.land-dsp); });
+  const LB=L0+0.15*T, nb=Math.max(4,Math.round(N*0.2));   // 처음 20%는 거의 함께 한 점으로 모여 압축돼요
+  ord.forEach((p,i)=>{ p.land=i<nb?L0+(LB-L0)*Math.pow((i+0.5)/nb,1.2):LB+(L1-LB)*Math.pow((i-nb+0.5)/(N-nb),0.9); const dsp=(0.32+0.18*Math.random())*T/Math.sqrt(av); p.ts=Math.max(p.tin+0.35,p.land-dsp); });
   let mx=0; for (const p of F) mx=Math.max(mx,p.land);
   const Tr=mx+0.45+0.35, D=Math.max(0.4,S['빛 빠지는 시간']??1.8);
   Object.assign(SU,{on:true,t:-0.3,T,N,F,CL,sp,Tr,D,Tend:Tr+D+0.15,post:SU.post,postT:-1,lastPop:0,M:0,Rm:0,MA:0,sb:0,sgv:-1,dbg:window.__suDbg?[]:null});
-  for (const m of SU.meshes){ m.visible=true; m.count=0; } SU.mass.visible=true;
+  for (const m of SU.meshes){ m.visible=true; m.count=0; } SU.mass.visible=true; SU.core.visible=true;
   Sfx('whoosh',0.25,0.7); }
 function suTick(){ if (!SU||!SU.on) return; const dt=1/60; SU.t+=dt; const t=SU.t, F=SU.F, Rw=R*(hScl?hScl[0]:1);
   let M=0; for (const p of F) M+=smt((t-(p.land-0.05))/0.5); M/=F.length; SU.M=M;   // 쌓인 양 = 도착한 방울들의 부드러운 합
   const rv=smt((t-SU.Tr)/SU.D); SU.rv=rv;   // 빛 빠짐 진행
-  const Rpk=1.45*Rw, Rg=Rpk*Math.cbrt(0.04+0.96*M); SU.Rm=Rg*(1-0.15*rv);   // 부피만큼 커져요 (세제곱근) → 쌓일수록 천천히 커짐
-  SU.MA=smt(M/0.3)*(1-rv); SU.MB=0.86+0.14*M;   // 불투명도는 첫 방울부터 천천히 진해져요
+  const Rpk=1.45*Rw, Rg=Rpk*(0.05*smt(M/0.2)+0.95*smt((M-0.15)/0.85)); SU.Rm=Rg*(1-0.42*smt(rv/0.6));   /* 빛이 빠질 때 가장자리가 몸 안쪽으로 걷혀요 (반투명 고리가 남지 않게) */ SU.Rg=Rg;   // 반지름 = 도착해 쌓인 양만큼 (0에서 시작 → 처음 20%는 아주 작은 점 → 방울이 더해질수록 커짐)
+  SU.heat=Math.pow(1-clamp01(Rg/Rpk),2.2);   // 작을수록 뜨겁고(하얗게) 강렬, 커지면 풀려요
+  SU.CA=smt(M/0.18)*(0.2+1.9*SU.heat)*(1-rv);   // 부피만큼 커져요 (세제곱근) → 쌓일수록 천천히 커짐
+  SU.MA=smt(M/0.12)*(1-smt((rv-0.4)/0.6)); SU.MB=0.86+0.14*M;   // 불투명도는 첫 방울부터 천천히 진해져요
   SU.sb=smt((M-0.2)/0.75)*(0.85+0.15*smt(rv/0.55));   // 빛 속에선 85%까지만 (가장자리가 비치지 않게), 빛이 빠지며 제 크기로   // 몸은 빛 안에서 함께 자라고, 빛이 다 찬 뒤 완성
   SU.sgv=Math.round(clamp(0.85*(1-rv)*Math.min(1,(S['발광 강도']??0.6)/0.6+0.3),0,0.85)*200)/200;
   for (const p of F){ if (t>=p.land && !p.popped){ p.popped=true; if (time-SU.lastPop>0.15){ SU.lastPop=time; Sfx('bump',0.04,1.6+Math.random()*0.4); } } }
   const _b=document.querySelector('#bar button.su'); if (_b) _b.classList.toggle('on',t<SU.Tend);
-  if (t>SU.Tend){ SU.on=false; SU.postT=time; for (const m of SU.meshes){ m.visible=false; m.count=0; } SU.mass.visible=false; SU.sg.fill(0); SU.sgAttr.needsUpdate=true; } }
+  if (t>SU.Tend){ SU.on=false; SU.postT=time; for (const m of SU.meshes){ m.visible=false; m.count=0; } SU.mass.visible=false; SU.core.visible=false; SU.sg.fill(0); SU.sgAttr.needsUpdate=true; } }
 // 몸 정점: 빛 안에서 부드럽게 한꺼번에 커질 뿐 (울퉁불퉁·움푹한 중간 모양 없음)
 function suDeform(ox,oy,oz){ const t=SU.t; const s=t<0?1-sstep(-0.3,0,t):SU.sb; DX*=s; DY*=s; DZ*=s; }
 const _suM=new THREE.Matrix4(), _suV=new THREE.Vector3(), _suQ=new THREE.Quaternion(), _suS=new THREE.Vector3();
@@ -3823,7 +3834,7 @@ function suPre(){ if (!SU||!SU.meshes) return;
   if (SU.sb<0.98){ for (const e of EYE) e.g.visible=false; mouthG.visible=false; if (typeof nose!=='undefined') nose.visible=false; }
   const t=SU.t, F=SU.F, CL=SU.CL, Rw=R*(hScl?hScl[0]:1), C=hupi.getWorldPosition(new THREE.Vector3());
   const sz=(S['파편 크기']??1), sp=SU.sp, dt=1/60, Rm=SU.Rm;
-  SU_U.uMC.value.copy(C); SU_U.uQ.value=Math.max(1e-3,Rm/0.62); SU_U.uMA.value=SU.MA; SU_U.uMB.value=SU.MB; SU_U.uBl.value=S['빛 흐림 정도']??0.6; SU_U.uGl.value=ge;
+  SU_U.uMC.value.copy(C); SU_U.uQ.value=Math.max(1e-3,Rm/0.62); SU_U.uMA.value=SU.MA; SU_U.uMB.value=SU.MB; SU_U.uBl.value=S['빛 흐림 정도']??0.6; SU_U.uGl.value=ge; SU_U.uH.value=Math.min(0.9,SU.heat*1.1); SU_U.uCA.value=SU.CA; SU_U.uQc.value=Math.max(0.42*Rw,Rm*1.25)*(0.85+0.3*(S['빛 흐림 정도']??0.6));
   const lim=Math.max(SCRW*1.02,Rw*1.2), spawnD=1.5*Math.hypot(SCRW,(SCRT-SCRB)/2), mesh=SU.meshes[0], aB=mesh.geometry.attributes.aBr.array, aA=mesh.geometry.attributes.aA.array; let k=0;
   const pr=SU.dbg?[[0,0],[0,0],[0,0],[0,0],[0,0]]:null;
   for (const p of F){
@@ -3831,7 +3842,7 @@ function suPre(){ if (!SU||!SU.meshes) return;
     const cl=CL[p.cl], r0w=Math.min(lim,p.r0*cl.rk*Rw);
     const u=clamp01((t-p.ts)/(p.land-p.ts)), e=u*u*(3-2*u);   // 궤도가 안쪽으로 서서히 감김 (도착 때 덩어리 가장자리)
     const sink=smt((t-p.land)/0.45);   // 도착 후 덩어리 속으로 스며듦
-    const Rs=Math.max(Rm,0.25*Rw)*0.85;
+    const Rs=Math.max(Rm*0.85,0.02*Rw);
     let r=Rs+(r0w-Rs)*(1-e); r=r*(1-sink)+Rs*0.45*sink;
     p.th+=cl.w*sp*1.6*Math.min(3,Math.pow(r0w/Math.max(0.3*Rw,r),1.0))*dt;   // 안쪽일수록 빨리 돌아요
     // 궤도면: 천천히 세차(세로축 회전) + 감길수록 비틀림
@@ -3841,11 +3852,11 @@ function suPre(){ if (!SU||!SU.meshes) return;
     const lo=Rw*0.05*(1-e); o=[o[0]+p.off[0]*lo,o[1]+p.off[1]*lo,o[2]+p.off[2]*lo];
     if (t<p.tin){ const q=1-Math.pow(1-clamp01(t/p.tin),3), s0=[C.x+p.sd[0]*spawnD,C.y+p.sd[1]*spawnD,C.z+p.sd[2]*spawnD]; o=[s0[0]+(o[0]-s0[0])*q,s0[1]+(o[1]-s0[1])*q,s0[2]+(o[2]-s0[2])*q]; }
     if (pr && t>=p.tin && sink<0.01){ pr[p.cl][0]+=r/Rw; pr[p.cl][1]++; } if (SU.dbg) p.rr=(t>=p.tin&&sink<0.3)?+(r/Rw).toFixed(3):null;
-    const scl=Rw*0.17*sz*p.size*(1-0.55*sink)*(t<p.tin?0.4+0.6*clamp01(t/p.tin):1);
+    const nc=smt(r/(0.7*Rw)), scl=Rw*0.17*sz*p.size*(1-0.55*sink)*(t<p.tin?0.4+0.6*clamp01(t/p.tin):1)*(0.3+0.7*nc);   // 가운데로 갈수록 작게 눌리고 더 밝아져요
     _suS.set(scl,scl,scl); _suV.set(o[0],o[1],o[2]); _suQ.identity(); _suM.compose(_suV,_suQ,_suS); mesh.setMatrixAt(k,_suM);
-    aB[k]=p.br; aA[k]=(1-sink)*(t<p.tin?smt(t/p.tin*1.5):1); k++; }
+    aB[k]=p.br*(1+0.45*(1-nc)); aA[k]=(1-sink)*(t<p.tin?smt(t/p.tin*1.5):1); k++; }
   mesh.count=k; mesh.instanceMatrix.needsUpdate=true; mesh.geometry.attributes.aBr.needsUpdate=true; mesh.geometry.attributes.aA.needsUpdate=true;
-  if (SU.dbg) SU.dbg.push([+t.toFixed(3),+(Rm/Rw).toFixed(4),+SU.MA.toFixed(4),+SU.sb.toFixed(4),SU.sgv,...pr.map(a=>a[1]?+(a[0]/a[1]).toFixed(4):null),k,F.map(p=>t<0||t>p.land+0.5?null:p.rr),F.map(p=>p.cl)]); }
+  if (SU.dbg) SU.dbg.push([+t.toFixed(3),+(Rm/Rw).toFixed(4),+SU.MA.toFixed(4),+SU.sb.toFixed(4),SU.sgv,+(SU.heat||0).toFixed(4),+(SU.CA||0).toFixed(4),+(SU.M||0).toFixed(4),...pr.map(a=>a[1]?+(a[0]/a[1]).toFixed(4):null),k,F.map(p=>t<0||t>p.land+0.5?null:p.rr),F.map(p=>p.cl)]); }
 function suChip(){ const b=document.createElement('button'); b.className='su'; b.innerHTML='🪐 소환'; b.onclick=()=>triggerSummon(); chipsEl.appendChild(b); }
 function suBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='소환 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } triggerSummon(); }
 window.triggerSummon=triggerSummon; window.__su={go:triggerSummon,SU};
