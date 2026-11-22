@@ -46,7 +46,7 @@
   #bar button{flex:none;border:0;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.82);color:#2b2320;font:700 12.5px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
   #bar button i{font-style:normal;font-weight:500;opacity:.6;margin-left:5px}
   #bar button:active{transform:scale(.95)}
-  #bar button.tk.on,#bar button.md.on{background:#2b2320;color:#fff}
+  #bar button.tk.on,#bar button.md.on,#bar button.pu.on{background:#2b2320;color:#fff}
   #bar .sw{display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:6px;vertical-align:-1px;box-shadow:0 0 0 1.5px rgba(0,0,0,.18)}
   #hint{pointer-events:none;text-align:center;font-size:11px;color:rgba(43,35,32,.55);transition:opacity .8s}
   #ttl{position:absolute;left:14px;top:12px;z-index:4;font:800 15px inherit;font-family:inherit;color:#2b2320;pointer-events:none}
@@ -251,6 +251,14 @@ const SCHEMA = [
   {k:'흡수범위',r:[1.5,4],d:2.6,tip:'오로라가 퍼져 있는 범위 (몸 크기 배율)'},
   {k:'몸발광강도',r:[0,1.5],d:0.8,tip:'몸 안에 차오르는 따뜻한 빛 세기 (원래 색·얼굴은 그대로)'},
   {k:'차오름시간',r:[0.5,8],d:3,tip:'빛이 몸에 꽉 차오르기까지 걸리는 시간(초)'}]},
+ {h:'맥동 설정', btns:'pu', f:[
+  {k:'기본발광강도',r:[0,1.5],d:0.6,tip:'박동 사이에도 계속 유지되는 은은한 금빛 (몸 색·얼굴은 그대로)'},
+  {k:'맥동강도',r:[0,2],d:1,tip:'박동 때 한 단계 밝아지는 정도 + 파동 세기'},
+  {k:'맥동주기',r:[0.6,4],d:1.6,tip:'박동 간격(초) — 클수록 느리고 묵직하게'},
+  {k:'파동속도',r:[0.3,4],d:1.4,tip:'빛의 파동이 퍼져 나가는 빠르기'},
+  {k:'파동폭',r:[0.2,2],d:1,tip:'파동 띠의 두께 (넓을수록 부드러운 막)'},
+  {k:'확산반경',r:[0.5,3],d:1.6,tip:'파동이 퍼져 사라지는 거리 (몸 크기 배율)'},
+  {k:'주변밝힘강도',r:[0,2],d:1,tip:'박동 때 캐릭터 근처 공간이 잠깐 따뜻하게 밝아지는 정도'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -2807,7 +2815,7 @@ function screenEdges(){ const C=cam.position; const hit=(nx,ny)=>{ _v3a.set(nx,n
   _pm.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse); _fr.setFromProjectionMatrix(_pm); const pl=_fr.planes[2]; FB=[pl.normal.x,pl.normal.y,-pl.normal.z,pl.constant]; }
 let FB=[0,1,0,7], BMIN=-R, BMK=''; function bodyMinB(){ const k=BSHK+'|'+FB[1].toFixed(3)+FB[2].toFixed(3); if (k===BMK) return BMIN; BMK=k; let m=1e9; for (let i=0;i<BSH.length;i+=3){ const v=FB[1]*BSH[i+1]+FB[2]*BSH[i+2]; if (v<m) m=v; } m-=(ANIK>=0&&ANI[ANIK]&&ANI[ANIK].drop||0)*R; BMIN=m; return m; }
 let LFLOOR=-1e9, floorY=0, rawFloor=0, camU=[0,0,-14], camOverride=null, camAbs=null, idleYaw=1;
-function step(){ const skip=slowTick(); pfxTick(); tkTick(); awTick(); mdTick(); if (HSTOP>0){ HSTOP--; return; } if (skip) return;
+function step(){ const skip=slowTick(); pfxTick(); tkTick(); awTick(); mdTick(); puTick(); if (HSTOP>0){ HSTOP--; return; } if (skip) return;
   const tt=time, m={x:M.x,y:M.y};
   if (S['잡기모드']) grabInput(tt); else {
   if (M.down){ M.down=false; mouseDown=true; downTime=tt; downPos={...m}; lastMouse={...m}; lastTouch=tt;
@@ -2862,7 +2870,7 @@ function step(){ const skip=slowTick(); pfxTick(); tkTick(); awTick(); mdTick();
 
   tilt*=0.92;
   UpdateActions(tt);
-  const s=1+Math.sin(BPH)*S['숨쉬기부풀기']+boing+mdPuff(), fy=FX.sy, gw=clamp01(1-FX.off[1]/0.8);
+  const s=1+Math.sin(BPH)*S['숨쉬기부풀기']+boing+mdPuff()+puPuff(), fy=FX.sy, gw=clamp01(1-FX.off[1]/0.8);
   hPos=add(add(basePos,[0,Math.sin(BPH)*S['숨쉬기위아래']+jump,0]),[FX.off[0],FX.off[1]+((fy-1)*R*0.95-FX.press*R*0.55)*gw,FX.off[2]]);
   hPos[1]+=tkFloat()+mdFloat(); hRot=qMul(qMul(MOT_Q,qEuler(FX.rx,FX.ry,FX.rz)),qEuler(0,-Math.sin(tt/1.4)*0.25*R2D*idleYaw,(-tilt)*R2D));
   { const sq_=UpdateSpin(1/60); if (sq_) hRot=qMul(sq_,hRot); if (SPIN.sway>1e-3){ const sw=SPIN.sway; hPos=add(hPos,[0.35*sw*Math.sin(tt*5.2),0,0]); hRot=qMul(qAxis(9*sw*Math.sin(tt*4.1+0.6),FWD),hRot); } }
@@ -3024,9 +3032,9 @@ function impactBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g
   if (!S['타격임팩트']){ S['타격임팩트']=true; save(); refreshAll(); }
   if (nm.includes('다시')) land(1); else vel=[Math.random()<0.5?-0.7:0.7,0.18,0]; }
 function btnGrid(det,kind){ const gd=document.createElement('div'); gd.className='grid';
-  const items=kind==='md'?['🧘 명상 시작/끝','이 섹션 초기화']:kind==='aw'?['✨ 각성 재생','이 섹션 초기화']:kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
+  const items=kind==='pu'?['☀️ 맥동 켜기/끄기','이 섹션 초기화']:kind==='md'?['🧘 명상 시작/끝','이 섹션 초기화']:kind==='aw'?['✨ 각성 재생','이 섹션 초기화']:kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
   for (const nm of items){ const b=document.createElement('button'); b.textContent=nm; b.title=nm;
-    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='md'){ mdBtn(nm); return; } if (kind==='aw'){ awBtn(nm); return; } if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
+    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='pu'){ puBtn(nm); return; } if (kind==='md'){ mdBtn(nm); return; } if (kind==='aw'){ awBtn(nm); return; } if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
     gd.appendChild(b); actBtns.push({b,kind,nm}); }
   det.appendChild(gd);
   if (kind==='hand'){ const h=document.createElement('div'); h.className='hint'; h.textContent='몸 젤리가 가늘게 늘어나 팔이 되고, 더 뻗으면 엄지 → 손가락 순서로 갈라져 나와요. 손동작 버튼을 누르면 그 자세로 손을 뻗어요. 팔다리가 있으면 팔 위쪽에서 나와요.'; det.appendChild(h); } }
@@ -3243,7 +3251,7 @@ function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) ret
   g.globalAlpha=1; }
 window.__pfx=PFX; window.__hit=(s,ix,iy)=>pfxHit(s,ix||0,iy||0);
 function prTick(){ buttTick(); const b=FX.big||1, cl=!!(MOT&&MOT.name==='복제'); let w=PRK; if (b>1.6) w=0.5; else if (b>1.2 && PRK>0.72) w=0.72; else if (cl) w=Math.min(w,window.__clk||0.62); else if (b<1.1) w=1; if (w!==PRK){ PRK=w; applyQL(); } }
-function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); tkPropsUpd(); mdPre(); if (AW&&((AW.cnt2=(AW.cnt2|0)+1)%60===1)) awPatchAll(); if (AW&&AW.on) awRender(); else if (TK&&TK.k>0.001) tkRender(); else if (IM.active()) impactRender(); else if (awActive()) awRender(); else { renderer.render(scene,cam); renderClone(); } }
+function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); tkPropsUpd(); mdPre(); puPre(); if (AW&&((AW.cnt2=(AW.cnt2|0)+1)%60===1)) awPatchAll(); if (AW&&AW.on) awRender(); else if (TK&&TK.k>0.001) tkRender(); else if (IM.active()) impactRender(); else if (PU&&PU.a>0.001) puRender(); else if (awActive()) awRender(); else { renderer.render(scene,cam); renderClone(); } }
 
 // ============================================================ pt749u: 염동력 (공간 굴절 후처리) + 테스트 소품
 // 상태: idle → start(염동력시작 초) → sustain → end(염동력종료 초). 세기 k>0 일 때만 후처리 (평소엔 추가 비용 0)
@@ -3473,13 +3481,66 @@ function mdChip(){ const b=document.createElement('button'); b.className='md'+(M
 function mdBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='명상 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } mdSet(!MD.on); }
 window.__md={on:()=>mdSet(true),off:()=>mdSet(false),MD};
 
+// ============================================================ 맥동 (Solar Pulse): 몸 전체가 따뜻한 금빛으로 계속 은은히 빛나고, '둥… 둥…' 박동마다 한 단계 밝아지며 실루엣 모양 그대로 빛의 파동이 퍼져 주변을 잠깐 데워요
+// 몸 빛 = 캐릭터 재질 uGlw(명상과 합산). 파동 = 캐릭터 실루엣 마스크를 크게 흐린 값 → 실루엣으로부터의 거리 추정 → 그 거리의 부드러운 띠 (원형 링 아님)
+var PU={on:false,a:0,t:0,bt:0,e:0};
+function puTick(){ if (!PU) return; const dt=1/60;
+  if (PU.on){ if (PU.a<=0) PU.bt=-0.35; PU.a=Math.min(1,PU.a+dt/0.9); } else PU.a=Math.max(0,PU.a-dt/1.2);
+  if (PU.a>0){ PU.t+=dt; PU.bt+=dt; } else { PU.t=0; PU.bt=0; } }
+function puSet(on){ if (!PU) return; PU.on=!!on; const b=document.querySelector('#chips button.pu'); if (b) b.classList.toggle('on',PU.on); }
+const puP=()=>Math.max(0.5,S['맥동주기']??1.6);
+function puBeat(tau){ if (tau<0) return 0; const up=0.16; return tau<up?sstep(0,up,tau):Math.exp(-(tau-up)/0.38); }   // 묵직한 한 번: 부드럽게 올라 천천히 가라앉음
+function puTau(){ const P=puP(); return PU.bt<0?PU.bt:PU.bt%P; }
+function puPuff(){ if (!PU||PU.a<=0) return 0; return 0.016*puBeat(puTau())*PU.a; }
+function puPre(){ if (!PU||PU.a<=0.001) return; const G=awU().g.value, A=sstep(0,1,PU.a), e=puBeat(puTau())*A;
+  const g=(S['기본발광강도']??0.6)*A*0.5+(S['맥동강도']??1)*e*0.3; G.x+=1.0*g; G.y+=0.78*g; G.z+=0.36*g; PU.e=e; }
+function puInit(){ const o={depthBuffer:false,type:THREE.HalfFloatType}; PU.f1=new THREE.WebGLRenderTarget(4,4,o); PU.f2=new THREE.WebGLRenderTarget(4,4,o); PU.g1=new THREE.WebGLRenderTarget(4,4,o); PU.g2=new THREE.WebGLRenderTarget(4,4,o);
+  const mat=new THREE.ShaderMaterial({uniforms:{tB:{value:null},tC:{value:null},tF:{value:PU.f2.texture},uSig:{value:.05},uRb:{value:.15},uReach:{value:.2},uD:{value:[0,0]},uI:{value:[0,0]},uW:{value:.05},uBase:{value:0},uLit:{value:0},uT:{value:0}},
+    vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
+    fragmentShader:`precision highp float; uniform sampler2D tB,tC,tF; uniform float uSig,uRb,uReach,uW,uBase,uLit,uT; uniform float uD[2],uI[2]; varying vec2 vUv;
+float h1(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float n2(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h1(i),h1(i+vec2(1.,0.)),f.x),mix(h1(i+vec2(0.,1.)),h1(i+vec2(1.,1.)),f.x),f.y); }
+void main(){ vec4 c=texture2D(tC,vUv); vec3 o=texture2D(tB,vUv).rgb*(1.-c.a)+c.rgb; float out0=1.-c.a;
+  if (out0<0.004){ gl_FragColor=vec4(o,1.); return; }
+  float b=clamp(texture2D(tF,vUv).r,1e-5,0.5);
+  float d=uSig*0.8*sqrt(max(0.,-2.*log(2.*b)));                                   // 실루엣에서의 거리(화면 높이 단위) 추정
+  if (d>uReach*1.15){ gl_FragColor=vec4(o,1.); return; }
+  float x=d/uReach, wob=(n2(vUv*vec2(9.,19.)+uT*0.3)-.5)*0.12*uW;                    // 띠 모양에 아주 느린 일렁임
+  float wv=0.;
+  for (int i=0;i<2;i++){ float k=(d+wob-uD[i])/uW; wv+=exp(-k*k)*uI[i]*pow(max(0.,1.-uD[i]/uReach),1.4); }
+  float lit=uLit*exp(-d/(uReach*0.45))+uBase*exp(-d/(uReach*0.22));                 // 박동 때 몸 근처만 잠깐 따뜻하게 밝아짐 + 평소 은은한 기운
+  vec3 cw=mix(vec3(1.,.84,.45),vec3(1.,.66,.4),smoothstep(.0,.5,x)); cw=mix(cw,vec3(1.,.5,.2),smoothstep(.45,1.,x));   // 금 → 살구 → 주황
+  float I=clamp(wv*0.85+lit,0.,1.)*out0*(1.-smoothstep(0.85,1.15,x));
+  o=mix(o,o*vec3(1.,.88,.66),I*0.45);                                               // 밝은 배경에서도 따뜻한 기운이 보이게
+  o=1.-(1.-o)*(1.-cw*I*0.75);                                                     // 스크린 합성: 어두운 배경에선 빛처럼 밝힘
+  gl_FragColor=vec4(o,1.); }`,depthTest:false,depthWrite:false});
+  const qm=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat); qm.frustumCulled=false; PU.q=new THREE.Scene(); PU.q.add(qm); PU.u=mat.uniforms; }
+function puRender(){ if (!AW.q) awInit(); if (!PU.q) puInit(); layersRender();
+  const g=pfxGeom(), rb=Math.max(g.rx,g.ry)/g.H, reach=(S['확산반경']??1.6)*rb, sig=reach/3.2;   // 화면 높이 단위
+  const fw=Math.ceil(_dbs.x/16), fh=Math.ceil(_dbs.y/16); if (PU.f1.width!==fw||PU.f1.height!==fh){ PU.f1.setSize(fw,fh); PU.f2.setSize(fw,fh); PU.g1.setSize(fw*4,fh*4); PU.g2.setSize(fw*4,fh*4); }
+  const sT=Math.max(1,sig*fh), st=Math.max(1,sT/4), bu=AW.bu, oc=TK.oc; bu.uS.value=sT/st;
+  // 먼저 1/4 해상도로 살짝 흐려 줄인 뒤(가는 뿔·귀도 고르게) 1/16 해상도에서 크게 흐려요
+  const gw=fw*4, gh=fh*4; bu.uS.value=2; bu.uFirst.value=1; bu.tS.value=TK.rc.texture; bu.uStep.value.set(1/gw,0); renderer.setRenderTarget(PU.g1); renderer.render(AW.bs,oc);
+  bu.uFirst.value=0; bu.tS.value=PU.g1.texture; bu.uStep.value.set(0,1/gh); renderer.setRenderTarget(PU.g2); renderer.render(AW.bs,oc);
+  bu.uS.value=sT/st; bu.uFirst.value=0; bu.tS.value=PU.g2.texture; bu.uStep.value.set(st/fw,0); renderer.setRenderTarget(PU.f1); renderer.render(AW.bs,oc);
+  bu.uFirst.value=0; bu.tS.value=PU.f1.texture; bu.uStep.value.set(0,st/fh); renderer.setRenderTarget(PU.f2); renderer.render(AW.bs,oc); renderer.setRenderTarget(null);
+  const u=PU.u, A=sstep(0,1,PU.a), P=puP(), spd=(S['파동속도']??1.4)*rb, tau=puTau(), pw=S['맥동강도']??1;
+  u.tB.value=TK.rb.texture; u.tC.value=TK.rc.texture; u.uSig.value=sig; u.uRb.value=rb; u.uReach.value=reach; u.uW.value=Math.max(0.004,(S['파동폭']??1)*rb*0.32);
+  const t0=tau<0?-1:tau; u.uD.value[0]=Math.max(0,t0)*spd; u.uI.value[0]=t0<0?0:pw*A*sstep(0,0.12,t0); u.uD.value[1]=(t0+P)*spd; u.uI.value[1]=PU.bt>P?pw*A:0;
+  u.uBase.value=(S['기본발광강도']??0.6)*A*0.35; u.uLit.value=(S['주변밝힘강도']??1)*PU.e*0.45; u.uT.value=time;
+  renderer.render(PU.q,oc); }
+function puChip(){ const b=document.createElement('button'); b.className='pu'+(PU.on?' on':''); b.innerHTML='☀️ 맥동';
+  b.onclick=()=>{ unlockAudio(); lastTouch=time; puSet(!PU.on); }; chipsEl.appendChild(b); }
+function puBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='맥동 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } puSet(!PU.on); }
+window.__pu={on:()=>puSet(true),off:()=>puSet(false),PU};
+
 // ============================================================ ver3: 아래 칩 바 (폰에서 바로 비교)
 const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('ttlSub');
 const hexOf=c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(clamp01(v)*255).toString(16).padStart(2,'0')).join('');
 let exprI=0, motI=0; const MOTS=Object.keys(MOTIONS).filter(n=>!['등장','퇴장','움찔','쓰다듬기 반응'].includes(n)); const EXS=EXPRS.filter(n=>n!=='기본');
 function chip(lab,val,fn,sw){ const b=document.createElement('button'); b.innerHTML=lab+(val!==undefined?'<i>'+val+'</i>':'')+(sw?'<span class="sw" style="background:'+sw+'"></span>':''); b.onclick=()=>{ unlockAudio(); lastTouch=time; fn(); save(); refreshAll(); renderChips(); }; chipsEl.appendChild(b); }
 const earLab=()=>S['얼굴']>=2&&ANI[S['얼굴']]&&S['귀']===ANI[S['얼굴']].ear?'동물 기본':EARS[S['귀']];
-function renderChips(){ chipsEl.innerHTML=''; tkChip(); chip('✨ 각성모드',undefined,()=>triggerAwaken()); mdChip();
+function renderChips(){ chipsEl.innerHTML=''; tkChip(); chip('✨ 각성모드',undefined,()=>triggerAwaken()); mdChip(); puChip();
   chip('🌀 스핀',undefined,()=>spinKick(SPINDIR*(Math.random()<0.5?-1:1)*(16+Math.random()*6)));
   chip('😮 쩌억',undefined,()=>playMotion('입 쩌억'));
   chip('👯 복제',undefined,()=>playMotion('복제'));
