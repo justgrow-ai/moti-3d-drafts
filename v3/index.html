@@ -64,10 +64,11 @@
       <div class="btns" style="margin-bottom:6px"><button id="bCopy" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a">📋 현재 값 복사</button><button id="bPaste">값 붙여넣기</button></div>
       <div class="btns"><button id="bReset">기본값으로</button><button id="bExport">JSON 내보내기</button><button id="bImport">JSON 가져오기</button></div>
       <input id="fImport" type="file" accept=".json,application/json" hidden>
-      <div class="tabs"><button data-t="opt" class="on">옵션</button><button data-t="act">표정 액션</button></div>
+      <div class="tabs"><button data-t="opt" class="on">옵션</button><button data-t="act">표정 액션</button><button data-t="hid">숨김 옵션</button></div>
     </div>
     <div id="fields" class="sub"></div>
     <div id="actFields" class="sub" hidden></div>
+    <div id="hidFields" class="sub" hidden></div>
   </div>
 </div>
 <script type="module">
@@ -157,6 +158,8 @@ const SCHEMA = [
   {k:'복원력',r:[0,1],d:0.5,tip:'놓았을 때 원래 모양으로 돌아오는 힘'},
   {k:'끊김',t:'bool',d:false,tip:'너무 멀리 늘이면 톡 끊어지며 놓쳐요'},
   {k:'끊김거리',r:[3,14],d:8},
+  {k:'되돌아오는속도',r:[0,1],d:0.5,tip:'놓았을 때 원래 모양으로 돌아오는 빠르기 (높을수록 빨리 톡 돌아와요)'},
+  {k:'놓을때출렁임',r:[0,1],d:0.5,tip:'놓았을 때 돌아오며 출렁이는 정도 (높을수록 더 많이·오래 출렁여요)'},
   {k:'잡는범위',hide:1,r:[0.08,0.6],d:0.22,tip:'손가락이 잡는 면적 (몸 반지름 대비). 클수록 넓고 뭉툭하게 잡혀요'},
   {k:'끝둥글기',hide:1,r:[0,1],d:0.75,tip:'잡힌 끝이 얼마나 둥글고 통통하게 남는지 (0 = 뾰족, 1 = 반죽처럼 둥글게)'}]},
  {h:'화면·재질', hide:1, f:[
@@ -380,6 +383,8 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   const face=take('얼굴'), eye=take('눈모양'); face.o=face.o.map((n,i)=>i?'동물형 · '+n:'기본형'); face.tip='기본형 또는 동물 얼굴을 골라요'; eye.tip='눈 모양 (기본: 점 눈)';
   const snd=['소리켜기','소리크기'].map(take);
   for (const g of SCHEMA){ if (g.tab==='act') continue; const keep=SHOW[g.h]||[]; for (const f of g.f) if (!keep.includes(f.k)) f.hide=1; }
+  for (const h of ['ver2 잡기','젤리 늘어남']){ const g=G(h); g.tab='hid'; g.hide=0; for (const f of g.f) f.hide=['치즈지수','잡는범위','끝둥글기'].includes(f.k)?1:0; }
+  G('ver2 잡기').h='잡기 · 늘이기'; G('젤리 늘어남').h='통째로 끌 때 늘어남';
   G('성능').f.push(...snd); G('성능').h='앱 설정'; G('몸 일렁임').h='일렁임 · 숨쉬기'; G('타격 임팩트 설정').hide=1;
   for (const [h,n] of [['염동력 설정','염동력'],['각성모드 설정','각성모드'],['명상 설정','명상'],['맥동 설정','맥동']]) G(h).lbl=n+' 강도';
   for (const g of SCHEMA) for (const f of g.f) if (f.k in FINAL) f.d=JSON.parse(JSON.stringify(FINAL[f.k]));   // '이 섹션 초기화'도 최종값으로
@@ -2641,9 +2646,9 @@ function grabSim(){
   const wt=S['무게감'], st=S['늘어남'], lag=S['뒤따라옴'], ch=S['치즈지수'], rs=S['복원력'], gs=S['잡는힘'];
   let aL=ITV(aW); { const l=len(aL); if (l>0.12) aL=mul(aL,0.12/l); } const inert=0.35+0.9*wt, multi=GR.pins.length>=2;
   const gL=mul(gDown, (0.0025+0.006*wt)*GR.held);
-  let kd0=0, damp=held?lerp(0.975,0.93,lag*0.6):lerp(0.93,0.88,rs), kd=lerp(0.55,0.035,st), ksm=held?lerp(0.03,0.12,rs):lerp(0.02,0.16,rs), kc0=0, kc=held?lerp(0.006,0.03,1-lag):0.06;
+  let kd0=0, damp=held?lerp(0.975,0.93,lag*0.6):clamp(lerp(0.93,0.88,rs)+((S['놓을때출렁임']??0.5)-0.5)*0.16,0.8,0.985), kd=lerp(0.55,0.035,st), ksm=held?lerp(0.03,0.12,rs):lerp(0.02,0.16,rs), kc0=0, kc=held?lerp(0.006,0.03,1-lag):0.06;
   if (multi){ kd*=0.2; kc=0; }
-  GR.relT=held?0:(GR.relT||0)+1; if (!held){ const ramp=clamp01((GR.relT-6)/45); ksm=lerp(ksm,0.6,ramp); kd*=1-0.8*ramp; }
+  GR.relT=held?0:(GR.relT||0)+1; if (!held){ const sp=Math.pow(4,((S['되돌아오는속도']??0.5)-0.5)*2), ramp=clamp01((GR.relT-6)/(45/sp)); ksm=Math.min(0.9,lerp(ksm,0.6,ramp)*sp); kd=Math.min(0.9,kd*(1-0.8*ramp)*sp); }
   for (let i=0;i<n;i++){ for (let a=0;a<3;a++){ V[i*3+a]=V[i*3+a]*damp-aL[a]*inert+gL[a]; P[i*3+a]=X[i*3+a]+V[i*3+a]; } }
   // 핀 목표 (국소)
   for (const p of GR.pins){ p.local=ITV(sub(p.world,hPos)); }
@@ -2744,7 +2749,7 @@ function grabInput(tt){
   for (const [id,p] of [...PTR]){
     if (p.st==='new'){ p.st='move'; lastTouch=tt;
       const hb=hitBody(p);
-      if (hb){ p.pin=grabAddPin(hb.rp,hb.world,id,p.shift); p.onBody=true; Sfx('pop',0.5,1.3+Math.random()*0.2); if (GR.pins.length===1 && MINI()) playExpr('놀람','once'); }
+      if (hb){ spinCatch(); p.pin=grabAddPin(hb.rp,hb.world,id,p.shift); p.onBody=true; Sfx('pop',0.5,1.3+Math.random()*0.2); if (GR.pins.length===1 && MINI()) playExpr('놀람','once'); }
       else if (spinNear(p.x,H-p.y)){ p.onBody=false; p.spin={h:[[tt,p.x,p.y]],fired:false,x0:p.x,y0:p.y,t0:tt}; }
       else { if (!orbitPtr) orbitPtr=id; p.onBody=false; p.last={x:p.x,y:p.y}; if (!p.shift) for (const q of [...GR.pins]) if (q.sticky && !q.dragging) grabRelease(q); } }
     if (p.st==='move'||p.st==='up'){ lastTouch=tt;
@@ -2761,7 +2766,7 @@ function grabInput(tt){
       if (p.st==='up' && p.pin && !p.moved && tt-p.t0>0.45) HOLDREL=tt;
       if (p.pin){ const w=planeAt(p.pin.plane,p); if (w){ p.pin.world=w; } p.pin.dragging=p.st!=='up'; }
       else if (orbitPtr===id && p.last){ const dx=p.x-p.last.x, dy=p.y-p.last.y; yaw+=dx*0.3; pitch=clamp(pitch-dy*0.3,-40,40); p.last={x:p.x,y:p.y}; } }
-    if (p.st==='up'){ PTR.delete(id); if (orbitPtr===id) orbitPtr=null;
+    if (p.st==='up'){ zoomTap(p,tt); PTR.delete(id); if (orbitPtr===id) orbitPtr=null;
       if (p.pin){ if (!p.pin.sticky){ grabRelease(p.pin); Sfx('boing',0.55,1.0+Math.random()*0.3); boingV-=0.03; }
         if (!p.moved && tt-p.t0<0.25 && !p.pin.sticky && !GR.pins.length && !tapReact(p)){ boingV-=S['클릭띠용']; clickJumpAt=tt+0.14; } } } }
   pinchTick(tt);
@@ -2880,7 +2885,7 @@ function step(){ const skip=slowTick(); pfxTick(); tkTick(); awTick(); mdTick();
     if (dragging){ dragging=false; const l=len(vel); if (l>S['던지기최대속도']) vel=mul(vel,S['던지기최대속도']/l); }
     if (downOnHupi && tt-downTime<0.25 && Math.hypot(m.x-downPos.x,m.y-downPos.y)<6 && !tapReact(m)){ boingV-=S['클릭띠용']; clickJumpAt=tt+0.14; Burst(add(hPos,[0,0,-1.5]),S['파티클개수']|0,1.2); } }
   }
-  if (M.wheel){ ZM.t=clamp(ZM.t*Math.exp(M.wheel*0.12),ZM.min,ZM.max); lastTouch=tt; M.wheel=0; }
+  if (M.wheel){ ZM.t=clamp(ZM.t*Math.exp(M.wheel*0.12*(M.wheel>0?1/(1+1.5*(JM.P||0)):1)),ZM.min,ZM.max); lastTouch=tt; M.wheel=0; }
   if (clickJumpAt>0 && tt>=clickJumpAt){ jumpV+=S['클릭점프']; boingV+=S['클릭띠용']*0.7; clickJumpAt=-1; Sfx('boing',0.9,S['튀는소리높이']); }
 
   // 카메라 (놀다가 1초 지나면 정면으로 복귀)
@@ -3078,8 +3083,8 @@ const fmt=(v,f)=>{ const span=f.r[1]-f.r[0]; return span>=20?v.toFixed(0):span>=
 function rowEl(label,tip){ const r=document.createElement('div'); r.className='row'; const l=document.createElement('label'); l.textContent=label; if (tip) { l.title=tip; r.title=tip; } r.appendChild(l); return r; }
 function slider(parent,label,tip,min,max,get,set,f){ const r=rowEl(label,tip); const i=document.createElement('input'); i.type='range'; i.min=min; i.max=max; i.step=(max-min)/1000; const v=document.createElement('span'); v.className='v';
   const upd=()=>{ i.value=get(); v.textContent=fmt(+get(),f); }; i.addEventListener('input',()=>{ set(+i.value); v.textContent=fmt(+i.value,f); save(); }); r.append(i,v); parent.appendChild(r); refreshers.push(upd); upd(); }
-const actEl=document.getElementById('actFields'), actBtns=[];
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); fieldsEl.hidden=b.dataset.t!=='opt'; actEl.hidden=b.dataset.t!=='act'; });
+const actEl=document.getElementById('actFields'), hidEl=document.getElementById('hidFields'), actBtns=[];
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); fieldsEl.hidden=b.dataset.t!=='opt'; actEl.hidden=b.dataset.t!=='act'; hidEl.hidden=b.dataset.t!=='hid'; });
 function impactBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='타격 임팩트 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; }
   if (!S['타격임팩트']){ S['타격임팩트']=true; save(); refreshAll(); }
   if (nm.includes('다시')) land(1); else vel=[Math.random()<0.5?-0.7:0.7,0.18,0]; }
@@ -3105,7 +3110,8 @@ for (const g of SCHEMA){ if (g.hide) continue; if (!g.btns && !g.f.some(f=>!f.hi
     else if (f.t==='vec2'){ for (const ax of ['x','y']) slider(det,f.k+' '+ax.toUpperCase(),f.tip,-2,2,()=>S[f.k][ax],v=>S[f.k][ax]=v,{r:[-2,2]}); }
     else slider(det,f.k,f.tip,f.r[0],f.r[1],()=>S[f.k],v=>S[f.k]=v,f);
   }
-  (g.tab==='act'?actEl:fieldsEl).appendChild(det); }
+  if (g.tab==='hid'){ det.open=true; const bw=document.createElement('div'); bw.className='btns'; const rb=document.createElement('button'); rb.textContent='이 섹션 초기화'; rb.onclick=()=>{ for (const f of g.f) S[f.k]=clone(f.d); save(); refreshAll(); exToast('기본값으로 되돌렸어요'); }; bw.appendChild(rb); det.appendChild(bw); }
+  (g.tab==='act'?actEl:g.tab==='hid'?hidEl:fieldsEl).appendChild(det); }
 if (S['표정']>0 && S['표정재생']>0) playExpr(EXPRS[S['표정']]);
 if (S['시작때등장']){ GONE=true; playMotion('등장'); }
 const refreshAll=()=>refreshers.forEach(f=>f()); refreshAll();
@@ -3616,31 +3622,64 @@ window.__pu={on:()=>puSet(true),off:()=>puSet(false),PU};
 // ============================================================ ver3: 확대·축소(핀치/휠) + 화면에 끼기(잼) + 아무 방향 스핀
 // ZM: 사용자가 정한 확대 배율 (런타임만). JM: 이번 프레임의 끼임 상태
 var _jm4=null, _jm4i=null;
-function zmTick(){ const lz=Math.log(ZM.z), lt=Math.log(ZM.t); ZM.z=Math.exp(lz+(lt-lz)*0.2); if (Math.abs(lt-lz)<1e-4) ZM.z=ZM.t;
+var JN=72, JS0=new Float32Array(JN), JS1=new Float32Array(JN), JR=new Float32Array(JN), JV=new Float32Array(JN), JT=new Float32Array(JN), JD=new Float32Array(JN), JSE=new Float32Array(JN), _jmT=-1, _jmWas=false;
+const JQV=[0.9,-0.6,0.35,-0.8];   // 모서리마다 들어가는 속도가 조금씩 달라요 (균일하지 않게)
+function zmTick(){ const lz=Math.log(ZM.z), lt=Math.log(ZM.t);
+  if (ZM.boing){ ZM.v=(ZM.v||0)+((lt-lz)*55-(ZM.v||0)*8.5)/60; ZM.z=Math.exp(lz+ZM.v/60); if (Math.abs(lt-lz)<2e-3&&Math.abs(ZM.v)<0.02){ ZM.z=ZM.t; ZM.boing=false; ZM.v=0; } }   // 더블탭 복귀: 통통 튀며 돌아와요
+  else { ZM.z=Math.exp(lz+(lt-lz)*0.2); if (Math.abs(lt-lz)<1e-4) ZM.z=ZM.t; }
   const hw=SCRW, hh=(SCRT-SCRB)/2; JM.zj=Math.max(0.3,Math.min(hw,hh)*0.96/R); JM.yc=(SCRT+SCRB)/2;
-  const B=(FX.big||1)*ZM.z; JM.B=B; JM.s=B<=JM.zj?B:JM.zj*Math.pow(B/JM.zj,0.62);   // 화면보다 커지면 더 커지는 대신 꽉 끼어요
-  JM.p=JM.s/JM.zj-1; JM.on=JM.p>-0.08; }
-function zmCenter(){ if (JM.p<=0) return; const k=clamp01(JM.p*1.5); hPos[0]+=(0-hPos[0])*k; hPos[1]+=(JM.yc-hPos[1])*k; }   // 끼면 화면 가운데로
-function jamSetup(){ if (!JM.on) return; if (!_jm4){ _jm4=new THREE.Matrix4(); _jm4i=new THREE.Matrix4(); } hupi.updateWorldMatrix(true,false); cam.updateMatrixWorld();
+  const B=(FX.big||1)*ZM.z; JM.B=B; JM.s=Math.min(B,JM.zj);   // 몸 자체는 화면에 닿는 크기까지만, 그 이상은 '압력'으로
+  JM.p=B/JM.zj-1; JM.on=JM.p>-0.04||_jmWas; }
+function zmCenter(){ const k=clamp01((JM.P||0)*4+Math.max(0,JM.p)*2); if (k<=0) return; hPos[0]+=(0-hPos[0])*k; hPos[1]+=(JM.yc-hPos[1])*k; }   // 끼면 화면 가운데로
+function softmin(a,b,k){ const m=Math.min(a,b); return m-k*Math.log(Math.exp((m-a)/k)+Math.exp((m-b)/k)); }
+function jamSetup(){ if (!JM.on){ _jmWas=false; JM.P=0; return; } if (!_jm4){ _jm4=new THREE.Matrix4(); _jm4i=new THREE.Matrix4(); } hupi.updateWorldMatrix(true,false); cam.updateMatrixWorld();
   _jm4.multiplyMatrices(cam.matrixWorldInverse,hupi.matrixWorld); _jm4i.copy(_jm4).invert(); JM.m.set(_jm4.elements); JM.mi.set(_jm4i.elements);
-  const ty=Math.tan(cam.fov*0.5*D2R), tx=ty*cam.aspect; JM.bx=tx*1.03; JM.by=ty*1.03;
-  const p=Math.max(0,JM.p), sh=Math.min(JM.bx,JM.by); JM.ax=JM.bx<=JM.by?0:1;   // 짧은 쪽으로 눌리고 긴 쪽으로 늘어나요
-  const sq=Math.pow(1+p,-0.35), st=1+0.3*Math.min(p,2.5); JM.fz=1/(1+1.2*p); JM.gf=Math.pow(1+p,-0.6); JM.rv=R*JM.s; JM.gx=JM.ax?st:sq; JM.gy=JM.ax?sq:st;
-  JM.rc=sh*(1-0.94*sstep(0.3,2.0,p)); JM.knee=sh*(0.07+0.05*sstep(0,1,p)); JM.cx=JM.m[12]; JM.cy=JM.m[13]; JM.cz=JM.m[14]; }
-// 정점 하나를 화면(시야 사각형)에 밀어 넣어요: 뷰 공간 탄젠트 좌표에서 둥근 사각형 SDF로 부드럽게 눌러 펴고, 눌린 만큼 앞뒤로 부풀어요
+  const ty=Math.tan(cam.fov*0.5*D2R), tx=ty*cam.aspect, bx=tx*1.02, by=ty*1.02; JM.bx=bx; JM.by=by;
+  JM.cx=JM.m[12]; JM.cy=JM.m[13]; JM.cz=JM.m[14]; const sc=Math.max(0.3,-JM.cz), Xc=JM.cx/sc, Yc=JM.cy/sc; JM.Xc=Xc; JM.Yc=Yc;
+  const r0=R*JM.s/sc, rt=r0*JM.B/JM.s; JM.r0=r0; const dth=2*Math.PI/JN;
+  let Ac=0, Abox=0, Dmin=1e9;
+  for (let i=0;i<JN;i++){ const th=(i+0.5)*dth, c=Math.cos(th), sn=Math.sin(th);
+    const D=Math.min(Math.abs(c)>1e-4?(c>0?bx-Xc:bx+Xc)/Math.abs(c):1e9, Math.abs(sn)>1e-4?(sn>0?by-Yc:by+Yc)/Math.abs(sn):1e9); JD[i]=D; if (D<Dmin) Dmin=D; Abox+=0.5*D*D*dth; }
+  // 부피(면적) 보존: 원래 부풀고 싶은 크기 π·rt² → 벽에 막히면 남는 빈 공간(긴 쪽 → 모서리 순)으로 밀려 들어가요
+  const sh=Math.min(bx,by), lg=Math.max(bx,by), a=Math.PI*rt*rt, at=Math.PI*sh*sh; let Af, P=0;
+  if (a<=at) Af=a; else { const ex=(a-at)/(sh*sh); P=1-Math.exp(-Math.sqrt(ex)/2.4); Af=at+(4*bx*by-at)*P*0.997; }
+  JM.P=P; JM.Pf=(JM.Pf||0)+(P-(JM.Pf||0))*0.12;
+  // 막의 모양 = 압력이 정하는 곡률: 옆벽에 닿기 전엔 동그랗게, 닿으면 관 속 풍선처럼 길어지고(돔), 위아래까지 닿으면 모서리 반지름이 압력만큼 줄어요
+  let wx, hy, rc;
+  if (Af<=at){ rc=Math.sqrt(Af/Math.PI); wx=hy=rc; }
+  else { const full=4*sh*lg-(4-Math.PI)*sh*sh; if (Af<=full){ rc=sh; const L=(Af+(4-Math.PI)*sh*sh)/(4*sh); wx=bx<=by?sh:L; hy=bx<=by?L:sh; } else { rc=Math.sqrt(Math.max(0,4*bx*by-Af)/(4-Math.PI)); wx=bx; hy=by; } }
+  JM.rc=rc; const g=Math.max(0,Math.min(1,(sh-rc)/sh));
+  // 모서리마다 다르게: 아래쪽은 무게로 먼저 차고(처짐), 위는 둥글게 버텨요. 좌우도 살짝 다르게
+  const RQ=[rc*Math.min(1.15,1+0.15*g), rc*Math.min(1.1,1+0.1*g), rc*(1-0.3*g), rc*(1-0.22*g)];   // 0:우상 1:좌상 2:좌하 3:우하
+  const k=Math.max(0.002,sh*0.02);
+  for (let i=0;i<JN;i++){ const th=(i+0.5)*dth, c=Math.cos(th), sn=Math.sin(th), q=c>=0?(sn>=0?0:3):(sn>=0?1:2), rq=Math.min(RQ[q],Math.min(wx,hy));
+    let lo=0, hi=JD[i]*1.2+lg;   // 중심에서 그 방향으로 둥근 사각형 경계까지
+    for (let it=0;it<20;it++){ const t=(lo+hi)/2, px=Math.abs(Xc+c*t), py=Math.abs(Yc+sn*t), qx=px-(wx-rq), qy=py-(hy-rq);
+      const dd=Math.hypot(Math.max(qx,0),Math.max(qy,0))+Math.min(Math.max(qx,qy),0)-rq; if (dd<0) lo=t; else hi=t; }
+    JT[i]=softmin((lo+hi)/2,JD[i],k); }
+  if (!_jmWas||JM.cnt>NV*0.8){ for (let i=0;i<JN;i++){ const v=JS1[i]>1e-6&&JM.cnt>NV*0.8?JS1[i]/(JM.r0p||r0):1; JS0[i]=v; } for (let i=0;i<JN;i++) JS1[i]=0; { const T_=Float32Array.from(JS0); for (let i=0;i<JN;i++) JS0[i]=Math.max(T_[i],(T_[(i+1)%JN]+T_[(i+JN-1)%JN])*0.5); } JM.cnt=0; }   // 몸 전체가 한 번 그려진 뒤에만 갱신 (반지름은 r0 단위로 저장)
+  JM.r0p=r0;   // 지난 프레임 실제 실루엣(방향별)
+  const dt=_jmT<0?1/60:clamp(time-_jmT,0,1/30); _jmT=time;
+  if (!_jmWas){ for (let i=0;i<JN;i++){ JR[i]=JT[i]; JV[i]=0; } _jmWas=true; }
+  // 각 방향 반지름: 벽 쪽은 바로 붙고, 모서리는 늦게·버티며 들어가요(밀가루 반죽처럼). 크기가 바뀌면 빈 쪽이 출렁
+  let dA=0; { const T_=Float32Array.from(JR); for (let i=0;i<JN;i++) JR[i]=T_[i]*0.8+(T_[(i+1)%JN]+T_[(i+JN-1)%JN])*0.1; } for (let i=0;i<JN;i++){ const lag=Dmin/JD[i], rate=JT[i]>JR[i]?(5+20*lag*lag)*(1-0.35*P):1e3; const d=(JT[i]-JR[i])*Math.min(1,rate*dt); JR[i]+=d; dA+=d; if (JR[i]>JD[i]) JR[i]=JD[i]; }
+  JM.wv=(JM.wv||0)+(-(JM.w||0)*180-(JM.wv||0)*7)*dt+dA/JN/Math.max(1e-4,sh)*9; JM.w=(JM.w||0)+JM.wv*dt; JM.w=clamp(JM.w,-0.08,0.08);
+  for (let i=0;i<JN;i++){ const th=(i+0.5)*dth, free=1-sstep(0.9,0.995,JR[i]/JD[i]); JM.wb=JM.wb||new Float32Array(JN); JM.wb[i]=Math.min(JD[i],JR[i]*(1+JM.w*free*(0.6+0.4*Math.cos(2*th+time*3)))); }
+  if (JM.p<-0.04){ let mx=0; for (let i=0;i<JN;i++) mx=Math.max(mx,Math.abs(JR[i]-r0)); if (mx<r0*0.01) _jmWas=false; }   // 다 빠지면 끝
+  const pf=JM.Pf; JM.fs=Math.pow(Math.max(1,JM.B/JM.zj),0.1)*(1-0.2*pf); JM.ax=1-0.36*pf; JM.ay=1-0.46*pf;
+  if (P>0.8&&!JM.hit){ JM.hit=true; if (!EX) playExpr('당황','once'); } else if (P<0.5) JM.hit=false; /* 꽉 끼는 순간 '읍!' */ JM.fz=1/(1+1.5*P); JM.rv=R*JM.s; }
+// 정점 하나: 뷰 공간 → 화면 탄젠트 좌표에서 '방향별 반지름' 지도로 다시 배치. 몸 가장자리는 벽까지 밀려가고, 가운데(얼굴)는 커지지 못하고 사방에서 눌려요
 function jamPress(){ const m=JM.m, lx=DX, ly=DY, lz=-DZ;
   let xv=m[0]*lx+m[4]*ly+m[8]*lz+m[12], yv=m[1]*lx+m[5]*ly+m[9]*lz+m[13], zv=m[2]*lx+m[6]*ly+m[10]*lz+m[14];
-  let s, X, Y;
-  if (JM.p>0){ const rz=zv-JM.cz, f=clamp01(rz/JM.rv); zv=JM.cz+rz*JM.fz;   // 유리에 눌린 듯 앞뒤로 납작 + 앞면(얼굴)은 안쪽으로 끼어요
-    s=Math.max(0.3,-zv); const Xc=JM.cx/s, Yc=JM.cy/s, g=1+(JM.gf-1)*f; X=Xc+(xv/s-Xc)*g*JM.gx; Y=Yc+(yv/s-Yc)*g*JM.gy; }
-  else { s=Math.max(0.3,-zv); X=xv/s; Y=yv/s; }
-  const rc=JM.rc, qx=Math.abs(X)-(JM.bx-rc), qy=Math.abs(Y)-(JM.by-rc);
-  let d,nx,ny; if (qx>0&&qy>0){ const l=Math.hypot(qx,qy); d=l-rc; nx=qx/l; ny=qy/l; } else if (qx>qy){ d=qx-rc; nx=1; ny=0; } else { d=qy-rc; nx=0; ny=1; }
-  const k=JM.knee;
-  if (d>-k){ const dn=-k+k*(1-Math.exp(-(d+k)/k)); let mv=d-dn;
-    if (WL.cr>0) mv+=WL.cr*k*0.35*Math.abs(Math.sin(X*9+Y*7+WL.tt*1.3))*sstep(-k,k,d);   // 꾸깃꾸깃 (풍선)
-    X-=(X<0?-1:1)*nx*mv; Y-=(Y<0?-1:1)*ny*mv; }
-  else if (JM.p<=0) return;
+  zv=JM.cz+(zv-JM.cz)*JM.fz; const s=Math.max(0.3,-zv);
+  const dx=xv/s-JM.Xc, dy=yv/s-JM.Yc, r=Math.hypot(dx,dy); if (r<1e-7) return;
+  let th=Math.atan2(dy,dx); if (th<0) th+=2*Math.PI; const fi=th/(2*Math.PI)*JN-0.5, i0=Math.floor(fi), t=fi-i0, ia=(i0+JN)%JN, ib=(i0+1)%JN;
+  const WB=JM.wb||JR; let rho=WB[ia]+(WB[ib]-WB[ia])*t; if (WL.cr>0) rho*=1-0.03*WL.cr*Math.abs(Math.sin(th*7+WL.tt*1.3));   // 꾸깃꾸깃 (풍선)
+  if (SHI>=0){ JM.cnt++; if (r>JS1[ia]) JS1[ia]=r; }
+  const r0=JM.r0*Math.max(0.5,JS0[ia]+(JS0[ib]-JS0[ia])*t), u=r/r0, aa=Math.min(1,JM.fs*JM.r0/Math.max(1e-6,rho)), U=0.88, uc=Math.min(u,U)/U;
+  const hU=aa*U+(1-aa)*U*U*U, rn=rho*Math.min(1,(aa*u+(1-aa)*Math.pow(Math.min(u,U),3))/hU)*(u>U?1:1);   // 바깥 띠는 벽에 납작 붙는 접촉면, 안쪽(얼굴)은 못 커지고 눌려요
+  const w=1-sstep(0.5,0.9,u), ox=dx/r*rn*(1-(1-JM.ax)*w), oy=dy/r*rn*(1-(1-JM.ay)*w);   // 얼굴 쪽은 옆에서 더 눌려 오종종
+  let X=JM.Xc+ox, Y=JM.Yc+oy; X=clamp(X,-JM.bx,JM.bx); Y=clamp(Y,-JM.by,JM.by);
   xv=X*s; yv=Y*s;
   const n=JM.mi; DX=n[0]*xv+n[4]*yv+n[8]*zv+n[12]; DY=n[1]*xv+n[5]*yv+n[9]*zv+n[13]; DZ=-(n[2]*xv+n[6]*yv+n[10]*zv+n[14]); }
 // 두 손가락 핀치 (빈 곳에서. 몸이 화면을 거의 채우면 몸 위에서도) → 확대·축소
@@ -3648,19 +3687,20 @@ function pinchTick(tt){ const big=JM.s>=JM.zj*0.85;
   const L=[...PTR.values()].filter(p=>p.st!=='up'&&(!p.pin||big));
   if (L.length>=2){ const a=L[0], b=L[1], d=Math.hypot(a.x-b.x,a.y-b.y);
     if (!ZM.pin){ ZM.pin={d0:Math.max(20,d),z0:ZM.t}; for (const p of L){ p.spin=null; p.pinch=true; if (p.pin){ grabRelease(p.pin); p.pin=null; p.onBody=false; } } orbitPtr=null; }
-    else ZM.t=clamp(ZM.pin.z0*d/ZM.pin.d0,ZM.min,ZM.max);
+    else { const rr=d/ZM.pin.d0, res=rr>1?1/(1+1.5*(JM.P||0)):1; ZM.t=clamp(ZM.pin.z0*Math.pow(rr,res),ZM.min,ZM.max); }   // 꽉 낄수록 벌리기 빡빡해요
     lastTouch=tt; }
   else if (ZM.pin && L.length<2){ ZM.pin=null; } }
 // ---- 스핀: 각속도 벡터 + 쿼터니언 (쓸어 넘긴 방향의 수직축으로 돌고, 느려지면 정면으로 돌아와요)
-function spinKick(w,ax){ const S_=SPIN; ax=ax?norm(ax):UP; const heavy=1+0.8*Math.max(0,JM.p), kv=mul(ax,w/heavy);
+function spinKick(w,ax){ const S_=SPIN; ax=ax?norm(ax):UP; const heavy=1+3*(JM.P||0), kv=mul(ax,w/heavy);
   if (!S_.on || dot(S_.wv,kv)<=0) S_.wv=kv; else S_.wv=add(S_.wv,mul(kv,0.6));
   const l=len(S_.wv), cap=30/heavy; if (l>cap) S_.wv=mul(S_.wv,cap/l);
-  S_.on=true; S_.tot=0; S_.dizzyAt=-1; Sfx('whoosh',0.6,1.2/Math.sqrt(heavy)); lastTouch=time; if (MINI()) playExpr('놀람','once'); }
-function UpdateSpin(dt){ const S_=SPIN; if (!S_.on && Math.abs(S_.T[0])+Math.abs(S_.T[1])+Math.abs(S_.Tv[0])+Math.abs(S_.Tv[1])<1e-3 && S_.sway<1e-3){ SPCF=0; return null; }
+  S_.on=true; S_.cat=null; S_.tot=0; S_.dizzyAt=-1; Sfx('whoosh',0.6,1.2/Math.sqrt(heavy)); lastTouch=time; if (MINI()) playExpr('놀람','once'); }
+function UpdateSpin(dt){ const S_=SPIN;
+  const held_=S_.on && S_.cat!=null && GR.pins.length>0; if (held_){ const wl0=len(S_.wv); if (wl0>1e-4){ const nl=wl0*Math.exp(-dt*12)-dt*0.8; S_.wv=nl>0?mul(S_.wv,nl/wl0):[0,0,0]; } }   // 잡으면 손가락 마찰로 0.2~0.3초에 걸쳐 멈춰요 if (!S_.on && Math.abs(S_.T[0])+Math.abs(S_.T[1])+Math.abs(S_.Tv[0])+Math.abs(S_.Tv[1])<1e-3 && S_.sway<1e-3){ SPCF=0; return null; }
   if (S_.on){ let wl=len(S_.wv); if (wl>1e-6) S_.ay=Math.abs(S_.wv[1])/wl;
-    const fr=1+0.5*Math.max(0,JM.p), dw=(1.5+0.42*wl)*dt*fr; S_.wv=wl>dw?mul(S_.wv,(wl-dw)/wl):[0,0,0];   // 끼어 있으면 마찰이 커서 금방 느려져요
+    const fr=1+1.2*(JM.P||0), dw=(1.5+0.42*wl)*dt*fr; S_.wv=wl>dw?mul(S_.wv,(wl-dw)/wl):[0,0,0];   // 끼어 있으면 마찰이 커서 금방 느려져요
     const q=S_.q, cw=clamp(Math.abs(q[3]),0,1), th=2*Math.acos(cw), sh=Math.sin(th/2), sg=q[3]<0?-1:1, u=sh>1e-6?[sg*q[0]/sh,sg*q[1]/sh,sg*q[2]/sh]:[0,0,0];
-    wl=len(S_.wv); if (wl<4.5){ const k=sstep(4.5,1.2,wl); S_.wv=add(S_.wv,mul(add(mul(u,-9*Math.sin(th)),mul(S_.wv,-1.6)),k*dt)); }   // 정면으로 끌어당기는 멈춤쇠
+    wl=len(S_.wv); if (wl<4.5 && !held_){ const k=sstep(4.5,1.2,wl); S_.wv=add(S_.wv,mul(add(mul(u,-9*Math.sin(th)),mul(S_.wv,-1.6)),k*dt)); }   // 정면으로 끌어당기는 멈춤쇠
     wl=len(S_.wv); if (wl>1e-7){ S_.q=qMul(qAxis(wl*dt*R2D,S_.wv),S_.q); const l=Math.hypot(...S_.q); S_.q=S_.q.map(v=>v/l); }
     S_.a+=wl*dt; S_.tot+=wl*dt;
     const hv=Math.floor(S_.a/Math.PI); if (hv!==S_.lastH){ S_.lastH=hv; if (wl>5) Sfx('whoosh',Math.min(0.45,wl*0.016),0.9+wl*0.02); }
@@ -3675,6 +3715,15 @@ function spinSwipe(vx,vy,v){ const l=Math.hypot(vx,vy)||1; spinKick(SPINDIR*Math
 function spinTrack(A_,tt,x,y){ A_.h.push([tt,x,y]); while (A_.h.length>2 && tt-A_.h[0][0]>0.1) A_.h.shift(); const h0=A_.h[0], ddt=Math.max(1/60,tt-h0[0]), vx=(x-h0[1])/ddt, vy=(y-h0[2])/ddt, v=Math.hypot(vx,vy);
   if (v>520){ const w_=Math.min(30,v*0.016); if (!A_.fired || w_>Math.abs(A_.pk||0)*1.15){ spinSwipe(vx,vy,v); A_.fired=true; A_.pk=w_; } } }
 function spinUp(A_,tt,x,y){ if (A_.fired) return; const dx=x-A_.x0, dy=y-A_.y0, ddt=Math.max(0.05,tt-A_.t0), dd=Math.hypot(dx,dy); if (dd>45 && ddt<0.6) spinSwipe(dx,dy,dd/ddt); }
+
+// ---- 스핀 중에 몸을 잡으면: 확 멈추지 않고 손 마찰로 스르륵 멈추며 출렁
+function spinCatch(){ const S_=SPIN, wl=len(S_.wv); if (!S_.on || wl<0.6) return; S_.cat=time;
+  const w=[...S_.wv]; S_.Tv[0]+=clamp(w[0]*2.2,-30,30); S_.Tv[1]+=clamp(-w[1]*1.6,-30,30);   // 멈추는 반동으로 살짝 기우뚱
+  boingV-=Math.min(0.06,wl*0.004); Sfx('bump',Math.min(0.5,0.15+wl*0.02),1.2); }
+// ---- 더블탭/더블클릭 → 원래 크기로 통통 돌아와요 (첫 탭 반응은 그대로)
+function zoomTap(p,tt){ if (p.moved || p.pinch || tt-p.t0>=0.25) return;
+  if (ZM.lt && tt-ZM.lt<0.3 && Math.hypot(p.x-ZM.lx,p.y-ZM.ly)<50){ ZM.lt=0; zoomReset(); } else { ZM.lt=tt; ZM.lx=p.x; ZM.ly=p.y; } }
+function zoomReset(){ const far=Math.abs(Math.log(ZM.z)); ZM.t=1; ZM.boing=true; ZM.v=ZM.v||0; Sfx('boing',0.35+Math.min(0.3,far*0.15),far>0.05?0.9:1.3); if (far<0.05) boingV-=0.03; }
 
 // ============================================================ ver3: 아래 칩 바 (폰에서 바로 비교)
 const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('ttlSub');
@@ -3702,8 +3751,10 @@ cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.o
 cvs.addEventListener('contextmenu',e=>e.preventDefault());
 window.__v3={ pal(i){ applyPalette(S,i); refreshAll(); renderChips(); }, set(o){ for (const k in o){ S[k]=o[k]; if (k==='얼굴') applyFace(S,o[k]); if (k==='모양'&&o[k]===7) applyFace(S,1); if (k==='팔레트') applyPalette(S,o[k]); } refreshAll(); renderChips(); }, face:(k)=>{ applyFace(S,k); refreshAll(); renderChips(); },
   facePts(){ const P_=o=>{ const v=new THREE.Vector3(); o.getWorldPosition(v); v.project(cam); return [+((v.x+1)/2*W).toFixed(1),+((1-v.y)/2*H).toFixed(1)]; }; return {eyeL:P_(EYE[0].g),eyeR:P_(EYE[1].g),mouth:P_(mouthG)}; },
-  zoom:(z)=>{ if (z!=null){ ZM.t=clamp(z,ZM.min,ZM.max); ZM.z=ZM.t; } return {z:ZM.z,t:ZM.t,s:JM.s,zj:JM.zj,p:JM.p,hp:[...hPos],yc:JM.yc,cy:JM.cy,cz:JM.cz,t2:SCRT,b2:SCRB,hs:[...hScl]}; },
+  zoom:(z)=>{ if (z!=null){ ZM.t=clamp(z,ZM.min,ZM.max); ZM.z=ZM.t; } return {z:ZM.z,t:ZM.t,s:JM.s,zj:JM.zj,p:JM.p,hp:[...hPos],yc:JM.yc,cy:JM.cy,cz:JM.cz,t2:SCRT,b2:SCRB,hs:[...hScl],js:Array.from(JS0).filter((v,i)=>i%9==0),jr:Array.from(JR).filter((v,i)=>i%9==0),r0:JM.r0,P:JM.P,fs:JM.fs,on:JM.on,B:JM.B,was:_jmWas,expr:EX&&EX.name,rc:JM.rc,bx:JM.bx,by:JM.by,c13:[JT[13],JR[13],JD[13]],c59:[JT[59],JR[59],JD[59]]}; },
   spin:(vx,vy)=>spinSwipe(vx,vy,Math.hypot(vx,vy)),
+  grd:()=>{ if (!GR.active||!GR.X) return -1; let c=[0,0,0]; const n=GR.n, X=GR.X; for (let i=0;i<n;i++){ c[0]+=X[i*3]; c[1]+=X[i*3+1]; c[2]+=X[i*3+2]; } c=c.map(v=>v/n); let m=0; for (let i=0;i<n;i++) m=Math.max(m,Math.hypot(X[i*3]-c[0],X[i*3+1]-c[1],X[i*3+2]-c[2])); return m; },
+  spinv:()=>len(SPIN.wv),
   bodyLow:()=>{ const P=bodyGeo.attributes.position.array; let n=0,y=0,r=0,y2=0; for (let i=0;i<NV;i++) if (rest[i*3+1]<-0.4*R){ n++; y+=P[i*3+1]; r+=Math.hypot(P[i*3],P[i*3+2]); } let m=0; for (let i=0;i<NV;i++) y2+=P[i*3+1]; return [y/n, r/n, y2/NV, root.position.y, FX.sy, FX.press, jump, boing, sq, basePos[1], floorY, vel[1], FX.off[1], BPH]; },
   schema:()=>{ const D=defaults(); return SCHEMA.map(g=>({h:g.h,hide:!!g.hide,tab:g.tab||'opt',btns:g.btns?g.btns.slice?g.btns.slice(0,40):String(g.btns):null,f:g.f.map(f=>({k:f.k,t:f.t||'range',r:f.r||null,o:f.o||null,hide:!!f.hide,tip:f.tip||'',d:exRound(D[f.k]),cur:exRound(S[f.k])}))})); },
   tier:(n,f)=>{ if (n!=null){ S['화질']=n; setTier(); } if (f!=null) S['FPS표시']=!!f; save(); return {tier:TIER,auto:TIER_AUTO,gpu:GPUS}; },
