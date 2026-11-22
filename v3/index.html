@@ -270,12 +270,14 @@ const SCHEMA = [
   {k:'주변밝힘강도',r:[0,2],d:1,tip:'박동 때 캐릭터 근처 공간이 잠깐 따뜻하게 밝아지는 정도'}]},
  {h:'소환 설정', btns:'su', f:[
   {k:'파편 수',r:[20,240],d:120,step:1,tip:'모여드는 덩어리 개수 (저화질은 48개, 중화질은 96개까지만)'},
-  {k:'파편 크기',r:[0.4,2],d:1,tip:'덩어리 하나의 크기 배율'},
-  {k:'발광 강도',r:[0,1.5],d:0.6,tip:'파편의 은은한 자체 발광 + 붙을 때 번지는 빛의 세기'},
+  {k:'파편 크기',r:[0.4,2],d:1,tip:'빛 방울 하나의 크기 배율'},
+  {k:'발광 강도',r:[0,1.5],d:0.6,tip:'빛 방울·큰 빛 덩어리의 따뜻한 밝기'},
   {k:'공전 속도',r:[0.2,3],d:1,tip:'중심 주위를 도는 빠르기'},
-  {k:'흡수 속도',r:[0.3,3],d:1,tip:'궤도를 좁혀 몸에 붙는 빠르기 (높을수록 빨리, 몰아서 붙어요)'},
-  {k:'형성 시간',r:[2,15],d:6,tip:'들어오기부터 몸이 완성되기까지 걸리는 전체 시간(초)'},
-  {k:'완성 후 발광 강도',r:[0,1.5],d:0.35,tip:'완성된 뒤 몸에 남는 은은한 빛 (0 = 없음)'}]},
+  {k:'흡수 속도',r:[0.3,3],d:1,tip:'궤도가 안쪽으로 감겨 가운데 빛에 쌓이는 빠르기'},
+  {k:'형성 시간',r:[2,15],d:6,tip:'들어오기부터 큰 빛 덩어리가 다 찰 때까지의 시간(초) — 빛 빠지는 시간은 따로'},
+  {k:'완성 후 발광 강도',r:[0,1.5],d:0.35,tip:'완성된 뒤 몸에 남는 은은한 빛 (0 = 없음)'},
+  {k:'빛 흐림 정도',r:[0,1],d:0.6,tip:'빛 방울과 큰 빛 덩어리 가장자리가 흐릿하게 번지는 정도'},
+  {k:'빛 빠지는 시간',r:[0.4,5],d:1.8,tip:'큰 빛 덩어리가 서서히 빠지며 캐릭터가 드러나는 시간(초)'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -387,7 +389,7 @@ const SCHEMA = [
 const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레트":3,"무늬색":{"r":0.298,"g":0.3725,"b":0.2157,"a":1},"눈스타일":0,"귀안쪽색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"귀안쪽":true,"볼색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"입안색":{"r":0.7098,"g":0.2824,"b":0.2471,"a":1},"잡기모드":true,"잡는힘":0.7382,"늘어남":0.448,"뒤따라옴":0.6,"무게감":0.5,"덩어리감":0.842,"치즈지수":0.916,"복원력":0.753,"끊김":false,"끊김거리":14,"잡는범위":0.2621,"끝둥글기":0.7997,"배경":0,"배경색":{"r":0.9647,"g":0.9255,"b":0.8745,"a":1},"배경그라데이션":false,"배경위색":{"r":0.84,"g":0.93,"b":1,"a":1},"배경아래색":{"r":1,"g":0.97,"b":0.91,"a":1},"스튜디오배경":false,"바닥그림자":false,"그림자부드러움":0,"조명":0,"키라이트각도":30,"키라이트높이":35,"키라이트세기":1.1,"키라이트색":{"r":1,"g":1,"b":1,"a":1},"채움빛":1,"채움색1":{"r":0.431,"g":0.659,"b":1,"a":1},"채움색2":{"r":1,"g":0.478,"b":0.612,"a":1},"주변광":1,"주변광색":{"r":0.22,"g":0.22,"b":0.3,"a":1},"림라이트":0,"림라이트색":{"r":1,"g":1,"b":1,"a":1},"환경반사":0,"재질":0,"몸광택":1,"반사":0,"빛통과":0,"클리어코트":0,"테두리빛세기":0,"안쪽빛남":0,"안쪽빛색":{"r":1,"g":0.75,"b":0.65,"a":1},"질감":0,"벨벳":0,"몸색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"몸색섞기":1,"팔다리도같이":true,"모양":0,"모양정도":1,"위홈깊이":0.5,"아래뾰족":1,"앞뒤두께":0.88,"얼굴무늬":1,"얼굴무늬색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"눈썹점":true,"외곽선":false,"외곽선두께":0.0857,"외곽선색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"충돌이펙트":4,"엉덩이":false,"기본반짝이":false,"말랑방울":false,"만화충격선":false,"먼지구름":false,"물결링":false,"타격임팩트":true,"나선파편":false,"쇼크웨이브":false,"초현실충격파":false,"만화충격파":false,"파티클크기":1,"충돌민감도":0.481,"슬로우모션":0,"슬로우지속":0.1988,"히트스톱":1.904,"화면흔들림":2.616,"흔들림시간":0.28,"섬광크기":0.8075,"섬광밝기":0.303,"파편양":42,"파편크기":1.2423,"파편크기편차":0.618,"터지는속도":1.1296,"파편중력":0.696,"부서짐":0.288,"사라지는시간":0.3,"파편밝기":0.847,"파편불투명도":0.3736,"테스트소품":false,"염동력반경":2.2,"굴절강도":1,"진동속도":1,"파동반복속도":1.6,"RGB분리강도":1,"방사형블러":0.5,"염동력시작":0.4,"염동력종료":0.6,"어두워지는정도":0.92,"테두리두께":1.2099,"광채강도":0.608,"어두워짐시간":2.258,"빛새어남시간":1.2752,"절정맥동시간":2,"유지시간":2,"복구시간":2.3091,"남는발광":0,"오로라색상":{"r":1,"g":0.55,"b":0.2,"a":1},"오로라투명도":0.484,"흐름속도":1.179,"흡수범위":3.165,"몸발광강도":0.8805,"차오름시간":3.7775,"기본발광강도":1.5,"맥동강도":2,"맥동주기":1.8954,"파동속도":2.5089,"파동폭":0.794,"확산반경":1.805,"주변밝힘강도":0.918,"눈모양":4,"눈크기":1,"눈동자크기":0.9885,"눈동자이동":0.349,"눈간격":1,"눈높이":0,"왼눈위치":{"x":-0.46,"y":0.32},"오른눈위치":{"x":0.46,"y":0.32},"깜빡임간격":4,"눈색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1},"귀":0,"귀크기":1,"귀간격":1,"귀출렁임":1,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1},"벼슬색":{"r":1,"g":0.42,"b":0.48,"a":1},"팔다리":0,"팔크기":1,"다리크기":1,"팔다리출렁임":1,"착지찌그러짐":1,"팔다리몸색":false,"팔다리색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"발톱색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"발바닥색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"꼬리":true,"팔손가락수":3,"팔손가락길이":1,"팔손가락굵기":1,"표정모드":0,"눈곡선":0,"눈윗기울기":0,"검은자":true,"검은자 크기":1,"하이라이트":false,"시선X":0,"시선Y":0,"표정":0,"표정재생":0,"표정세기":1,"자동표정":0,"자동간격":6,"표정소리":true,"눈썹표시":1,"눈뜸왼":1,"눈뜸오른":1,"눈꺼풀기울기":0,"입모양":1,"눈썹각도":0,"볼터치":1,"모션크기":1,"모션속도":1,"모션표정":true,"탭반응":1,"쓰다듬기감지":true,"시작때등장":true,"손쪽":1,"손방향":0,"뿌리굵기":0.3,"뿌리높이":0.1,"뿌리각도":15,"이음매부드러움":0.1,"팔길이":1.9,"팔굵기":0.2,"팔가늘어짐":0.12,"팔꿈치굽힘":20,"팔출렁임":1,"근육량":0,"근질":0,"손크기":1.25,"손모양":0,"손가락수":4,"손가락길이":1,"손가락굵기":1,"손가락벌림":0.6,"손가락굽힘":0.08,"마디굽힘":0.25,"손끝둥글기":0.8,"엄지":true,"엄지각도":55,"손가락나오는지점":0.6,"손동작":1,"손속도":1,"오버슈트":1,"넣는방식":0,"손항상":false,"손색":0,"손색상":{"r":1,"g":0.6039,"b":0.5255,"a":1},"손색세기":0.7,"따라오는속도":0.4911,"출렁임잡기":0.4,"늘어남시작":2.388,"최대늘어남":3.1325,"가운데잘록":0.7921,"일렁임크기":0.0597,"일렁임속도":0.996,"숨쉬기위아래":0.0876,"숨쉬기부풀기":0.0268,"테두리빛두께":0.5,"테두리색1":{"r":0.35,"g":0.65,"b":1,"a":1},"테두리색2":{"r":1,"g":0.45,"b":0.6,"a":1},"중력":0,"바닥탄력":0.5254,"던지기최대속도":0.8168,"클릭띠용":0.004,"클릭점프":0.0236,"파티클개수":0,"소리켜기":true,"소리크기":0.6,"튀는소리높이":1,"부딪힘소리높이":1,"각성유지시간":3.59,"놓을때출렁임":0.39,"되돌아오는속도":0.5};
 // 패널 정리: 얼굴·눈 / 스킬 강도 / 일렁임·숨쉬기 / 앱 설정만 보이고, 나머지는 숨김(= 열 때마다 위 기본값으로 고정)
 { const G=h=>SCHEMA.find(g=>g.h===h), take=k=>{ for (const g of SCHEMA){ const i=g.f.findIndex(f=>f.k===k); if (i>=0) return g.f.splice(i,1)[0]; } };
-  const SHOW={'염동력 설정':['굴절강도','RGB분리강도','염동력반경'],'각성모드 설정':['광채강도','어두워지는정도'],'명상 설정':['몸발광강도','오로라투명도'],'맥동 설정':['기본발광강도','맥동강도'],'소환 설정':['파편 수','파편 크기','발광 강도','공전 속도','흡수 속도','형성 시간','완성 후 발광 강도'],'몸 일렁임':['일렁임크기','숨쉬기위아래','숨쉬기부풀기'],'성능':['화질']};
+  const SHOW={'염동력 설정':['굴절강도','RGB분리강도','염동력반경'],'각성모드 설정':['광채강도','어두워지는정도'],'명상 설정':['몸발광강도','오로라투명도'],'맥동 설정':['기본발광강도','맥동강도'],'소환 설정':['파편 수','파편 크기','발광 강도','공전 속도','흡수 속도','형성 시간','완성 후 발광 강도','빛 흐림 정도','빛 빠지는 시간'],'몸 일렁임':['일렁임크기','숨쉬기위아래','숨쉬기부풀기'],'성능':['화질']};
   const face=take('얼굴'), eye=take('눈모양'); face.o=face.o.map((n,i)=>i?'동물형 · '+n:'기본형'); face.tip='기본형 또는 동물 얼굴을 골라요'; eye.tip='눈 모양 (기본: 점 눈)';
   const snd=['소리켜기','소리크기'].map(take);
   for (const g of SCHEMA){ if (g.tab==='act') continue; const keep=SHOW[g.h]||[]; for (const f of g.f) if (!keep.includes(f.k)) f.hide=1; }
@@ -3741,109 +3743,109 @@ function zoomTap(p,tt){ if (p.moved || p.pinch || tt-p.t0>=0.25) return;
   if (ZM.lt && tt-ZM.lt<0.3 && Math.hypot(p.x-ZM.lx,p.y-ZM.ly)<50){ ZM.lt=0; zoomReset(); } else { ZM.lt=tt; ZM.lx=p.x; ZM.ly=p.y; } }
 function zoomReset(){ const far=Math.abs(Math.log(ZM.z)); ZM.t=1; ZM.boing=true; ZM.v=ZM.v||0; Sfx('boing',0.35+Math.min(0.3,far*0.15),far>0.05?0.9:1.3); if (far<0.05) boingV-=0.03; }
 
-// ============================================================ 소환 (Summon): 몸과 같은 색·재질의 작은 덩어리들이 화면 밖에서 들어와 공전 → 뭉침 → 좁아지는 궤도로 합류 → 압축되며 하나의 몸이 돼요
-// 파편 = 인스턴스 메시 3종(울퉁불퉁 구) — 몸 색 그대로, 은은한 자체 발광. 몸 = 정점마다 '도착 시각'(가장 가까운 파편이 붙은 곳에서 퍼져 나감)이 있어
-//   도착 전엔 작은 울퉁불퉁한 핵(밀도 높아지며 커짐) 높이에 있다가, 파편이 붙으면 그 자리부터 원래 몸 표면까지 차올라요. 붙는 자리엔 짧은 빛이 번져요.
-var SU={on:false,t:0,T:6,N:0,F:null,land:null,nz:null,sg:null,c:0,ff:0,post:0,postT:-1,lastPop:0,meshes:null,sgAttr:null};
-const SU_SEED=()=>Math.random();
+// ============================================================ 소환 (Summon) v2: 빛 덩어리들이 5개 궤도로 돌다가 → 궤도가 하나씩 안쪽으로 틀어지며 감겨 들어와 → 가운데 빛 덩어리에 차곡차곡 쌓여 하나의 큰 빛이 되고 → 빛이 서서히 빠지며 캐릭터가 드러나요
+// 모든 크기·밝기·반지름은 시간에 대해 부드러운 곡선(smoothstep 합)이라 갑자기 확 커지는 순간이 없어요. 몸은 빛 안에 숨어 있다가(빛이 다 찬 뒤에 완성) 빛이 빠지면서 보여요.
+var SU={on:false,t:0,T:6,N:0,F:null,sg:null,post:0,postT:-1,lastPop:0,meshes:null,mass:null,sgAttr:null,M:0,Rm:0,MA:0,sb:1,sgv:0,dbg:null};
 function suCap(){ return TIER>=3?48:TIER===2?96:240; }
-function suGeo(seed){ const g=new THREE.IcosahedronGeometry(1,2), p=g.attributes.position; const a=[], s=seed*17.3;
-  for (let k=0;k<4;k++) a.push([Math.sin(s+k*3.1),Math.cos(s*1.7+k*2.3),Math.sin(s*0.7+k*5.1)].map(v=>v*2.2+0.4));
-  for (let i=0;i<p.count;i++){ const x=p.getX(i), y=p.getY(i), z=p.getZ(i); let n=0; for (const w of a) n+=Math.sin(x*w[0]+y*w[1]+z*w[2]+seed*9.1); const r=1+0.16*n/4*2;
-    p.setXYZ(i,x*r,y*r*(0.86+0.1*seed),z*r); }
-  g.computeVertexNormals(); return g; }
-function suInit(){ if (SU.meshes) return; const cap=240, per=Math.ceil(cap/3);
-  const mat=new THREE.ShaderMaterial({uniforms:{uBodyC:bodyColU.c,uGlowC:{value:new THREE.Color(1,0.86,0.62)}},fog:false,
-    vertexShader:`attribute float aBr; attribute float aGl; varying vec3 vN; varying vec3 vV; varying float vB; varying float vG;
-void main(){ mat4 m=modelMatrix*instanceMatrix; vec4 wp=m*vec4(position,1.); vN=normalize(mat3(m)*normal); vV=normalize(cameraPosition-wp.xyz); vB=aBr; vG=aGl; gl_Position=projectionMatrix*viewMatrix*wp; }`,
-    fragmentShader:`uniform vec3 uBodyC; uniform vec3 uGlowC; varying vec3 vN; varying vec3 vV; varying float vB; varying float vG;
-void main(){ float nv=clamp(dot(normalize(vN),normalize(vV)),0.,1.); vec3 c=uBodyC*vB*(0.76+0.24*pow(nv,0.8));   // 몸과 같은 단색 + 아주 옅은 입체감
-  vec3 g=uGlowC*clamp(vG*(0.55+0.45*nv),0.,0.8); c=1.-(1.-c)*(1.-g); gl_FragColor=vec4(c,1.); }`});
-  SU.meshes=[]; for (let k=0;k<3;k++){ const g=suGeo(k*0.37+0.2); g.setAttribute('aBr',new THREE.InstancedBufferAttribute(new Float32Array(per),1)); g.setAttribute('aGl',new THREE.InstancedBufferAttribute(new Float32Array(per),1));
-    const m=new THREE.InstancedMesh(g,mat,per); m.count=0; m.frustumCulled=false; m.visible=false; scene.add(m); SU.meshes.push(m); }
+const SU_U={uMC:{value:new THREE.Vector3()},uQ:{value:1},uMA:{value:0},uMB:{value:1},uBl:{value:0.6},uGl:{value:0.6},uBodyC:null};
+const SU_GLSL=`uniform vec3 uMC; uniform float uQ; uniform float uMA; uniform float uMB; uniform float uBl; uniform float uGl; uniform vec3 uBodyC;
+float suCore(float r){ float e0=mix(0.92,0.35,uBl); return 1.-smoothstep(e0,1.+0.25*uBl,r); }`;
+function suInit(){ if (SU.meshes) return; SU_U.uBodyC=bodyColU.c; const cap=240;
+  // 파편 = 화면을 향한 부드러운 빛 방울 (가장자리가 흐릿하게 번짐). 큰 빛 덩어리 뒤에 있는 방울은 그 빛에 가려져요
+  const fm=new THREE.ShaderMaterial({uniforms:SU_U,transparent:true,depthTest:true,depthWrite:false,fog:false,
+    vertexShader:SU_GLSL+`
+attribute float aBr; attribute float aA; varying vec2 vUv; varying float vBr; varying float vA;
+void main(){ vec3 c=(instanceMatrix*vec4(0.,0.,0.,1.)).xyz; float sc=length(instanceMatrix[0].xyz);
+  vec4 mv=viewMatrix*vec4(c,1.); vec4 mc=viewMatrix*vec4(uMC,1.); float behind=step(mv.z,mc.z-0.05);
+  float occ=suCore(length(mv.xy-mc.xy)/(uQ*0.62))*uMA*behind;
+  vUv=position.xy; vBr=aBr; vA=aA*(1.-occ); mv.xy+=position.xy*sc; gl_Position=projectionMatrix*mv; }`,
+    fragmentShader:SU_GLSL+`
+varying vec2 vUv; varying float vBr; varying float vA;
+void main(){ float r=length(vUv); if (r>1.) discard; float e0=mix(0.7,0.0,uBl);
+  float a=clamp((1.-smoothstep(e0,1.,r))*0.75+exp(-r*r*4.5)*0.55,0.,1.)*vA;
+  vec3 warm=vec3(1.,0.93,0.8); vec3 c=mix(uBodyC,warm,clamp((0.15+0.4*(1.-r))*uGl/0.6,0.,0.8))*vBr;
+  gl_FragColor=vec4(min(c,vec3(1.)),a); }`});
+  const g=new THREE.PlaneGeometry(2,2); g.setAttribute('aBr',new THREE.InstancedBufferAttribute(new Float32Array(cap),1)); g.setAttribute('aA',new THREE.InstancedBufferAttribute(new Float32Array(cap),1));
+  const m=new THREE.InstancedMesh(g,fm,cap); m.count=0; m.frustumCulled=false; m.visible=false; m.renderOrder=4600; scene.add(m); SU.meshes=[m];
+  // 큰 빛 덩어리 = 가운데 하나의 부드러운 빛 (몸 위에 그려져서 몸을 감싸 숨겨요)
+  const mm=new THREE.ShaderMaterial({uniforms:SU_U,transparent:true,depthTest:false,depthWrite:false,fog:false,
+    vertexShader:SU_GLSL+`
+varying vec2 vUv; void main(){ vec4 mv=viewMatrix*vec4(uMC,1.); mv.xy+=position.xy*uQ; vUv=position.xy; gl_Position=projectionMatrix*mv; }`,
+    fragmentShader:SU_GLSL+`
+varying vec2 vUv; void main(){ float r=length(vUv)/0.62; float core=suCore(r); float halo=exp(-r*r*mix(5.,1.6,uBl))*0.45;
+  float a=clamp(core+halo*(1.-core),0.,1.)*uMA; vec3 warm=vec3(1.,0.93,0.8);
+  vec3 c=mix(uBodyC,warm,clamp((0.12+0.45*(1.-smoothstep(0.,1.,r)))*uGl/0.6,0.,0.8))*uMB; gl_FragColor=vec4(min(c,vec3(1.)),a); }`});
+  SU.mass=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mm); SU.mass.frustumCulled=false; SU.mass.visible=false; SU.mass.renderOrder=4500; scene.add(SU.mass);
   if (!bodyGeo.attributes.aSg){ SU.sgAttr=new THREE.BufferAttribute(new Float32Array(NV),1); bodyGeo.setAttribute('aSg',SU.sgAttr); } else SU.sgAttr=bodyGeo.attributes.aSg;
   SU.sg=SU.sgAttr.array; }
 function suUnit(){ const z=Math.random()*2-1, a=Math.random()*Math.PI*2, r=Math.sqrt(1-z*z); return [r*Math.cos(a),r*Math.sin(a),z]; }
+const smt=x=>{ x=clamp01(x); return x*x*x*(x*(x*6-15)+10); };   // smootherstep (속도·가속도 모두 0에서 시작/끝)
 function triggerSummon(){ suInit(); if (SU.on) return; unlockAudio(); lastTouch=time;
   const T=Math.max(2,S['형성 시간']??6), N=Math.max(8,Math.min(suCap(),Math.round(S['파편 수']??120))), av=Math.max(0.3,S['흡수 속도']??1), sp=S['공전 속도']??1;
-  const Ta0=0.4*T, Ta1=Math.min(0.9*T,Ta0+0.48*T/av);
-  // 파편 목표(몸 정점) 고르기: 고르게 퍼진 방향 → 가장 가까운 정점
-  const dirs=[]; for (let i=0;i<NV;i++){ const x=rest[i*3], y=rest[i*3+1], z=rest[i*3+2], l=Math.hypot(x,y,z)||1; dirs.push([x/l,y/l,z/l]); }
-  // 공전 궤도면 5개: 기울기(경사)·방향(교점각)이 서로 확실히 달라서 5개의 각도로 엇갈리며 돌아요. 면마다 속도·회전 방향도 조금씩 달라요
-  const F=[], ga=Math.PI*(3-Math.sqrt(5)), NC=5, CL=[], DIRW=[1,-1,1,1,-1], SPW=[1.0,0.82,1.15,0.92,1.08], RAD=[1.0,1.08,0.94,1.04,0.98];
-  const a0=Math.random()*Math.PI/5;   // 화면에서 본 궤도 기울기가 36°씩 다른 5개 고리 (원자 모양) — 법선이 앞쪽으로 기울어 있어 고리는 타원이고 몸 앞뒤를 지나가요
+  // 공전 궤도면 5개: 화면에서 본 기울기가 36°씩 다른 타원 고리 (몸 앞뒤로 지나감). 면마다 속도·방향·반지름이 조금씩 달라요. 감겨 들어오면서 궤도면이 천천히 틀어져요(세차 + 비틀림)
+  const F=[], NC=5, CL=[], DIRW=[1,-1,1,1,-1], SPW=[1.0,0.82,1.15,0.92,1.08], RAD=[1.0,1.08,0.94,1.04,0.98];
+  const a0=Math.random()*Math.PI/5;
   for (let c=0;c<NC;c++){ const ang=a0+c*Math.PI/NC+(Math.random()-0.5)*0.12, nz=(c%2?-1:1)*(0.17+0.05*c), h=Math.sqrt(1-nz*nz);
-    CL.push({ax:[-Math.sin(ang)*h,Math.cos(ang)*h,nz],ph:Math.random()*6.283,w:SPW[c]*DIRW[c],rk:RAD[c]}); }
-  for (let f=0;f<N;f++){ const y=1-2*(f+0.5)/N, rr=Math.sqrt(1-y*y), th=ga*f; const d=[rr*Math.cos(th),y,rr*Math.sin(th)];
-    let best=0, bd=-2; for (let i=0;i<NV;i+=3){ const q=dirs[i], dd=q[0]*d[0]+q[1]*d[1]+q[2]*d[2]; if (dd>bd){ bd=dd; best=i; } }
-    const q=dirs[best], front=-q[2], top=q[1];
-    const key=Math.random()*0.5+0.38*front+0.12*top;   // 몸통(뒤·아래)부터, 얼굴(앞)·머리 위는 나중에
-    const sd=suUnit(); sd[2]*=0.5;
-    F.push({vi:best,d:q,key,cl:f%NC,sd,tin:(0.05+0.2*Math.random())*T,r0:(1.25+0.2*Math.random()),ph:((Math.floor(f/NC)+0.5)/Math.ceil(N/NC)-0.5)*Math.PI*1.8+(Math.random()-0.5)*0.15,off:suUnit(),offR:0.25+0.3*Math.random(),
-      size:(0.55+0.85*Math.pow(Math.random(),1.5)),squash:[0.8+0.4*Math.random(),0.8+0.4*Math.random(),0.8+0.4*Math.random()],rax:suUnit(),rw:(0.4+0.8*Math.random())*(Math.random()<0.5?-1:1),
-      br:0.92+0.16*Math.random(),gl:0.8+0.4*Math.random(),m:f%3,th:0,q:[0,0,0,1]}); }
-  const ord=[...F].sort((a,b)=>a.key-b.key); ord.forEach((p,i)=>{ p.land=Ta0+(Ta1-Ta0)*Math.pow(i/Math.max(1,N-1),0.85)+(Math.random()-0.5)*0.04*T; });
-  // 정점 도착 시각 = 가장 빨리 닿는 파편 + 거리/퍼지는 속도 (붙은 곳에서 이웃으로 번져 경계가 이어져요)
-  const cellA=Math.sqrt(4*Math.PI/N), spd=cellA/(0.42/Math.sqrt(av));
-  if (!SU.land||SU.land.length!==NV){ SU.land=new Float32Array(NV); SU.nz=new Float32Array(NV); }
-  const W=[suUnit(),suUnit(),suUnit()].map(v=>v.map(x=>x*3.2)); let laF=0;
-  for (let i=0;i<NV;i++){ const q=dirs[i]; let m=1e9; for (const p of F){ const dd=Math.acos(clamp(q[0]*p.d[0]+q[1]*p.d[1]+q[2]*p.d[2],-1,1)); const t=p.land+dd/spd; if (t<m) m=t; } SU.land[i]=m;
-    let n=0; for (const w of W) n+=Math.sin(q[0]*w[0]+q[1]*w[1]+q[2]*w[2]); SU.nz[i]=n/3;
-    if (-q[2]>0.8) laF=Math.max(laF,m); }
-  let mx=0; for (let i=0;i<NV;i++) mx=Math.max(mx,SU.land[i]);
-  Object.assign(SU,{on:true,t:-0.3,T,N,F,CL,sp,laF,Tc:mx+0.45,fd:0.38/Math.sqrt(av),c:0,ff:0,post:SU.post,postT:-1,lastPop:0});
-  SU.sg.fill(0); SU.sgAttr.needsUpdate=true; for (const m of SU.meshes){ m.visible=true; m.count=0; }
+    CL.push({ax:[-Math.sin(ang)*h,Math.cos(ang)*h,nz],ph:Math.random()*6.283,w:SPW[c]*DIRW[c],rk:RAD[c],pr:(0.12+0.1*Math.random())*(c%2?-1:1),tw:(0.45+0.35*Math.random())*(Math.random()<0.5?-1:1)}); }
+  for (let f=0;f<N;f++){ const sd=suUnit(); sd[2]*=0.5;
+    F.push({cl:f%NC,sd,tin:(0.04+0.16*Math.random())*T,r0:1.15+0.45*Math.random(),ph:((Math.floor(f/NC)+0.5)/Math.ceil(N/NC)-0.5)*Math.PI*1.8+(Math.random()-0.5)*0.15,
+      off:suUnit(),size:0.6+0.8*Math.pow(Math.random(),1.5),br:0.9+0.2*Math.random(),th:0}); }
+  // 도착 순서 = 안쪽 궤도부터 (바깥쪽은 더 오래 돌아요). 도착 시각은 넓게 퍼져 있어 덩어리가 한 번에 커지지 않고 계속 조금씩 쌓여요
+  const L0=0.3*T, L1=Math.min(0.9*T,L0+0.58*T/av);
+  const ord=[...F].sort((a,b)=>(a.r0*CL[a.cl].rk)-(b.r0*CL[b.cl].rk)+(Math.random()-0.5)*0.12);
+  ord.forEach((p,i)=>{ p.land=L0+(L1-L0)*Math.pow((i+0.5)/N,0.9); const dsp=(0.32+0.18*Math.random())*T/Math.sqrt(av); p.ts=Math.max(p.tin+0.35,p.land-dsp); });
+  let mx=0; for (const p of F) mx=Math.max(mx,p.land);
+  const Tr=mx+0.45+0.35, D=Math.max(0.4,S['빛 빠지는 시간']??1.8);
+  Object.assign(SU,{on:true,t:-0.3,T,N,F,CL,sp,Tr,D,Tend:Tr+D+0.15,post:SU.post,postT:-1,lastPop:0,M:0,Rm:0,MA:0,sb:0,sgv:-1,dbg:window.__suDbg?[]:null});
+  for (const m of SU.meshes){ m.visible=true; m.count=0; } SU.mass.visible=true;
   Sfx('whoosh',0.25,0.7); }
-function suTick(){ if (!SU||!SU.on) return; const dt=1/60; SU.t+=dt; const t=SU.t, F=SU.F;
-  let A=0; for (const p of F) A+=sstep(p.land-0.05,p.land+0.15,t); A/=F.length; SU.A=A;
-  const comp=1-0.045*Math.exp(-Math.pow((t-SU.Tc)/0.35,2));   // 다 모이면 한 번 꾹 압축됐다 풀려요
-  SU.c=(0.2*sstep(0,0.05,A)+0.6*Math.pow(A,0.7))*comp; SU.Rf=lerp(0.62,1,sstep(0.15,1,A))*sstep(0,0.03,A); SU.sq=comp; SU.ff=sstep(SU.laF+0.05,SU.laF+0.55,t);
-  for (const p of F){ if (t>=p.land && !p.popped){ p.popped=true; if (time-SU.lastPop>0.12){ SU.lastPop=time; Sfx('bump',0.06,1.5+Math.random()*0.4); } } }
-  const _b=document.querySelector('#bar button.su'); if (_b) _b.classList.toggle('on',t<SU.Tc+0.6);
-  if (t>SU.Tc+0.6){ SU.on=false; SU.postT=time; for (const m of SU.meshes){ m.visible=false; m.count=0; } SU.sg.fill(0); SU.sgAttr.needsUpdate=true; } }
-// 몸 정점 하나 (deform 끝, 다른 눌림 효과 전에)
-function suDeform(ox,oy,oz){ const t=SU.t;
-  if (t<0){ const s=1-sstep(-0.3,0,t); DX*=s; DY*=s; DZ*=s; return; }   // 시작: 원래 몸이 흩어지듯 사라져요
-  let s;
-  if (SHI>=0 && SHA===BSH){ const la=SU.land[SHI], f=sstep(la,la+SU.fd,t), n=SU.nz[SHI];
-    const lump=1+0.24*n*(1-f)+0.05*(1-f)*Math.sin(n*7+t*2.3);
-    const Rf=Math.max(SU.c,SU.Rf)*(1+0.07*n*(1-SU.A));   // 붙은 자리는 '지금 덩어리 크기'까지만 → 전체가 함께 커지며 촘촘해져요
-    const base=Math.max(SU.c,Rf*0.86);
-    s=base*lump*(1-f)+f*Rf;
-    const g=sstep(la-0.04,la+0.06,t)*Math.exp(-Math.max(0,t-la-0.06)/0.32)*(S['발광 강도']??0.6)*0.5; SU.sg[SHI]=g; }
-  else s=SU.ff>0.01?SU.c*0.55+(1-SU.c*0.55)*SU.ff:SU.c*0.55;   // 눈·입은 얼굴 쪽이 다 차오른 뒤에 표면으로 올라와요
-  s*=SU.sq||1; DX*=s; DY*=s; DZ*=s; }
-const _suM=new THREE.Matrix4(), _suV=new THREE.Vector3(), _suQ=new THREE.Quaternion(), _suS=new THREE.Vector3(), _suP=new THREE.Vector3();
+function suTick(){ if (!SU||!SU.on) return; const dt=1/60; SU.t+=dt; const t=SU.t, F=SU.F, Rw=R*(hScl?hScl[0]:1);
+  let M=0; for (const p of F) M+=smt((t-(p.land-0.05))/0.5); M/=F.length; SU.M=M;   // 쌓인 양 = 도착한 방울들의 부드러운 합
+  const rv=smt((t-SU.Tr)/SU.D); SU.rv=rv;   // 빛 빠짐 진행
+  const Rpk=1.45*Rw, Rg=Rpk*Math.cbrt(0.04+0.96*M); SU.Rm=Rg*(1-0.15*rv);   // 부피만큼 커져요 (세제곱근) → 쌓일수록 천천히 커짐
+  SU.MA=smt(M/0.3)*(1-rv); SU.MB=0.86+0.14*M;   // 불투명도는 첫 방울부터 천천히 진해져요
+  SU.sb=smt((M-0.2)/0.75)*(0.85+0.15*smt(rv/0.55));   // 빛 속에선 85%까지만 (가장자리가 비치지 않게), 빛이 빠지며 제 크기로   // 몸은 빛 안에서 함께 자라고, 빛이 다 찬 뒤 완성
+  SU.sgv=Math.round(clamp(0.85*(1-rv)*Math.min(1,(S['발광 강도']??0.6)/0.6+0.3),0,0.85)*200)/200;
+  for (const p of F){ if (t>=p.land && !p.popped){ p.popped=true; if (time-SU.lastPop>0.15){ SU.lastPop=time; Sfx('bump',0.04,1.6+Math.random()*0.4); } } }
+  const _b=document.querySelector('#bar button.su'); if (_b) _b.classList.toggle('on',t<SU.Tend);
+  if (t>SU.Tend){ SU.on=false; SU.postT=time; for (const m of SU.meshes){ m.visible=false; m.count=0; } SU.mass.visible=false; SU.sg.fill(0); SU.sgAttr.needsUpdate=true; } }
+// 몸 정점: 빛 안에서 부드럽게 한꺼번에 커질 뿐 (울퉁불퉁·움푹한 중간 모양 없음)
+function suDeform(ox,oy,oz){ const t=SU.t; const s=t<0?1-sstep(-0.3,0,t):SU.sb; DX*=s; DY*=s; DZ*=s; }
+const _suM=new THREE.Matrix4(), _suV=new THREE.Vector3(), _suQ=new THREE.Quaternion(), _suS=new THREE.Vector3();
+function suRotY(v,a){ const c=Math.cos(a), s=Math.sin(a); return [c*v[0]+s*v[2],v[1],-s*v[0]+c*v[2]]; }
+function suRotAx(v,ax,a){ const q=qAxis(a*180/Math.PI,ax); return qRot(q,v); }
 function suPre(){ if (!SU||!SU.meshes) return;
   const G=awU().g.value, ge=S['발광 강도']??0.6;
-  if (SU.on){ if (SU.sgAttr) SU.sgAttr.needsUpdate=true; const g=0.12*ge*(SU.A||0); G.x+=g; G.y+=0.86*g; G.z+=0.62*g; }
-  if (SU.postT>=0){ const k=sstep(0,1.4,time-SU.postT), g=((S['완성 후 발광 강도']??0.35)*0.22)*k+0.12*ge*(1-k); G.x+=g; G.y+=0.86*g; G.z+=0.62*g; }   // 완성 뒤 은은한 빛 유지
+  if (SU.postT>=0 && !SU.on){ const k=sstep(0,1.2,time-SU.postT), g=((S['완성 후 발광 강도']??0.35)*0.22)*k; G.x+=g; G.y+=0.86*g; G.z+=0.62*g; }   // 완성 뒤 은은한 빛 유지
   if (!SU.on) return;
-  if (SU.ff<0.5){ for (const e of EYE) e.g.visible=false; mouthG.visible=false; if (typeof nose!=='undefined') nose.visible=false; }   // 얼굴은 앞면이 다 차오른 뒤에
+  { const sv=SU.sgv; if (SU.sg[0]!==sv){ SU.sg.fill(sv); SU.sgAttr.needsUpdate=true; }
+    const pg=((S['완성 후 발광 강도']??0.35)*0.22)*SU.rv; G.x+=pg; G.y+=0.86*pg; G.z+=0.62*pg; }   // 빛이 빠지는 동안 몸의 남는 빛으로 이어져요
+  if (SU.sb<0.98){ for (const e of EYE) e.g.visible=false; mouthG.visible=false; if (typeof nose!=='undefined') nose.visible=false; }
   const t=SU.t, F=SU.F, CL=SU.CL, Rw=R*(hScl?hScl[0]:1), C=hupi.getWorldPosition(new THREE.Vector3());
-  const pos=bodyGeo.attributes.position.array, sz=(S['파편 크기']??1), sp=SU.sp, dt=1/60;
-  const lim=Math.max(SCRW*1.02,Rw*1.2), spawnD=1.5*Math.hypot(SCRW,(SCRT-SCRB)/2), cnt=[0,0,0];
-  hupi.updateMatrixWorld();
-  for (const p of F){ const mesh=SU.meshes[p.m], k=cnt[p.m];
-    if (t>p.land+0.32||t<0){ continue; }
-    const cl=CL[p.cl], spread=1-0.85*sstep(0.3*SU.T,0.6*SU.T,t);   // 군집 안에서 흩어져 있다가 점점 한 덩어리로
-    let r=Math.min(lim,p.r0*cl.rk*Rw)*(1-0.32*sstep(0.3*SU.T,p.land,t));
-    p.th+=cl.w*sp*1.6*Math.pow(p.r0*cl.rk*Rw/Math.max(0.3,r),1.2)*dt;   // 안쪽으로 갈수록 빨라져요
-    const th=cl.ph+p.th+p.ph*spread, ax=cl.ax; let e1=Math.abs(ax[1])<0.9?[0,1,0]:[1,0,0]; e1=norm(cross(e1,ax)); const e2=cross(ax,e1);
-    const ct=Math.cos(th), st=Math.sin(th); let o=[C.x+r*(ct*e1[0]+st*e2[0]),C.y+r*(ct*e1[1]+st*e2[1]),C.z+r*(ct*e1[2]+st*e2[2])];
-    const lo=p.offR*Rw*0.08*(0.3+spread); o=[o[0]+p.off[0]*lo,o[1]+p.off[1]*lo,o[2]+p.off[2]*lo];
-    if (t<p.tin){ const e=1-Math.pow(1-clamp01(t/p.tin),3), s0=[C.x+p.sd[0]*spawnD,C.y+p.sd[1]*spawnD,C.z+p.sd[2]*spawnD]; o=[s0[0]+(o[0]-s0[0])*e,s0[1]+(o[1]-s0[1])*e,s0[2]+(o[2]-s0[2])*e]; }
-    // 목표: 지금 몸의 그 정점 위치 (핵이 커지고, 붙으면 원래 표면까지 차오름)
-    _suP.set(pos[p.vi*3],pos[p.vi*3+1],pos[p.vi*3+2]).applyMatrix4(hupi.matrixWorld);
-    const Tsp=0.95/Math.sqrt(S['흡수 속도']??1), a=sstep(p.land-Tsp,p.land,t), ae=a*a*(3-2*a);
-    o=[o[0]+(_suP.x-o[0])*ae,o[1]+(_suP.y-o[1])*ae,o[2]+(_suP.z-o[2])*ae];
-    const sink=sstep(p.land,p.land+0.3,t), scl=Rw*0.12*sz*p.size*(1-sink)*(t<p.tin?sstep(0,0.25,t/p.tin)+0.0:1);
-    if (scl<1e-4) continue;
-    p.q=qMul(qAxis(p.rw*40*dt,p.rax),p.q); _suQ.set(p.q[0],p.q[1],p.q[2],p.q[3]);
-    _suS.set(scl*p.squash[0],scl*p.squash[1],scl*p.squash[2]); _suV.set(o[0],o[1],o[2]); _suM.compose(_suV,_suQ,_suS); mesh.setMatrixAt(k,_suM);
-    mesh.geometry.attributes.aBr.array[k]=p.br; mesh.geometry.attributes.aGl.array[k]=ge*(0.22*p.gl+0.35*a);   // 다가갈수록 조금 더 따뜻하게
-    cnt[p.m]=k+1; }
-  for (let i=0;i<3;i++){ const m=SU.meshes[i]; m.count=cnt[i]; m.instanceMatrix.needsUpdate=true; m.geometry.attributes.aBr.needsUpdate=true; m.geometry.attributes.aGl.needsUpdate=true; } }
+  const sz=(S['파편 크기']??1), sp=SU.sp, dt=1/60, Rm=SU.Rm;
+  SU_U.uMC.value.copy(C); SU_U.uQ.value=Math.max(1e-3,Rm/0.62); SU_U.uMA.value=SU.MA; SU_U.uMB.value=SU.MB; SU_U.uBl.value=S['빛 흐림 정도']??0.6; SU_U.uGl.value=ge;
+  const lim=Math.max(SCRW*1.02,Rw*1.2), spawnD=1.5*Math.hypot(SCRW,(SCRT-SCRB)/2), mesh=SU.meshes[0], aB=mesh.geometry.attributes.aBr.array, aA=mesh.geometry.attributes.aA.array; let k=0;
+  const pr=SU.dbg?[[0,0],[0,0],[0,0],[0,0],[0,0]]:null;
+  for (const p of F){
+    if (t<0||t>p.land+0.5) continue;
+    const cl=CL[p.cl], r0w=Math.min(lim,p.r0*cl.rk*Rw);
+    const u=clamp01((t-p.ts)/(p.land-p.ts)), e=u*u*(3-2*u);   // 궤도가 안쪽으로 서서히 감김 (도착 때 덩어리 가장자리)
+    const sink=smt((t-p.land)/0.45);   // 도착 후 덩어리 속으로 스며듦
+    const Rs=Math.max(Rm,0.25*Rw)*0.85;
+    let r=Rs+(r0w-Rs)*(1-e); r=r*(1-sink)+Rs*0.45*sink;
+    p.th+=cl.w*sp*1.6*Math.min(3,Math.pow(r0w/Math.max(0.3*Rw,r),1.0))*dt;   // 안쪽일수록 빨리 돌아요
+    // 궤도면: 천천히 세차(세로축 회전) + 감길수록 비틀림
+    let ax=suRotY(cl.ax,cl.pr*t); let e1=Math.abs(ax[1])<0.9?[0,1,0]:[1,0,0]; e1=norm(cross(e1,ax)); ax=norm(suRotAx(ax,e1,cl.tw*e)); e1=norm(cross(Math.abs(ax[1])<0.9?[0,1,0]:[1,0,0],ax)); const e2=cross(ax,e1);
+    const th=cl.ph+p.th+p.ph*(1-0.5*e), ct=Math.cos(th), st=Math.sin(th);
+    let o=[C.x+r*(ct*e1[0]+st*e2[0]),C.y+r*(ct*e1[1]+st*e2[1]),C.z+r*(ct*e1[2]+st*e2[2])];
+    const lo=Rw*0.05*(1-e); o=[o[0]+p.off[0]*lo,o[1]+p.off[1]*lo,o[2]+p.off[2]*lo];
+    if (t<p.tin){ const q=1-Math.pow(1-clamp01(t/p.tin),3), s0=[C.x+p.sd[0]*spawnD,C.y+p.sd[1]*spawnD,C.z+p.sd[2]*spawnD]; o=[s0[0]+(o[0]-s0[0])*q,s0[1]+(o[1]-s0[1])*q,s0[2]+(o[2]-s0[2])*q]; }
+    if (pr && t>=p.tin && sink<0.01){ pr[p.cl][0]+=r/Rw; pr[p.cl][1]++; } if (SU.dbg) p.rr=(t>=p.tin&&sink<0.3)?+(r/Rw).toFixed(3):null;
+    const scl=Rw*0.17*sz*p.size*(1-0.55*sink)*(t<p.tin?0.4+0.6*clamp01(t/p.tin):1);
+    _suS.set(scl,scl,scl); _suV.set(o[0],o[1],o[2]); _suQ.identity(); _suM.compose(_suV,_suQ,_suS); mesh.setMatrixAt(k,_suM);
+    aB[k]=p.br; aA[k]=(1-sink)*(t<p.tin?smt(t/p.tin*1.5):1); k++; }
+  mesh.count=k; mesh.instanceMatrix.needsUpdate=true; mesh.geometry.attributes.aBr.needsUpdate=true; mesh.geometry.attributes.aA.needsUpdate=true;
+  if (SU.dbg) SU.dbg.push([+t.toFixed(3),+(Rm/Rw).toFixed(4),+SU.MA.toFixed(4),+SU.sb.toFixed(4),SU.sgv,...pr.map(a=>a[1]?+(a[0]/a[1]).toFixed(4):null),k,F.map(p=>t<0||t>p.land+0.5?null:p.rr),F.map(p=>p.cl)]); }
 function suChip(){ const b=document.createElement('button'); b.className='su'; b.innerHTML='🪐 소환'; b.onclick=()=>triggerSummon(); chipsEl.appendChild(b); }
 function suBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='소환 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } triggerSummon(); }
 window.triggerSummon=triggerSummon; window.__su={go:triggerSummon,SU};
