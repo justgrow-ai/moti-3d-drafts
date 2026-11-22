@@ -12,6 +12,7 @@
   #view canvas{display:block;width:100%;height:100%;touch-action:none}
   #panel{width:320px;height:100%;overflow-y:auto;background:#fff;color:#1a1a1a;border-left:1px solid #e6e6e6;font-size:12.5px;transition:width .2s}
   #panel.closed{width:0;border:0}
+  #wrap.dk #ttl{color:#efe9e2} #wrap.dk #hint{color:rgba(239,233,226,.5)} #wrap.dk #view{background:#0e0d0c}
   #toggle{position:absolute;top:12px;right:12px;z-index:5;padding:7px 13px;border-radius:999px;border:0;background:rgba(255,255,255,.78);color:#2b2320;font:600 12.5px inherit;font-family:inherit;cursor:pointer}
   .top{position:sticky;top:0;background:#fff;padding:14px 14px 10px;border-bottom:1px solid #eee;z-index:2}
   .top h1{font-size:15px;margin:0 0 9px;font-weight:700}
@@ -134,6 +135,7 @@ const MAT_PRESETS=[
 const MAT_NAMES=MAT_PRESETS.map(p=>p.n);
 const SCHEMA = [
  {h:'동물형', f:[
+  {k:'배경스타일',t:'enum',o:['검은 그라데이션','크림 (예전 · 동물 팔레트 색)'],d:0,tip:'배경: 기본은 캐릭터 쪽이 살짝 밝은 따뜻한 차콜 그라데이션'},
   {k:'얼굴',t:'enum',o:FACES,d:0,onSet:()=>applyFace(S,S['얼굴']),tip:'동물 얼굴 (머리 모양·무늬·뿔·갈기 등). 동물마다 기본 색이 있고 팔레트로 바꿀 수 있어요'},
   {k:'팔레트',hide:1,t:'enum',o:PAL_NAMES,d:0,onSet:()=>applyPalette(S,S['팔레트']),tip:'몸·귀 안쪽·볼·잉크·배경 색을 한 번에 바꿔요 (동물 기본 = 동물 얼굴 고유 색)'},
   {k:'무늬색',hide:1,t:'color',d:C(0.54,0.42,0.31),tip:'동물 얼굴: 줄무늬·반점·갈기 색'},
@@ -2755,13 +2757,20 @@ function softShadowTex(k){ const c=document.createElement('canvas'); c.width=c.h
 const lin=(c)=>new THREE.Color().setRGB(c.r,c.g,c.b,THREE.SRGBColorSpace), raw=(c)=>new THREE.Color().setRGB(c.r,c.g,c.b,THREE.LinearSRGBColorSpace);
 let bgLum=0;
 function applyBg(){
-  const grad=false, a=S['배경색'], t=S['배경위색'], b=S['배경아래색'];
-  const key=JSON.stringify([grad,a,t,b]); if (key===lookBgKey) return; lookBgKey=key;
+  const grad=false, a=S['배경색'], t=S['배경위색'], b=S['배경아래색'], dk=(S['배경스타일']|0)===0;
+  const key=JSON.stringify([grad,a,t,b,dk]); if (key===lookBgKey) return; lookBgKey=key;
+  const wr=document.getElementById('wrap'); if (wr) wr.classList.toggle('dk',dk);
+  if (dk){ if (scene.background && scene.background.isTexture) scene.background.dispose(); scene.background=darkBgTex(); const e=lin({r:0.07,g:0.066,b:0.062}); scene.fog.color.copy(e); cycMat.color.copy(e); bgLum=0.1; return; }
   if (scene.background && scene.background.isTexture) scene.background.dispose();
   if (grad){ const c=document.createElement('canvas'); c.width=4; c.height=256; const g=c.getContext('2d'); const gr=g.createLinearGradient(0,0,0,256);
     const h=o=>'rgb('+[o.r,o.g,o.b].map(v=>Math.round(clamp01(v)*255)).join(',')+')'; gr.addColorStop(0,h(t)); gr.addColorStop(1,h(b)); g.fillStyle=gr; g.fillRect(0,0,4,256);
     const tx=new THREE.CanvasTexture(c); tx.colorSpace=THREE.NoColorSpace; scene.background=tx; scene.fog.color.copy(lin(b)); cycMat.color.copy(raw(b)).multiplyScalar(0.86); bgLum=(t.r+t.g+t.b+b.r+b.g+b.b)/6; }
   else { scene.background=lin(a); scene.fog.color.copy(lin(a)); cycMat.color.copy(raw(a)).multiplyScalar(0.86); bgLum=(a.r+a.g+a.b)/3; } }
+// 검은 그라데이션: 캐릭터가 쉬는 자리(화면 아래쪽 가운데)가 살짝 밝은 따뜻한 차콜 → 가장자리 거의 검정. 미세한 디더로 띠 무늬 없게
+function darkBgTex(){ const W=256, H=512, c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d');
+  const gr=g.createRadialGradient(W*0.5,H*0.7,0,W*0.5,H*0.66,H*0.78); gr.addColorStop(0,'#2a2826'); gr.addColorStop(0.45,'#1c1a19'); gr.addColorStop(1,'#0e0d0c'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const im=g.getImageData(0,0,W,H), d=im.data; for (let i=0;i<d.length;i+=4){ const n=(Math.random()-0.5)*2.2; d[i]+=n; d[i+1]+=n; d[i+2]+=n; } g.putImageData(im,0,0);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.NoColorSpace; return t; }
 const _rimDir=new THREE.Vector3();
 function lookApply(){
   applyBg();
@@ -3129,7 +3138,7 @@ function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=(time-I
   if (IM.rt.width!==_dbs.x||IM.rt.height!==_dbs.y){ IM.rt.setSize(_dbs.x,_dbs.y); IM.b1.setSize(Math.ceil(_dbs.x/4),Math.ceil(_dbs.y/4)); IM.b2.setSize(Math.ceil(_dbs.x/4),Math.ceil(_dbs.y/4)); }
   // 한 번만 그려요: 배경색으로 지우되 알파 0 → 색은 평소와 같고, 알파가 곧 캐릭터 실루엣 마스크
   const bg=scene.background; renderer.getClearColor(_icc); const ca=renderer.getClearAlpha();
-  if (bg && bg.isColor){ scene.background=null; renderer.setClearColor(bg,0); }
+  if (bg && bg.isColor){ scene.background=null; renderer.setClearColor(bg,0); } else if (bg && bg.isTexture){ scene.background=null; renderer.setClearColor(0x000000,0); }
   const _ub=tkIMPre(bg); renderer.setRenderTarget(IM.rt); renderer.clear(); renderer.render(scene,cam); renderClone(); if (_ub) for (const o of TK.__imHid) o.visible=true; IM.u.uUseBG.value=_ub?1:0; if (_ub) IM.u.tBG.value=TK.rb.texture;
   scene.background=bg; renderer.setClearColor(_icc,ca); renderer.setRenderTarget(null);
   const pr=renderer.getPixelRatio(); if (md===1||md===4){ const sg=16*pr/(_dbs.x/IM.b1.width)/3;   // 한 칸 = 시그마의 1/3
@@ -3210,7 +3219,7 @@ function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) ret
   if (!A.length && !PFX.live) return; const g=PFX.g, dpr=Math.max(0.75,Math.min(1.5,renderer.getPixelRatio())), W_=view.clientWidth, H_=view.clientHeight;
   if (c.width!==Math.round(W_*dpr)||c.height!==Math.round(H_*dpr)){ c.width=Math.round(W_*dpr); c.height=Math.round(H_*dpr); }
   g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W_,H_); if (!A.length){ PFX.live=false; c.style.display='none'; return; } if (c.style.display==='none') c.style.display='block';   // 비어 있으면 캔버스를 숨겨서 합성 비용도 0
-  const _bgc=S['배경색']||{r:1,g:0.95,b:0.85}, _db=S['파편밝기']??0.35, DC=hexOf({r:lerp(_bgc.r*0.86,1,_db),g:lerp(_bgc.g*0.84,1,_db),b:lerp(_bgc.b*0.8,1,_db)}), DA=S['파편불투명도']??0.95;
+  const _bgc=(S['배경스타일']|0)===0?{r:0.66,g:0.62,b:0.57}:(S['배경색']||{r:1,g:0.95,b:0.85}), _db=S['파편밝기']??0.35, DC=hexOf({r:lerp(_bgc.r*0.86,1,_db),g:lerp(_bgc.g*0.84,1,_db),b:lerp(_bgc.b*0.8,1,_db)}), DA=S['파편불투명도']??0.95;
   const OL=hexOf(S['외곽선색']), BD=hexOf(S['몸색']), lw0=Math.max(1.5,S['외곽선두께']*40); g.lineCap='round'; g.lineJoin='round';
   const BH={flash:1,crack:1,ripple:1,sring:1,hring:1,star:1,speed:1,cline:1}, Gm=pfxGeom();   // 이 종류들은 캐릭터 뒤(실루엣 바깥)에만 보여요
   const clipOut=()=>{ g.save(); g.beginPath(); g.rect(-10,-10,W_+20,H_+20); g.ellipse(Gm.cx,Gm.cy,Gm.rx*0.97,Gm.ry*0.97,0,0,6.2832); g.clip('evenodd'); };
@@ -3349,7 +3358,7 @@ function tkBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.
 window.__tk={on:()=>{ TK.latch=true; tkSet(true); },off:()=>tkSet(false),TK};
 
 // 충돌이펙트(IM) 경로: 소품이 실루엣 마스크에 섞이지 않게 — 소품은 배경 쪽(tBG)으로 따로 그려 합성
-function tkIMPre(bg){ if (!TK) return false; const L=[TK.props,(typeof MD!=='undefined'&&MD)?MD.mesh:null].filter(o=>o&&o.visible); TK.__imHid=L; if (!L.length) return false; if (!TK.rb) tkInit(); if (TK.rb.width!==_dbs.x||TK.rb.height!==_dbs.y){ TK.rb.setSize(_dbs.x,_dbs.y); TK.rc.setSize(_dbs.x,_dbs.y); }
+function tkIMPre(bg){ if (!TK) return false; const L=[TK.props,(typeof MD!=='undefined'&&MD)?MD.mesh:null].filter(o=>o&&o.visible); TK.__imHid=L; if (!L.length && !(bg&&bg.isTexture)) return false; if (!TK.rb) tkInit(); if (TK.rb.width!==_dbs.x||TK.rb.height!==_dbs.y){ TK.rb.setSize(_dbs.x,_dbs.y); TK.rc.setSize(_dbs.x,_dbs.y); }
   const b0=scene.background; scene.background=bg; root.visible=false; renderer.setRenderTarget(TK.rb); renderer.clear(); renderer.render(scene,cam); root.visible=true; scene.background=b0; for (const o of L) o.visible=false; return true; }
 
 // ============================================================ 각성모드 (일식 각성): 몸이 짙은 실루엣으로 → 실루엣 가장자리에서 백금빛이 새어 나와 번짐 → 눈에 빛 → 절정 맥동 → 유지 → 복구 (+ 은은한 발광이 남음)
@@ -3447,9 +3456,9 @@ function mdFloat(){ if (!MD||MD.a<=0) return 0; return mdE()*(0.22*R+0.035*R*mdB
 function mdPuff(){ if (!MD||(MD.a<=0&&MD.f<=0)) return 0; return mdE()*0.022*mdBr()+mdF()*0.035; }          // 숨쉬듯 부풀고, 충만할수록 통통
 function mdEye(){ if (!MD||MD.a<=0) return 1; return 1-0.97*sstep(0,1,Math.min(1,MD.a*1.6)); }
 function mdMesh(){ if (MD.mesh) return MD.mesh;
-  const mat=new THREE.ShaderMaterial({uniforms:{uCol:{value:new THREE.Color(1,0.55,0.2)},uOp:{value:0.55},uA:{value:0},uT:{value:0},uSpd:{value:1},uRg:{value:2.6}},transparent:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,depthWrite:false,
+  const mat=new THREE.ShaderMaterial({uniforms:{uCol:{value:new THREE.Color(1,0.55,0.2)},uOp:{value:0.55},uA:{value:0},uT:{value:0},uSpd:{value:1},uRg:{value:2.6},uDk:{value:0}},transparent:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,depthWrite:false,
     vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-    fragmentShader:`precision highp float; uniform vec3 uCol; uniform float uOp,uA,uT,uSpd,uRg; varying vec2 vUv;
+    fragmentShader:`precision highp float; uniform vec3 uCol; uniform float uOp,uA,uT,uSpd,uRg,uDk; varying vec2 vUv;
 float h3(vec3 p){ return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
 float n3(vec3 p){ vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
   return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z); }
@@ -3465,7 +3474,8 @@ void main(){ vec2 q=(vUv-.5)*2.*uRg; float r=length(q); if (r>uRg){ discard; }
   float inflow=1.-smoothstep(0.9,uRg,r);                                           // 몸 쪽일수록 진해짐 (끌려와 스며듦)
   float m=env*(0.32+0.15*w.x)+env*(s1*0.55+s2*0.38)*(0.35+0.65*inflow);
   vec3 col=mix(uCol,vec3(1.,0.74,0.45),s2*0.5+s1*0.2);
-  float al=clamp(m*uOp*uA,0.,0.85); gl_FragColor=vec4(col*al*1.2,al*0.9); }   // 반쯤 더하기: 어두운 배경에선 빛처럼, 밝은 배경에선 따뜻한 색막처럼`});
+  float al=clamp(m*uOp*uA,0.,0.85); col=mix(col,col*vec3(1.,1.08,1.25)+vec3(0.,0.03,0.),uDk);   // 어두운 배경: 더 밝고 맑은 주황빛 (갈색으로 탁해지지 않게)
+  gl_FragColor=vec4(col*al*mix(1.2,1.6,uDk),al*mix(0.9,0.5,uDk)); }   // 반쯤 더하기: 어두운 배경에선 빛처럼, 밝은 배경에선 따뜻한 색막처럼`});
   const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),mat); m.frustumCulled=false; m.renderOrder=-5; m.visible=false; scene.add(m); MD.mesh=m; MD.u=mat.uniforms; return m; }
 const _mdv=new THREE.Vector3(), _mdc=new THREE.Vector3();
 function mdPre(){ if (!MD) return; const G=awU().g.value; G.set(0,0,0); const act=MD.a>0.001||MD.f>0.001;
@@ -3475,7 +3485,7 @@ function mdPre(){ if (!MD) return; const G=awU().g.value; G.set(0,0,0); const ac
   if (MD.a<=0.001) return; const m=mdMesh(); m.visible=true; const rg=S['흡수범위']??2.6;
   _mdv.set(hPos[0],hPos[1],-hPos[2]); _mdc.copy(cam.position); const d=_mdv.distanceTo(_mdc), back=1.6, k=(d+back)/Math.max(1e-3,d);
   m.position.copy(_mdc).addScaledVector(_mdv.sub(_mdc),k); m.quaternion.copy(cam.quaternion); m.scale.setScalar(2*rg*R*Math.max(hScl[0],hScl[1])*k);
-  const u=MD.u; u.uCol.value.setRGB(c.r,c.g,c.b); u.uOp.value=S['오로라투명도']??0.55; u.uA.value=mdE(); u.uT.value=MD.t; u.uSpd.value=S['흐름속도']??1; u.uRg.value=rg; }
+  const u=MD.u; u.uCol.value.setRGB(c.r,c.g,c.b); u.uOp.value=S['오로라투명도']??0.55; u.uA.value=mdE(); u.uT.value=MD.t; u.uSpd.value=S['흐름속도']??1; u.uRg.value=rg; u.uDk.value=bgLum<0.3?1:0; }
 function mdChip(){ const b=document.createElement('button'); b.className='md'+(MD.on?' on':''); b.innerHTML='🧘 명상';
   b.onclick=()=>{ unlockAudio(); lastTouch=time; mdSet(!MD.on); }; chipsEl.appendChild(b); }
 function mdBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='명상 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } mdSet(!MD.on); }
