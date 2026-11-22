@@ -193,6 +193,18 @@ const SCHEMA = [
   {k:'외곽선색',t:'color',d:C(0.17,0.14,0.13),tip:'바깥 테두리 선 색 (눈 색과 따로)'},
   {k:'충돌이펙트',t:'enum',o:['끔','외곽 글로우','중첩','홀로그램','전부'],d:4,tip:'부딪히는 순간 캐릭터 실루엣에 붙는 효과 (끔이면 비용 0)'},
   {k:'엉덩이',t:'bool',d:true,tip:'뒤 아래쪽에 동글동글한 엉덩이 (몸 살이 그대로 부풀어요). 끄면 천천히 원래 몸으로'}]},
+ {h:'충격 파티클', f:[
+  {k:'기본반짝이',t:'bool',d:true,tip:'원래 있던 알록달록 동그란 반짝이 (착지할 때)'},
+  {k:'말랑방울',t:'bool',d:false,tip:'몸 색 젤리 방울이 톡톡 튀었다가 몸으로 쏙 흡수'},
+  {k:'만화충격선',t:'bool',d:false,tip:'부딪힌 자리에서 짧은 검은 선이 방사형으로 팟'},
+  {k:'먼지구름',t:'bool',d:false,tip:'동글동글 구름이 부딪힌 면(바닥·벽·천장)을 따라 퐁'},
+  {k:'물결링',t:'bool',d:false,tip:'납작한 동그라미 테두리가 1~2겹 조용히 퍼져요'},
+  {k:'타격임팩트',t:'bool',d:false,tip:'하얀 섬광 + 거미줄 균열 + 히트스톱·화면 흔들림 + 강한 파편'},
+  {k:'나선파편',t:'bool',d:false,tip:'소용돌이 구슬이 잠깐 돌다가 파편이 휘말려 흩어져요'},
+  {k:'쇼크웨이브',t:'bool',d:false,tip:'두꺼운 링이 빠르게 퍼지며 안쪽 공간이 살짝 굴절'},
+  {k:'초현실충격파',t:'bool',d:false,tip:'여러 겹 링이 시차를 두고 퍼지며 색 번짐·잔상, 공기가 일그러지듯 사라져요'},
+  {k:'만화충격파',t:'bool',d:false,tip:'외곽선 있는 톱니 별 터짐 + 팍 속도선'},
+  {k:'파티클크기',r:[0.5,1.8],d:1,tip:'충격 파티클 전체 크기'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -1045,7 +1057,7 @@ function UpdateGlyphs(){ for (let i=glyphs.length-1;i>=0;i--){ const g=glyphs[i]
 // ---- 몸 모션 (젤리 체인 물리 위에 얹어서 말랑하게)
 const FX={off:[0,0,0],rx:0,ry:0,rz:0,sy:1,sx:1,press:0,wob:0,walk:0,walkPh:0};
 let MOT=null, MOT_Q=[0,0,0,1], gDown=[0,-1,0], wobPh=0;
-const land=(k=1)=>{ Impact(0.45+0.5*k,0,-1); sqV+=0.26*k*S['착지찌그러짐']; boingV-=0.07*k; Sfx('bump',0.5+0.4*k,S['부딪힘소리높이']); if (k>0.6) Sfx('boing',0.35*k,S['튀는소리높이']*1.05); Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.4)|0,0.7); };
+const land=(k=1)=>{ Impact(0.45+0.5*k,0,-1); sqV+=0.26*k*S['착지찌그러짐']; boingV-=0.07*k; Sfx('bump',0.5+0.4*k,S['부딪힘소리높이']); if (k>0.6) Sfx('boing',0.35*k,S['튀는소리높이']*1.05); if (S['기본반짝이']!==false) Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.4)|0,0.7); };
 const launch=(p=1)=>Sfx('boing',0.8,S['튀는소리높이']*p);
 const settle=(k,a=0.3,f=16,d=6)=>1-a*Math.exp(-k*d)*Math.cos(k*f);
 function slerpQ(a,b,t){ let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]; let bb=b; if (d<0){ d=-d; bb=b.map(x=>-x); }
@@ -2571,7 +2583,7 @@ function screenEdges(){ const C=cam.position; const hit=(nx,ny)=>{ _v3a.set(nx,n
   _pm.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse); _fr.setFromProjectionMatrix(_pm); const pl=_fr.planes[2]; FB=[pl.normal.x,pl.normal.y,-pl.normal.z,pl.constant]; }
 let FB=[0,1,0,7], BMIN=-R, BMK=''; function bodyMinB(){ const k=BSHK+'|'+FB[1].toFixed(3)+FB[2].toFixed(3); if (k===BMK) return BMIN; BMK=k; let m=1e9; for (let i=0;i<BSH.length;i+=3){ const v=FB[1]*BSH[i+1]+FB[2]*BSH[i+2]; if (v<m) m=v; } BMIN=m; return m; }
 let LFLOOR=-1e9, floorY=0, rawFloor=0, camU=[0,0,-14], camOverride=null, camAbs=null, idleYaw=1;
-function step(){
+function step(){ pfxTick(); if (HSTOP>0){ HSTOP--; return; }
   const tt=time, m={x:M.x,y:M.y};
   if (S['잡기모드']) grabInput(tt); else {
   if (M.down){ M.down=false; mouseDown=true; downTime=tt; downPos={...m}; lastMouse={...m}; lastTouch=tt;
@@ -2614,7 +2626,7 @@ function step(){
     if (basePos[1]<floor && vel[1]<0){ basePos[1]=floor;
       if (Math.abs(vel[1])>0.04){ const hit=clamp01(Math.abs(vel[1])/0.4); Impact((hit-0.15)/0.55,0,-1); Sfx('bump',0.25+0.75*hit,S['부딪힘소리높이']); if (hit>0.3) Sfx('boing',hit*0.6,S['튀는소리높이']*1.1);
         sqV+=Math.min(0.3,Math.abs(vel[1])*0.9)*S['착지찌그러짐'];
-        vel[1]*=-S['바닥탄력']; boingV-=Math.min(0.12,Math.abs(vel[1])*0.4); if (Math.abs(vel[1])>0.08) Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.47)|0,0.7); }
+        vel[1]*=-S['바닥탄력']; boingV-=Math.min(0.12,Math.abs(vel[1])*0.4); if (Math.abs(vel[1])>0.08 && S['기본반짝이']!==false) Burst(add(hPos,[0,-2.2,-0.5]),(S['파티클개수']*0.47)|0,0.7); }
       else vel[1]=0;
       vel[0]*=0.85; }
     if (basePos[1]<floor) basePos[1]=floor;
@@ -2839,8 +2851,8 @@ function buttTick(){ BUTT+=((S['엉덩이']?1:0)-BUTT)*0.12; if (Math.abs(BUTT-(
   const vy=vel[1], ds=(FX.sy||1)-BPS; BPS=FX.sy||1; const kick=(vy-BPV)*2.2+ds*1.6; BPV=vy;
   BJV+=-BJ*0.32+clamp(kick,-0.6,0.6); BJV*=0.82; BJ=clamp(BJ+BJV,-1,1); }
 // 충돌 이펙트: 세기 s·시작 시각·방향(화면). 모드가 '끔'이거나 끝나면 평소처럼 바로 그려요(추가 비용 0)
-const IM={s:0,t0:-9,ix:1,iy:0,dur:0.6,rt:null,mk:null, active(){ return (S['충돌이펙트']|0)>0 && this.s>0.01 && time-this.t0<this.dur; }};
-function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03||!(S['충돌이펙트']|0)) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
+const IM={s:0,t0:-9,ix:1,iy:0,dur:0.6,rt:null,mk:null, active(){ return ((S['충돌이펙트']|0)>0 && this.s>0.01 && time-this.t0<this.dur) || PFX.swOn; }};
+function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03) return; window.__hits=(window.__hits||0)+1; try{ pfxHit(s,ix,iy); }catch(e){ reportErr(e,'pfx'); } if (!(S['충돌이펙트']|0)) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
   IM.s=s; IM.t0=time; const l=Math.hypot(ix,iy); if (l>1e-3){ IM.ix=ix/l; IM.iy=iy/l; } else { IM.ix=Math.random()<0.5?1:-1; IM.iy=0.25; } }
 window.__impact=(s,ix,iy)=>Impact(s,ix||0,iy||0); window.__im=IM; window.__vel=(x,y)=>{ vel=[x,y,0]; };
 function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,stencilBuffer:true,samples:LOWQ?0:4}); IM.b1=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false}); IM.b2=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false});
@@ -2849,12 +2861,14 @@ function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,s
     fragmentShader:`uniform sampler2D tM; uniform vec2 uStep; varying vec2 vUv; void main(){ float a=0.,w=0.; for (int i=-8;i<=8;i++){ float f=float(i), k=exp(-f*f/18.); a+=k*texture2D(tM,vUv+uStep*f).a; w+=k; } gl_FragColor=vec4(a/w); }`,depthTest:false,depthWrite:false});
   const bq=new THREE.Mesh(new THREE.PlaneGeometry(2,2),bm); bq.frustumCulled=false; IM.bs=new THREE.Scene(); IM.bs.add(bq); IM.bu=bm.uniforms;
   const mat=new THREE.ShaderMaterial({uniforms:{tC:{value:IM.rt.texture},tM:{value:IM.rt.texture},tB:{value:IM.b2.texture},uRes:{value:new THREE.Vector2()},uDir:{value:new THREE.Vector2(1,0)},uPR:{value:1},uBg:{value:new THREE.Color()},
-      uGlow:{value:0},uGhost:{value:0},uHolo:{value:0},uRing:{value:0},uRingL:{value:0.5}},
+      uGlow:{value:0},uGhost:{value:0},uHolo:{value:0},uRing:{value:0},uRingL:{value:0.5},uSW:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]},uSWw:{value:[1,1,1]},uSWca:{value:0}},
     vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
-    fragmentShader:`precision highp float; uniform sampler2D tC,tM,tB; uniform vec2 uRes,uDir; uniform vec3 uBg; uniform float uPR,uGlow,uGhost,uHolo,uRing,uRingL; varying vec2 vUv;
+    fragmentShader:`precision highp float; uniform sampler2D tC,tM,tB; uniform vec2 uRes,uDir; uniform vec3 uBg; uniform float uPR,uGlow,uGhost,uHolo,uRing,uRingL,uSWca; uniform vec4 uSW[3]; uniform float uSWw[3]; varying vec2 vUv;
 float M(vec2 uv){ return texture2D(tM,uv).a; }
 vec3 C(vec2 uv){ vec4 t=texture2D(tC,uv); return t.rgb+uBg*(1.-t.a); }   // 알파 0으로 지운 자리에 배경색을 되살려요
-void main(){ vec2 px=1./uRes; vec3 col=C(vUv); float m0=M(vUv); vec3 o=col;
+void main(){ vec2 px=1./uRes; vec3 col=C(vUv);
+  { vec2 P=vUv*uRes, off=vec2(0.); for (int i=0;i<3;i++){ vec4 q=uSW[i]; if (q.w>.01){ vec2 dv=P-q.xy; float d=length(dv)+.001, f=(d-q.z)/uSWw[i]; off+=dv/d*(-f)*exp(-f*f)*q.w; } }   // 링 자리만 바깥↔안쪽으로 굴절
+    if (dot(off,off)>.01){ vec2 o2=off*px; col=C(vUv+o2); if (uSWca>.01) col=vec3(C(vUv+o2*(1.+uSWca)).r,col.g,C(vUv+o2*(1.-uSWca)).b); } } float m0=M(vUv); vec3 o=col;
   float out0=1.-smoothstep(.15,.6,m0);                                   // 실루엣 바깥(배경)일수록 1
   // 중첩: 충돌 방향으로 어긋난 캐릭터 사본 두 겹이 반투명하게 겹쳐요 (본체 위에선 옅게)
   if (uGhost>.01){ vec2 d=uDir*uGhost*px*uPR;
@@ -2876,14 +2890,14 @@ void main(){ vec2 px=1./uRes; vec3 col=C(vUv); float m0=M(vUv); vec3 o=col;
   gl_FragColor=vec4(o,1.); }`,depthTest:false,depthWrite:false});
   const qm=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat); qm.frustumCulled=false; IM.q=new THREE.Scene(); IM.q.add(qm); IM.u=mat.uniforms; IM.oc=new THREE.OrthographicCamera(-1,1,1,-1,0,1); }
 const _icc=new THREE.Color();
-function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=IM.s, u=IM.u, md=S['충돌이펙트']|0, all=md===4;
+function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=(time-IM.t0<IM.dur)?IM.s:0, u=IM.u, md=s>0?(S['충돌이펙트']|0):0, all=md===4;
   if (IM.rt.width!==_dbs.x||IM.rt.height!==_dbs.y){ IM.rt.setSize(_dbs.x,_dbs.y); IM.b1.setSize(Math.ceil(_dbs.x/4),Math.ceil(_dbs.y/4)); IM.b2.setSize(Math.ceil(_dbs.x/4),Math.ceil(_dbs.y/4)); }
   // 한 번만 그려요: 배경색으로 지우되 알파 0 → 색은 평소와 같고, 알파가 곧 캐릭터 실루엣 마스크
   const bg=scene.background; renderer.getClearColor(_icc); const ca=renderer.getClearAlpha();
   if (bg && bg.isColor){ scene.background=null; renderer.setClearColor(bg,0); }
   renderer.setRenderTarget(IM.rt); renderer.clear(); renderer.render(scene,cam); renderClone();
   scene.background=bg; renderer.setClearColor(_icc,ca); renderer.setRenderTarget(null);
-  const pr=renderer.getPixelRatio(); if (u.uGlow.value>-1 && ((S['충돌이펙트']|0)===1||(S['충돌이펙트']|0)===4)){ const sg=16*pr/(_dbs.x/IM.b1.width)/3;   // 한 칸 = 시그마의 1/3
+  const pr=renderer.getPixelRatio(); if (md===1||md===4){ const sg=16*pr/(_dbs.x/IM.b1.width)/3;   // 한 칸 = 시그마의 1/3
     IM.bu.tM.value=IM.rt.texture; IM.bu.uStep.value.set(sg/IM.b1.width,0); renderer.setRenderTarget(IM.b1); renderer.render(IM.bs,IM.oc);
     IM.bu.tM.value=IM.b1.texture; IM.bu.uStep.value.set(0,sg/IM.b1.height); renderer.setRenderTarget(IM.b2); renderer.render(IM.bs,IM.oc); renderer.setRenderTarget(null); }
   const wob=Math.exp(-5.5*t)*Math.cos(t*12);
@@ -2891,10 +2905,100 @@ function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=IM.s, u
   u.uGlow.value=(md===1||all)?Math.min(1,s*1.3)*Math.min(1,t/0.03)*Math.exp(-5.5*t):0;
   u.uGhost.value=(md===2||all)?s*(all?13:17)*wob:0;                      // css px, 어긋났다가 출렁이며 합쳐져요
   u.uHolo.value=(md===3||all)?s*(all?9:12)*Math.exp(-5*t)*Math.cos(t*10):0;
-  const ur=t/0.42; u.uRing.value=(all||md===1)&&ur<1?s*0.9*(1-ur)*Math.min(1,t/0.04):0; u.uRingL.value=0.55-0.5*Math.sqrt(Math.min(1,ur));
+  pfxSWU(u,pr); const ur=t/0.42; u.uRing.value=(all||md===1)&&ur<1?s*0.9*(1-ur)*Math.min(1,t/0.04):0; u.uRingL.value=0.55-0.5*Math.sqrt(Math.min(1,ur));
   renderer.render(IM.q,IM.oc); }
+// ---------- 충격 파티클 (2D 오버레이 캔버스, 1/60초 고정 스텝 → 히트스톱 중에도 계속 움직여요). 다 끝나면 배열 비우고 캔버스 한 번 지워요
+var HSTOP=0; var PFX={L:[],cv:null,g:null,T:0,shT:0,shA:0,sw:[],swOn:false,live:false};
+const PFX_KEYS=['말랑방울','만화충격선','먼지구름','물결링','타격임팩트','나선파편','쇼크웨이브','초현실충격파','만화충격파'];
+const rr=(a,b)=>a+Math.random()*(b-a), _pv=new THREE.Vector3();
+function pfxCanvas(){ if (PFX.cv) return; const c=document.createElement('canvas'); c.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2;display:block';
+  view.appendChild(c); PFX.cv=c; PFX.g=c.getContext('2d'); }
+function pfxGeom(){ const W_=view.clientWidth, H_=view.clientHeight; _pv.set(hPos[0],hPos[1],-hPos[2]).project(cam); const cx=(_pv.x+1)/2*W_, cy=(1-_pv.y)/2*H_;
+  _pv.set(hPos[0]+R*hScl[0],hPos[1],-hPos[2]).project(cam); const rx=Math.max(8,Math.abs((_pv.x+1)/2*W_-cx)); _pv.set(hPos[0],hPos[1]+R*hScl[1],-hPos[2]).project(cam); const ry=Math.max(8,Math.abs((1-_pv.y)/2*H_-cy));
+  return {cx,cy,rx:Math.min(rx,W_*0.6),ry:Math.min(ry,H_*0.6),W:W_,H:H_}; }
+function pfxHit(s,ix,iy){ if (s<0.12 || !PFX_KEYS.some(k=>S[k])) return; pfxCanvas(); const G=pfxGeom(), l=Math.hypot(ix,iy), hasN=l>1e-3;
+  let x=G.cx, y=G.cy, nx=0, ny=-1; if (hasN){ ix/=l; iy/=l; x=G.cx+ix*G.rx; y=G.cy-iy*G.ry; nx=-ix; ny=iy; }
+  x=clamp(x,3,G.W-3); y=clamp(y,3,G.H-3);
+  const sc=clamp(Math.min(G.rx,G.ry)/80,0.55,1.8)*(S['파티클크기']||1), P={x,y,nx,ny,tx:-ny,ty:nx,hasN,s,sc,G}, A=PFX.L;
+  const ang=(spr)=>hasN?Math.atan2(ny,nx)+rr(-spr,spr):rr(0,6.2832);
+  if (S['말랑방울']){ const n=Math.round(4+5*s); for (let i=0;i<n;i++){ const a=ang(1.15), sp=rr(3.5,7.5)*sc*(0.6+0.6*s); A.push({k:'drop',t:0,life:1.4,x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:rr(4,8.5)*sc*(0.7+0.4*s),home:rr(0.36,0.5),g:0.32*sc}); } }
+  if (S['만화충격선']){ const n=3+Math.round(2*s); for (let i=0;i<n;i++){ const a=hasN?Math.atan2(ny,nx)+(-1+2*(i+0.5)/n)*1.15+rr(-0.12,0.12):6.2832*(i+rr(0.2,0.8))/n; A.push({k:'cline',t:0,life:0.3,x,y,a,r0:rr(10,16)*sc,len:rr(14,24)*sc*(0.7+0.5*s)}); } }
+  if (S['먼지구름']){ const n=5+Math.round(4*s); for (let i=0;i<n;i++){ const sd=i%2?1:-1; let ox,oy,vx,vy;
+      if (hasN){ const a=rr(0,12)*sc, b=rr(1,8)*sc; ox=P.tx*sd*a+nx*b; oy=P.ty*sd*a+ny*b; const v=rr(1.6,4.2)*sc*(0.6+0.6*s), vn=rr(0.2,1.1)*sc; vx=P.tx*sd*v+nx*vn; vy=P.ty*sd*v+ny*vn; }
+      else { const a=rr(0,6.2832), v=rr(1.5,3.5)*sc; ox=Math.cos(a)*G.rx*0.6; oy=Math.sin(a)*G.ry*0.6; vx=Math.cos(a)*v; vy=Math.sin(a)*v; }
+      A.push({k:'puff',t:0,life:rr(0.45,0.65),x:x+ox,y:y+oy,vx,vy,r:rr(5,9)*sc*(0.7+0.5*s)}); } }
+  if (S['물결링']) for (let i=0;i<(s>0.45?2:1);i++) A.push({k:'ripple',t:-0.11*i,life:0.65,x,y,a:Math.atan2(P.ty,P.tx),flat:hasN?0.38:1,R:70*sc*(0.6+0.6*s)});
+  if (S['타격임팩트']){ A.push({k:'flash',t:0,life:0.16,x,y,R:95*sc*(0.7+0.5*s)});
+    const rays=[], nr=7+Math.round(3*s); for (let i=0;i<nr;i++){ let a=6.2832*(i+rr(0.15,0.85))/nr, px_=0, py_=0; const pts=[[0,0]]; for (let j=0;j<5;j++){ a+=rr(-0.32,0.32); const L=rr(9,19)*sc*(0.7+0.5*s); px_+=Math.cos(a)*L; py_+=Math.sin(a)*L; pts.push([px_,py_]); } rays.push(pts); }
+    A.push({k:'crack',t:0,life:0.62,x,y,rays});
+    const nf=10+Math.round(10*s); for (let i=0;i<nf;i++){ const a=ang(1.35), sp=rr(6,15)*sc*(0.6+0.5*s); A.push({k:'shard',t:0,life:rr(0.45,0.75),x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:rr(4,9)*sc,rot:rr(0,6.28),w:rr(-0.5,0.5),wh:i%3!==0,g:0.4*sc}); }
+    HSTOP=Math.max(HSTOP,Math.round(3+4*s)); PFX.shT=0.28; PFX.shA=Math.max(PFX.shA,(4+7*s)*Math.min(1.4,sc)); }
+  if (S['나선파편']) A.push({k:'swirl',t:0,life:0.62,x:hasN?x+nx*14*sc:x,y:hasN?y+ny*14*sc:y,R:30*sc*(0.7+0.5*s),rot:rr(0,6.28),sp:0,s});
+  if (S['쇼크웨이브']){ A.push({k:'sring',t:0,life:0.36,x,y,R:125*sc*(0.6+0.5*s),w:13*sc}); PFX.sw.push({t:0,life:0.36,x,y,R:125*sc*(0.6+0.5*s),amp:12*s,w:16*sc,ca:0}); }
+  if (S['초현실충격파']) for (let i=0;i<3;i++){ A.push({k:'hring',t:-0.085*i,life:0.75,x,y,R:(150-25*i)*sc*(0.6+0.5*s)}); PFX.sw.push({t:-0.085*i,life:0.75,x,y,R:(150-25*i)*sc*(0.6+0.5*s),amp:(9-2*i)*s,w:20*sc,ca:0.35}); }
+  if (S['만화충격파']){ const n=13, sp=[]; for (let i=0;i<n*2;i++) sp.push(i%2?rr(0.42,0.55):rr(0.8,1.15));
+    A.push({k:'star',t:0,life:0.34,x,y,R:46*sc*(0.7+0.5*s),sp,rot:rr(0,6.28)});
+    for (let i=0;i<11;i++){ const a=hasN?Math.atan2(ny,nx)+rr(-1.4,1.4):rr(0,6.2832); A.push({k:'speed',t:0,life:rr(0.18,0.28),x,y,a,r0:50*sc*(0.7+0.5*s)*rr(0.9,1.2),len:rr(18,34)*sc}); } }
+  if (A.length>260) A.splice(0,A.length-260); PFX.live=true; }
+function pfxTick(){ if (!PFX) return; const dt=1/60; PFX.T+=dt; if (window.__noSW) PFX.sw.length=0; if (PFX.shT>0){ PFX.shT-=dt; if (PFX.shT<=0) PFX.shA=0; }
+  for (let i=PFX.sw.length-1;i>=0;i--){ const w=PFX.sw[i]; w.t+=dt; if (w.t>=w.life) PFX.sw.splice(i,1); } PFX.swOn=PFX.sw.length>0;
+  const A=PFX.L; if (!A.length) return; let G=null;
+  for (let i=A.length-1;i>=0;i--){ const p=A[i]; p.t+=dt; if (p.t>=p.life){ A.splice(i,1); continue; } if (p.t<0) continue;
+    if (p.k==='drop'){ if (p.t<p.home){ p.vy+=p.g; p.vx*=0.985; p.x+=p.vx; p.y+=p.vy; } else { G=G||pfxGeom(); const dx=G.cx-p.x, dy=G.cy-p.y, d=Math.hypot(dx,dy); p.vx=p.vx*0.7+dx*0.06; p.vy=p.vy*0.7+dy*0.06; p.x+=p.vx; p.y+=p.vy; if (d<Math.min(G.rx,G.ry)*0.95){ p.r*=0.72; if (p.r<0.8){ A.splice(i,1); continue; } } } }
+    else if (p.k==='puff'){ p.x+=p.vx; p.y+=p.vy; p.vx*=0.9; p.vy*=0.9; }
+    else if (p.k==='shard'){ p.vy+=p.g; p.vx*=0.97; p.x+=p.vx; p.y+=p.vy; p.rot+=p.w; }
+    else if (p.k==='bit'){ const c=Math.cos(p.cw), s_=Math.sin(p.cw), vx=p.vx*c-p.vy*s_, vy=p.vx*s_+p.vy*c; p.vx=vx*0.97; p.vy=vy*0.97; p.cw*=0.93; p.x+=p.vx; p.y+=p.vy; }
+    else if (p.k==='swirl'){ p.rot+=dt*(16-10*p.t/p.life); if (p.t>0.12 && p.t<0.5){ const n=2; for (let j=0;j<n;j++){ const a=p.rot+j*3.1416+rr(-0.3,0.3), rr_=p.R*rr(0.7,1.05), sp=rr(3,6)*(p.R/30);
+          A.push({k:'bit',t:0,life:rr(0.4,0.6),x:p.x+Math.cos(a)*rr_,y:p.y+Math.sin(a)*rr_,vx:-Math.sin(a)*sp+Math.cos(a)*sp*0.5,vy:Math.cos(a)*sp+Math.sin(a)*sp*0.5,cw:0.12,r:rr(2.2,4.2)*(p.R/30),c:j?'#ffffff':'#8fd8ff'}); } } } }
+  if (A.length>320) A.splice(0,A.length-320); }
+function pfxSWU(u,pr){ const H_=_dbs.y; for (let i=0;i<3;i++){ const w=PFX.sw[i], q=u.uSW.value[i]; if (!w||w.t<0){ q.set(0,0,0,0); continue; } const k=w.t/w.life, e=1-Math.pow(1-k,2.2);
+    q.set(w.x*pr, H_-w.y*pr, w.R*e*pr, w.amp*pr*(1-k)*Math.min(1,w.t/0.04)); u.uSWw.value[i]=Math.max(2,w.w*pr*(1-0.5*k)); }
+  u.uSWca.value=PFX.sw.some(w=>w.ca>0)?0.35:0; }
+function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) return; const A=PFX.L, sh=PFX.shA>0&&PFX.shT>0;
+  const tf=sh?`translate(${(Math.random()*2-1)*PFX.shA*PFX.shT/0.28}px,${(Math.random()*2-1)*PFX.shA*PFX.shT/0.28}px)`:'';
+  if (renderer.domElement.style.transform!==tf){ renderer.domElement.style.transform=tf; c.style.transform=tf; }
+  if (!A.length && !PFX.live) return; const g=PFX.g, dpr=Math.max(0.75,Math.min(1.5,renderer.getPixelRatio())), W_=view.clientWidth, H_=view.clientHeight;
+  if (c.width!==Math.round(W_*dpr)||c.height!==Math.round(H_*dpr)){ c.width=Math.round(W_*dpr); c.height=Math.round(H_*dpr); }
+  g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W_,H_); if (!A.length){ PFX.live=false; c.style.display='none'; return; } if (c.style.display==='none') c.style.display='block';   // 비어 있으면 캔버스를 숨겨서 합성 비용도 0
+  const OL=hexOf(S['외곽선색']), BD=hexOf(S['몸색']), lw0=Math.max(1.5,S['외곽선두께']*40); g.lineCap='round'; g.lineJoin='round';
+  const BH={crack:1,ripple:1,sring:1,hring:1,star:1,speed:1,cline:1}, Gm=pfxGeom();   // 이 종류들은 캐릭터 뒤(실루엣 바깥)에만 보여요
+  const clipOut=()=>{ g.save(); g.beginPath(); g.rect(-10,-10,W_+20,H_+20); g.ellipse(Gm.cx,Gm.cy,Gm.rx*0.97,Gm.ry*0.97,0,0,6.2832); g.clip('evenodd'); };
+  for (const pass of [1,0]){   // 1: 캐릭터 뒤 → 몸 자리만 지우개로 지움, 0: 앞
+  if (pass===0){
+  // 구름은 테두리를 먼저 다 그리고 안을 칠해서 하나로 뭉친 구름처럼
+  let pf=false; for (const p of A) if (p.k==='puff'&&p.t>=0){ pf=true; const u=p.t/p.life, r=p.r*(1+1.1*Math.sqrt(u))*(u>0.7?1-(u-0.7)/0.3:1); if (r<=0.3) continue; g.beginPath(); g.arc(p.x,p.y,r+lw0*0.5,0,6.2832); g.fillStyle=OL; g.fill(); }
+  if (pf) for (const p of A) if (p.k==='puff'&&p.t>=0){ const u=p.t/p.life, r=p.r*(1+1.1*Math.sqrt(u))*(u>0.7?1-(u-0.7)/0.3:1); if (r<=0.3) continue; g.beginPath(); g.arc(p.x,p.y,Math.max(0,r-lw0*0.5),0,6.2832); g.fillStyle='#fffdf6'; g.fill(); }
+  }
+  for (const p of A){ if (p.t<0) continue; if ((BH[p.k]===1)!==(pass===1)) continue; const u=p.t/p.life; g.globalAlpha=1;
+    if (p.k==='drop'){ const v=Math.hypot(p.vx,p.vy), st=1+Math.min(0.7,v*0.06); g.save(); g.translate(p.x,p.y); g.rotate(Math.atan2(p.vy,p.vx)); g.beginPath(); g.ellipse(0,0,p.r*st,p.r/st,0,0,6.2832); g.fillStyle=BD; g.fill(); g.lineWidth=lw0*0.85; g.strokeStyle=OL; g.stroke(); g.restore(); }
+    else if (p.k==='cline'){ const gr=Math.min(1,u/0.22), r0=p.r0+38*u*(p.len/20), L=p.len*gr*(1-0.75*Math.max(0,u-0.4)/0.6); g.globalAlpha=u>0.75?1-(u-0.75)/0.25:1; g.beginPath(); g.moveTo(p.x+Math.cos(p.a)*r0,p.y+Math.sin(p.a)*r0); g.lineTo(p.x+Math.cos(p.a)*(r0+L),p.y+Math.sin(p.a)*(r0+L)); g.lineWidth=lw0*1.5; g.strokeStyle=OL; g.stroke(); }
+    else if (p.k==='ripple'){ const e=1-Math.pow(1-u,3), R_=p.R*e; if (R_<6) continue; g.globalAlpha=Math.min(1,(1-u)*1.3); g.beginPath(); g.ellipse(p.x,p.y,R_,R_*p.flat,p.a,0,6.2832); g.lineWidth=lw0*(2-1.4*u); g.strokeStyle=OL; g.stroke(); }
+    else if (p.k==='flash'){ const R_=p.R*(0.45+0.8*u); g.globalAlpha=1-u*u; const gd=g.createRadialGradient(p.x,p.y,0,p.x,p.y,R_); gd.addColorStop(0,'rgba(255,255,255,1)'); gd.addColorStop(0.45,'rgba(255,255,255,0.95)'); gd.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gd; g.beginPath(); g.arc(p.x,p.y,R_,0,6.2832); g.fill(); }
+    else if (p.k==='crack'){ const gr=Math.min(1,u/0.1); g.globalAlpha=u>0.6?1-(u-0.6)/0.4:1; g.strokeStyle=OL;
+      for (const ry of p.rays){ const n=Math.max(1,Math.round(gr*(ry.length-1))); g.beginPath(); g.moveTo(p.x,p.y); for (let j=1;j<=n;j++) g.lineTo(p.x+ry[j][0],p.y+ry[j][1]); g.lineWidth=lw0*1.2; g.stroke(); }
+      if (gr>=1){ g.lineWidth=lw0*0.7; for (const lv of [2,4]){ g.beginPath(); p.rays.forEach((ry,j)=>{ const q=ry[Math.min(lv,ry.length-1)]; if (j===0) g.moveTo(p.x+q[0],p.y+q[1]); else g.lineTo(p.x+q[0],p.y+q[1]); }); g.closePath(); g.stroke(); } } }
+    else if (p.k==='shard'){ g.save(); g.translate(p.x,p.y); g.rotate(p.rot); const r=p.r*(u>0.6?1-(u-0.6)/0.4:1); g.beginPath(); g.moveTo(r*1.4,0); g.lineTo(-r*0.6,r*0.7); g.lineTo(-r*0.5,-r*0.6); g.closePath(); g.fillStyle=p.wh?'#ffffff':OL; g.fill(); g.lineWidth=lw0*0.7; g.strokeStyle=OL; g.stroke(); g.restore(); }
+    else if (p.k==='swirl'){ const sIn=Math.min(1,u/0.15), sOut=u>0.72?1-(u-0.72)/0.28:1, R_=p.R*sIn*sOut*(1+0.06*Math.sin(p.t*40)); if (R_<1) continue;
+      g.beginPath(); g.arc(p.x,p.y,R_,0,6.2832); g.fillStyle='#dff4ff'; g.fill(); g.lineWidth=lw0; g.strokeStyle=OL; g.stroke();
+      for (let j=0;j<3;j++){ g.beginPath(); for (let q=0;q<=14;q++){ const f=q/14, a=p.rot+j*2.094+f*4.2, r=R_*(0.12+0.86*f); const X=p.x+Math.cos(a)*r, Y=p.y+Math.sin(a)*r; q?g.lineTo(X,Y):g.moveTo(X,Y); } g.lineWidth=lw0*1.3; g.strokeStyle='#3aa9f0'; g.stroke(); }
+      g.beginPath(); g.arc(p.x,p.y,R_*0.28,0,6.2832); g.fillStyle='#ffffff'; g.fill(); }
+    else if (p.k==='bit'){ const r=p.r*(1-u); g.beginPath(); g.arc(p.x,p.y,Math.max(0.5,r),0,6.2832); g.fillStyle=p.c; g.fill(); g.lineWidth=lw0*0.6; g.strokeStyle=OL; g.stroke(); }
+    else if (p.k==='sring'){ const e=1-Math.pow(1-u,2.2), R_=p.R*e, w=p.w*(1-0.8*u); g.globalAlpha=1-u*u; g.beginPath(); g.arc(p.x,p.y,R_,0,6.2832); g.lineWidth=w+lw0*1.2; g.strokeStyle=OL; g.stroke(); g.lineWidth=w; g.strokeStyle='#ffffff'; g.stroke(); }
+    else if (p.k==='hring'){ const e=1-Math.pow(1-u,2.2), R_=p.R*e, a=(1-u)*(1-u); const o=3+5*(1-u);
+      for (const [rr2,al] of [[0.88,0.25],[1,1]]){ const Rk=R_*rr2; if (Rk<1) break; g.lineWidth=2.4*(0.6+0.8*(1-u))*(rr2<1?0.7:1);
+        if (rr2<1){ g.globalAlpha=a*al; g.strokeStyle='#ffffff'; g.beginPath(); g.arc(p.x,p.y,Rk,0,6.2832); g.stroke(); continue; }
+        g.globalAlpha=a*al*0.85; g.strokeStyle='#ff5a4e'; g.beginPath(); g.arc(p.x+o,p.y,Rk,0,6.2832); g.stroke();
+        g.strokeStyle='#38c8ff'; g.beginPath(); g.arc(p.x-o,p.y,Rk,0,6.2832); g.stroke();
+        g.globalAlpha=a*al; g.strokeStyle='#ffffff'; g.beginPath(); g.arc(p.x,p.y,Rk,0,6.2832); g.stroke(); } }
+    else if (p.k==='star'){ const sc_=u<0.12?1.18*u/0.12:(u<0.25?1.18-0.18*(u-0.12)/0.13:1), al=u>0.7?1-(u-0.7)/0.3:1, R_=p.R*sc_; g.globalAlpha=al;
+      const path=(k)=>{ g.beginPath(); p.sp.forEach((f,i)=>{ const a=p.rot+i*Math.PI/13, r=R_*f*k; const X=p.x+Math.cos(a)*r, Y=p.y+Math.sin(a)*r; i?g.lineTo(X,Y):g.moveTo(X,Y); }); g.closePath(); };
+      path(1); g.fillStyle='#ffe066'; g.fill(); g.lineWidth=lw0*1.3; g.strokeStyle=OL; g.stroke(); path(0.58); g.fillStyle='#ffffff'; g.fill(); }
+    else if (p.k==='speed'){ const r0=p.r0+60*u*(p.len/26), L=p.len*(1-u); g.globalAlpha=1-u; g.beginPath(); g.moveTo(p.x+Math.cos(p.a)*r0,p.y+Math.sin(p.a)*r0); g.lineTo(p.x+Math.cos(p.a)*(r0+L),p.y+Math.sin(p.a)*(r0+L)); g.lineWidth=lw0; g.strokeStyle=OL; g.stroke(); } }
+  if (pass){ g.globalAlpha=1; g.globalCompositeOperation='destination-out'; g.beginPath(); g.ellipse(Gm.cx,Gm.cy,Gm.rx*0.97,Gm.ry*0.97,0,0,6.2832); g.fill(); g.globalCompositeOperation='source-over'; } }
+  g.globalAlpha=1; }
+window.__pfx=PFX; window.__hit=(s,ix,iy)=>pfxHit(s,ix||0,iy||0);
 function prTick(){ buttTick(); const b=FX.big||1, cl=!!(MOT&&MOT.name==='복제'); let w=PRK; if (b>1.6) w=0.5; else if (b>1.2 && PRK>0.72) w=0.72; else if (cl) w=Math.min(w,window.__clk||0.62); else if (b<1.1) w=1; if (w!==PRK){ PRK=w; applyQL(); } }
-function renderFrame(){ prTick(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); if (IM.active()) impactRender(); else { renderer.render(scene,cam); renderClone(); } }
+function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); if (IM.active()) impactRender(); else { renderer.render(scene,cam); renderClone(); } }
 
 // ============================================================ ver3: 아래 칩 바 (폰에서 바로 비교)
 const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('ttlSub');
