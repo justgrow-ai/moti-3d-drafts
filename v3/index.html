@@ -3629,10 +3629,14 @@ function zmTick(){ const lz=Math.log(ZM.z), lt=Math.log(ZM.t);
   else { ZM.z=Math.exp(lz+(lt-lz)*0.2); if (Math.abs(lt-lz)<1e-4) ZM.z=ZM.t; }
   const hw=SCRW, hh=(SCRT-SCRB)/2; JM.zj=Math.max(0.3,Math.min(hw,hh)*0.96/R); JM.yc=(SCRT+SCRB)/2;
   const B=(FX.big||1)*ZM.z; JM.B=B; JM.s=Math.min(B,JM.zj);   // 몸 자체는 화면에 닿는 크기까지만, 그 이상은 '압력'으로
-  JM.p=B/JM.zj-1; JM.on=JM.p>-0.04||_jmWas; }
+  JM.p=B/JM.zj-1; JM.dev=JM.devA||0; JM.devA=0;
+  // 안전장치: 화면에 닿는 크기 아래로 내려가면 끼임 효과 전체를 0으로 녹여요(찝힘이 남지 않게)
+  const kt=sstep(-0.12,-0.02,JM.p); JM.k=(JM.k||0)+(kt-(JM.k||0))*(kt>(JM.k||0)?0.35:0.12); if (JM.k<0.002&&kt===0) JM.k=0;
+  JM.on=JM.k>0; if (!JM.on&&_jmWas) jamReset(); }
+function jamReset(){ _jmWas=false; JM.P=0; JM.Pf=0; JM.w=0; JM.wv=0; JM.cnt=0; JM.r0p=0; JM.hit=false; _jmT=-1; JR.fill(0); JV.fill(0); JT.fill(0); JS0.fill(0); JS1.fill(0); if (JM.wb) JM.wb.fill(0); }
 function zmCenter(){ const k=clamp01((JM.P||0)*4+Math.max(0,JM.p)*2); if (k<=0) return; hPos[0]+=(0-hPos[0])*k; hPos[1]+=(JM.yc-hPos[1])*k; }   // 끼면 화면 가운데로
 function softmin(a,b,k){ const m=Math.min(a,b); return m-k*Math.log(Math.exp((m-a)/k)+Math.exp((m-b)/k)); }
-function jamSetup(){ if (!JM.on){ _jmWas=false; JM.P=0; return; } if (!_jm4){ _jm4=new THREE.Matrix4(); _jm4i=new THREE.Matrix4(); } hupi.updateWorldMatrix(true,false); cam.updateMatrixWorld();
+function jamSetup(){ if (!JM.on) return; if (!_jm4){ _jm4=new THREE.Matrix4(); _jm4i=new THREE.Matrix4(); } hupi.updateWorldMatrix(true,false); cam.updateMatrixWorld();
   _jm4.multiplyMatrices(cam.matrixWorldInverse,hupi.matrixWorld); _jm4i.copy(_jm4).invert(); JM.m.set(_jm4.elements); JM.mi.set(_jm4i.elements);
   const ty=Math.tan(cam.fov*0.5*D2R), tx=ty*cam.aspect, bx=tx*1.02, by=ty*1.02; JM.bx=bx; JM.by=by;
   JM.cx=JM.m[12]; JM.cy=JM.m[13]; JM.cz=JM.m[14]; const sc=Math.max(0.3,-JM.cz), Xc=JM.cx/sc, Yc=JM.cy/sc; JM.Xc=Xc; JM.Yc=Yc;
@@ -3665,11 +3669,10 @@ function jamSetup(){ if (!JM.on){ _jmWas=false; JM.P=0; return; } if (!_jm4){ _j
   let dA=0; { const T_=Float32Array.from(JR); for (let i=0;i<JN;i++) JR[i]=T_[i]*0.8+(T_[(i+1)%JN]+T_[(i+JN-1)%JN])*0.1; } for (let i=0;i<JN;i++){ const lag=Dmin/JD[i], rate=JT[i]>JR[i]?(5+20*lag*lag)*(1-0.35*P):1e3; const d=(JT[i]-JR[i])*Math.min(1,rate*dt); JR[i]+=d; dA+=d; if (JR[i]>JD[i]) JR[i]=JD[i]; }
   JM.wv=(JM.wv||0)+(-(JM.w||0)*180-(JM.wv||0)*7)*dt+dA/JN/Math.max(1e-4,sh)*9; JM.w=(JM.w||0)+JM.wv*dt; JM.w=clamp(JM.w,-0.08,0.08);
   for (let i=0;i<JN;i++){ const th=(i+0.5)*dth, free=1-sstep(0.9,0.995,JR[i]/JD[i]); JM.wb=JM.wb||new Float32Array(JN); JM.wb[i]=Math.min(JD[i],JR[i]*(1+JM.w*free*(0.6+0.4*Math.cos(2*th+time*3)))); }
-  if (JM.p<-0.04){ let mx=0; for (let i=0;i<JN;i++) mx=Math.max(mx,Math.abs(JR[i]-r0)); if (mx<r0*0.01) _jmWas=false; }   // 다 빠지면 끝
   const pf=JM.Pf; JM.fs=Math.pow(Math.max(1,JM.B/JM.zj),0.1)*(1-0.2*pf); JM.ax=1-0.36*pf; JM.ay=1-0.46*pf;
   if (P>0.8&&!JM.hit){ JM.hit=true; if (!EX) playExpr('당황','once'); } else if (P<0.5) JM.hit=false; /* 꽉 끼는 순간 '읍!' */ JM.fz=1/(1+1.5*P); JM.rv=R*JM.s; }
 // 정점 하나: 뷰 공간 → 화면 탄젠트 좌표에서 '방향별 반지름' 지도로 다시 배치. 몸 가장자리는 벽까지 밀려가고, 가운데(얼굴)는 커지지 못하고 사방에서 눌려요
-function jamPress(){ const m=JM.m, lx=DX, ly=DY, lz=-DZ;
+function jamPress(){ const m=JM.m, lx=DX, ly=DY, lz=-DZ, ox0=DX, oy0=DY, oz0=DZ;
   let xv=m[0]*lx+m[4]*ly+m[8]*lz+m[12], yv=m[1]*lx+m[5]*ly+m[9]*lz+m[13], zv=m[2]*lx+m[6]*ly+m[10]*lz+m[14];
   zv=JM.cz+(zv-JM.cz)*JM.fz; const s=Math.max(0.3,-zv);
   const dx=xv/s-JM.Xc, dy=yv/s-JM.Yc, r=Math.hypot(dx,dy); if (r<1e-7) return;
@@ -3681,7 +3684,10 @@ function jamPress(){ const m=JM.m, lx=DX, ly=DY, lz=-DZ;
   const w=1-sstep(0.5,0.9,u), ox=dx/r*rn*(1-(1-JM.ax)*w), oy=dy/r*rn*(1-(1-JM.ay)*w);   // 얼굴 쪽은 옆에서 더 눌려 오종종
   let X=JM.Xc+ox, Y=JM.Yc+oy; X=clamp(X,-JM.bx,JM.bx); Y=clamp(Y,-JM.by,JM.by);
   xv=X*s; yv=Y*s;
-  const n=JM.mi; DX=n[0]*xv+n[4]*yv+n[8]*zv+n[12]; DY=n[1]*xv+n[5]*yv+n[9]*zv+n[13]; DZ=-(n[2]*xv+n[6]*yv+n[10]*zv+n[14]); }
+  const n=JM.mi; DX=n[0]*xv+n[4]*yv+n[8]*zv+n[12]; DY=n[1]*xv+n[5]*yv+n[9]*zv+n[13]; DZ=-(n[2]*xv+n[6]*yv+n[10]*zv+n[14]);
+  { const dd=Math.hypot(DX-ox0,DY-oy0,DZ-oz0)*JM.k; if (dd>(JM.devA||0)) JM.devA=dd; }
+  const kb=JM.k; if (kb<1){ DX=ox0+(DX-ox0)*kb; DY=oy0+(DY-oy0)*kb; DZ=oz0+(DZ-oz0)*kb; }
+  if (!(DX===DX&&DY===DY&&DZ===DZ)){ DX=ox0; DY=oy0; DZ=oz0; } }   // NaN 방지
 // 두 손가락 핀치 (빈 곳에서. 몸이 화면을 거의 채우면 몸 위에서도) → 확대·축소
 function pinchTick(tt){ const big=JM.s>=JM.zj*0.85;
   const L=[...PTR.values()].filter(p=>p.st!=='up'&&(!p.pin||big));
@@ -3751,10 +3757,11 @@ cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.o
 cvs.addEventListener('contextmenu',e=>e.preventDefault());
 window.__v3={ pal(i){ applyPalette(S,i); refreshAll(); renderChips(); }, set(o){ for (const k in o){ S[k]=o[k]; if (k==='얼굴') applyFace(S,o[k]); if (k==='모양'&&o[k]===7) applyFace(S,1); if (k==='팔레트') applyPalette(S,o[k]); } refreshAll(); renderChips(); }, face:(k)=>{ applyFace(S,k); refreshAll(); renderChips(); },
   facePts(){ const P_=o=>{ const v=new THREE.Vector3(); o.getWorldPosition(v); v.project(cam); return [+((v.x+1)/2*W).toFixed(1),+((1-v.y)/2*H).toFixed(1)]; }; return {eyeL:P_(EYE[0].g),eyeR:P_(EYE[1].g),mouth:P_(mouthG)}; },
-  zoom:(z)=>{ if (z!=null){ ZM.t=clamp(z,ZM.min,ZM.max); ZM.z=ZM.t; } return {z:ZM.z,t:ZM.t,s:JM.s,zj:JM.zj,p:JM.p,hp:[...hPos],yc:JM.yc,cy:JM.cy,cz:JM.cz,t2:SCRT,b2:SCRB,hs:[...hScl],js:Array.from(JS0).filter((v,i)=>i%9==0),jr:Array.from(JR).filter((v,i)=>i%9==0),r0:JM.r0,P:JM.P,fs:JM.fs,on:JM.on,B:JM.B,was:_jmWas,expr:EX&&EX.name,rc:JM.rc,bx:JM.bx,by:JM.by,c13:[JT[13],JR[13],JD[13]],c59:[JT[59],JR[59],JD[59]]}; },
+  zoom:(z)=>{ if (z!=null){ ZM.t=clamp(z,ZM.min,ZM.max); ZM.z=ZM.t; } return {z:ZM.z,t:ZM.t,s:JM.s,zj:JM.zj,p:JM.p,hp:[...hPos],yc:JM.yc,cy:JM.cy,cz:JM.cz,t2:SCRT,b2:SCRB,hs:[...hScl],js:Array.from(JS0).filter((v,i)=>i%9==0),jr:Array.from(JR).filter((v,i)=>i%9==0),r0:JM.r0,P:JM.P,fs:JM.fs,on:JM.on,k:JM.k,dev:JM.dev,B:JM.B,was:_jmWas,expr:EX&&EX.name,rc:JM.rc,bx:JM.bx,by:JM.by,c13:[JT[13],JR[13],JD[13]],c59:[JT[59],JR[59],JD[59]]}; },
   spin:(vx,vy)=>spinSwipe(vx,vy,Math.hypot(vx,vy)),
   grd:()=>{ if (!GR.active||!GR.X) return -1; let c=[0,0,0]; const n=GR.n, X=GR.X; for (let i=0;i<n;i++){ c[0]+=X[i*3]; c[1]+=X[i*3+1]; c[2]+=X[i*3+2]; } c=c.map(v=>v/n); let m=0; for (let i=0;i<n;i++) m=Math.max(m,Math.hypot(X[i*3]-c[0],X[i*3+1]-c[1],X[i*3+2]-c[2])); return m; },
   spinv:()=>len(SPIN.wv),
+  pos:()=>{ const P_=bodyGeo.attributes.position.array, o=[]; for (let i=0;i<NV;i+=5) o.push(P_[i*3],P_[i*3+1],P_[i*3+2]); return o; },
   bodyLow:()=>{ const P=bodyGeo.attributes.position.array; let n=0,y=0,r=0,y2=0; for (let i=0;i<NV;i++) if (rest[i*3+1]<-0.4*R){ n++; y+=P[i*3+1]; r+=Math.hypot(P[i*3],P[i*3+2]); } let m=0; for (let i=0;i<NV;i++) y2+=P[i*3+1]; return [y/n, r/n, y2/NV, root.position.y, FX.sy, FX.press, jump, boing, sq, basePos[1], floorY, vel[1], FX.off[1], BPH]; },
   schema:()=>{ const D=defaults(); return SCHEMA.map(g=>({h:g.h,hide:!!g.hide,tab:g.tab||'opt',btns:g.btns?g.btns.slice?g.btns.slice(0,40):String(g.btns):null,f:g.f.map(f=>({k:f.k,t:f.t||'range',r:f.r||null,o:f.o||null,hide:!!f.hide,tip:f.tip||'',d:exRound(D[f.k]),cur:exRound(S[f.k])}))})); },
   tier:(n,f)=>{ if (n!=null){ S['화질']=n; setTier(); } if (f!=null) S['FPS표시']=!!f; save(); return {tier:TIER,auto:TIER_AUTO,gpu:GPUS}; },
