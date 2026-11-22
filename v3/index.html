@@ -134,6 +134,9 @@ const MAT_PRESETS=[
   {n:'직접 고르기'}];
 const MAT_NAMES=MAT_PRESETS.map(p=>p.n);
 const SCHEMA = [
+ {h:'성능', f:[
+  {k:'화질',t:'enum',o:['자동','고','중','저'],d:0,onSet:()=>setTier(),tip:'자동 = 기기에 맞춰 고르고, 버벅이면 알아서 낮춰요. 고 = 가장 선명, 저 = 오래된 폰도 부드럽게'},
+  {k:'FPS표시',t:'bool',d:false,tip:'화면 왼쪽 아래에 초당 프레임 수와 화질 단계를 작게 보여줘요'},]},
  {h:'동물형', f:[
   {k:'배경스타일',t:'enum',o:['검은 그라데이션','크림 (예전 · 동물 팔레트 색)'],d:0,tip:'배경: 기본은 캐릭터 쪽이 살짝 밝은 따뜻한 차콜 그라데이션'},
   {k:'얼굴',t:'enum',o:FACES,d:0,onSet:()=>applyFace(S,S['얼굴']),tip:'동물 얼굴 (머리 모양·무늬·뿔·갈기 등). 동물마다 기본 색이 있고 팔레트로 바꿀 수 있어요'},
@@ -458,13 +461,30 @@ function makeGeo(V,T,dynamic){
 const view = document.getElementById('view');
 const renderer = new THREE.WebGLRenderer({antialias:true, stencil:true});
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
-const PRMAX=Math.min(devicePixelRatio, LOWQ?1.5:2); renderer.setPixelRatio(PRMAX);
+// 화질: 자동(기기 추정) / 고 / 중 / 저. 고 = 지금 모습 그대로, 중·저 = 해상도·효과 해상도·안티에일리어싱·파편 수를 줄여 폰에서 부드럽게
+const GPUS=(()=>{ try{ const gl=renderer.getContext(), e=gl.getExtension('WEBGL_debug_renderer_info'); return String(e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)); }catch(_){ return ''; } })();
+function autoTier(){ if (QS.get('q')==='hi') return 1; if (QS.get('q')==='low') return 3; const g=GPUS, mem=navigator.deviceMemory||4, cores=navigator.hardwareConcurrency||4;
+  const lowG=/Mali-[0-9T]|Mali-G(31|51|52|57|68)\b|Adreno \(TM\) ?[1-5]\d\d|Adreno [1-5]\d\d|PowerVR|SwiftShader|llvmpipe|Intel\(R\) HD Graphics [2-5]\d\d|Vivante|VideoCore/i.test(g);
+  const hiG=/Apple|Adreno \(TM\) ?(6[4-9]|[7-9]\d)\d|Adreno (6[4-9]|[7-9]\d)\d|Mali-G7[6-9]|Mali-G[7-9]\d\d|Immortalis|NVIDIA|GeForce|Radeon|RTX/i.test(g);
+  if (lowG||mem<=2||cores<=2) return 3; if (MOB){ const ios=/Apple/i.test(g)||/iPhone|iPad/.test(navigator.userAgent); if (!ios&&(mem<=3||cores<=4)) return 3; return 2; } return hiG||!/Intel/i.test(g)?1:2; }   // 폰은 자동이면 최대 '중' (iOS는 코어 수를 4로 낮춰 알려줘서 코어 수로 판단 안 해요)
+const TIER_AUTO=autoTier(), TIERS={1:{pr:2,fx:1,ms:4,pc:1},2:{pr:1.5,fx:1,ms:2,pc:0.65},3:{pr:1,fx:1,ms:0,pc:0.35}};
+let TIER=(S['화질']|0)||TIER_AUTO;
+let PRMAX=Math.min(devicePixelRatio, TIERS[TIER].pr); renderer.setPixelRatio(PRMAX);
+function fxK(){ return TIERS[TIER].fx*((typeof QL!=='undefined'&&QL.fx)||1); }
+function fxMS(){ return (typeof QL!=='undefined'&&QL.fx<1)?0:TIERS[TIER].ms; }
+function pcK(){ return TIERS[TIER].pc*((typeof QL!=='undefined'&&QL.pc)||1); }
 // 품질 자동 조절: FPS가 낮으면 해상도 → 부품 외곽선 → 물리 스텝 순서로 낮춰요 (?q=hi 고정, ?cap=1 끔)
-const QL={lvl:0, fps:60, fc:0, ft:performance.now(), low:0, good:0, downs:0, partOL:true, maxStep:3, auto:!QS.has('cap')&&QS.get('q')!=='hi',
-  levels:[{pr:PRMAX},{pr:Math.min(PRMAX,1.5)},{pr:Math.min(PRMAX,1.25)},{pr:1,ol:0.7},{pr:0.85,ol:0.6,maxStep:2}].filter((l,i,a)=>i===0||l.pr<a[i-1].pr||l.ol)};
+const QL={lvl:0, fps:60, fc:0, ft:performance.now(), low:0, good:0, downs:0, partOL:true, maxStep:3, fx:1, pc:1, auto0:!QS.has('cap')&&QS.get('q')!=='hi', auto:false, levels:[]};
+// 자동 조절 단계: 해상도 먼저 → 효과 해상도·파편 수 → 물리 스텝
+function buildQL(){ QL.levels=[{pr:PRMAX},{pr:Math.min(PRMAX,1.5)},{pr:Math.min(PRMAX,1.25)},{pr:Math.min(PRMAX,1),ol:0.7,pc:0.6},{pr:0.85,ol:0.6,fx:0.75,pc:0.45,maxStep:2},{pr:0.75,ol:0.6,fx:0.5,pc:0.35,maxStep:2}].filter((l,i,a)=>i===0||l.pr<a[i-1].pr||l.ol&&!a[i-1].ol);
+  QL.auto=QL.auto0&&!((S['화질']|0)%3); }   // 자동·저 에서만 스스로 낮춰요 (고·중은 고정)
+buildQL();
 let PRK=1;
-function applyQL(){ const L=QL.levels[QL.lvl]; renderer.setPixelRatio(L.pr*PRK); QL.maxStep=L.maxStep||3; OLU.scale=L.ol||1; if (typeof resize==='function') resize(); }
+function applyQL(){ const L=QL.levels[QL.lvl], fx0=QL.fx; QL.fx=L.fx||1; QL.pc=L.pc||1; if (QL.fx!==fx0) fxRefresh(); renderer.setPixelRatio(L.pr*PRK); QL.maxStep=L.maxStep||3; OLU.scale=L.ol||1; if (typeof resize==='function') resize(); }
 let GL_LOST=false, GL_RESTORED=0, IDLEF=0;
+// 화질 바꾸기 (옵션 '화질'): 해상도 상한·효과 렌더타깃 안티에일리어싱을 다시 맞춰요
+function fxRefresh(){ const n=fxMS(); for (const rt of [typeof IM!=='undefined'&&IM.rt, typeof TK!=='undefined'&&TK&&TK.rb, typeof TK!=='undefined'&&TK&&TK.rc]) if (rt && rt.samples!==n){ rt.samples=n; rt.dispose(); } }
+function setTier(){ TIER=(S['화질']|0)||TIER_AUTO; PRMAX=Math.min(devicePixelRatio,TIERS[TIER].pr); buildQL(); QL.lvl=0; QL.downs=0; QL.low=0; QL.good=0; QL.fx=1; QL.pc=1; fxRefresh(); applyQL(); }
 document.addEventListener('visibilitychange',()=>{ if (!document.hidden){ last=performance.now(); acc=0; } });
 renderer.domElement.addEventListener('webglcontextlost',e=>{ e.preventDefault(); GL_LOST=true; reportErr('WebGL context lost','gl'); },false);
 renderer.domElement.addEventListener('webglcontextrestored',()=>{ GL_LOST=false; GL_RESTORED++; last=performance.now(); acc=0; },false);
@@ -2999,22 +3019,27 @@ new ResizeObserver(resize).observe(view); resize();
 let acc=0, paused=false, last=performance.now(); const perf={cpu:0, frames:0};
 const DBGEL=DEBUG?Object.assign(document.createElement('div'),{id:'dbg'}):null;
 if (DBGEL){ DBGEL.style.cssText='position:absolute;left:8px;top:54px;z-index:20;font:11px/1.35 ui-monospace,monospace;color:#2b2320;background:rgba(255,255,255,.8);padding:5px 7px;border-radius:8px;pointer-events:none;white-space:pre;max-width:70vw;overflow:hidden'; view.appendChild(DBGEL); }
+var IDLEH=false, FPSEL=null;   // IDLEH: 이번 1초에 쉬는 중(30fps로 아껴 그림)이 있었으면 자동 조절 판단에서 빼요
+function fpsShow(){ const on=!!S['FPS표시']; if (!on){ if (FPSEL) FPSEL.style.display='none'; return; }
+  if (!FPSEL){ FPSEL=document.createElement('div'); FPSEL.style.cssText='position:absolute;left:12px;bottom:12px;z-index:6;font:600 11px/1.3 ui-monospace,monospace;color:#fff;background:rgba(0,0,0,.45);padding:4px 7px;border-radius:7px;pointer-events:none'; view.appendChild(FPSEL); }
+  FPSEL.style.display='block'; FPSEL.textContent=QL.fps.toFixed(0)+' fps · '+['','고','중','저'][TIER]+((S['화질']|0)?'':' (자동)')+' · '+renderer.getPixelRatio().toFixed(2)+'x'+(QL.lvl?' · 낮춤 '+QL.lvl:''); }
 function qlTick(now){ QL.fc++; if (now-QL.ft<1000) return; QL.fps=QL.fc*1000/(now-QL.ft); QL.fc=0; QL.ft=now;
-  if (QL.auto && !document.hidden){ if (QL.fps<42){ QL.low++; QL.good=0; } else if (QL.fps>57){ QL.good++; QL.low=0; } else { QL.low=0; QL.good=0; }
+  if (QL.auto && !document.hidden && !IDLEH){ if (QL.fps<50){ QL.low++; QL.good=0; } else if (QL.fps>58){ QL.good++; QL.low=0; } else { QL.low=0; QL.good=0; }
     if (QL.low>=2 && QL.lvl<QL.levels.length-1){ QL.lvl++; QL.downs++; QL.low=0; applyQL(); }
-    else if (QL.good>=8 && QL.lvl>0 && QL.downs<3){ QL.lvl--; QL.good=0; applyQL(); } }
+    else if (QL.good>=8 && QL.lvl>0 && QL.downs<4){ QL.lvl--; QL.good=0; applyQL(); } }
+  IDLEH=false; fpsShow();
   if (DBGEL){ const m=renderer.info.memory; DBGEL.textContent='fps '+QL.fps.toFixed(0)+' · cpu '+perf.cpu.toFixed(1)+'ms · pr '+renderer.getPixelRatio().toFixed(2)+' · 품질 '+QL.lvl+'/'+(QL.levels.length-1)+(LOWQ?' (폰)':'')
       +'\n정점 '+NV+' · geo '+m.geometries+' · tex '+m.textures+' · draw '+renderer.info.render.calls+(GL_RESTORED?' · GL 복구 '+GL_RESTORED:'')+(GL_LOST?' · GL 끊김':'')
       +(ERRS.length?'\n'+ERRS.map(e=>'⚠ '+e.m.slice(0,90)+(e.n>1?' ×'+e.n:'')).join('\n'):''); } }
 function frame(now){
   if (!CAP) requestAnimationFrame(frame);
-  if (GL_LOST){ last=now; return; }
+  if (GL_LOST||document.hidden){ last=now; return; }   // 탭이 숨겨지면 아무것도 안 그려요
   const dt=Math.min(0.1,(now-last)/1000); last=now; acc+=dt; let n=0;
   const t0=performance.now();
   if (paused) acc=0;
   try { while (acc>=1/60-1e-4 && n<QL.maxStep){ step(); acc-=1/60; n++; } } catch(e){ reportErr(e,'step'); acc=0; }
   if (n>=QL.maxStep) acc=0;
-  const idle=!M.held&&!PTR.size&&!MOT&&!(EX&&!EX.out)&&!GR.pins.length&&time-lastTouch>3&&Math.abs(jumpV)<1e-3; IDLEF=idle?IDLEF+1:0;
+  const idle=!M.held&&!PTR.size&&!MOT&&!(EX&&!EX.out)&&!GR.pins.length&&time-lastTouch>3&&Math.abs(jumpV)<1e-3&&!(TK&&TK.k>0)&&!(AW&&AW.on)&&!(MD&&(MD.a>0||MD.f>0))&&!(PU&&PU.a>0)&&!(PFX&&PFX.live)&&!IM.active(); IDLEF=idle?IDLEF+1:0; if (idle) IDLEH=true;
   const drew=n>0&&(!idle||(IDLEF&1)===0||QS.has('cap'));
   if (drew){ SAFE(bodyMesh,'body'); SAFE(bodyEarMesh,'ears'); SAFE(skinLimbs,'limbs'); SAFE(faceMesh,'face'); }
   perf.cpu=perf.cpu*0.9+(performance.now()-t0)*0.1; perf.frames++;
@@ -3099,7 +3124,7 @@ const IM={s:0,t0:-9,ix:1,iy:0,dur:0.6,rt:null,mk:null, active(){ return ((S['충
 function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03) return; window.__hits=(window.__hits||0)+1; try{ pfxHit(s,ix,iy); }catch(e){ reportErr(e,'pfx'); } if (!(S['충돌이펙트']|0)) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
   IM.s=s; IM.t0=time; const l=Math.hypot(ix,iy); if (l>1e-3){ IM.ix=ix/l; IM.iy=iy/l; } else { IM.ix=Math.random()<0.5?1:-1; IM.iy=0.25; } }
 window.__impact=(s,ix,iy)=>Impact(s,ix||0,iy||0); window.__im=IM; window.__vel=(x,y)=>{ vel=[x,y,0]; };
-function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,stencilBuffer:true,samples:LOWQ?0:4}); IM.b1=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false}); IM.b2=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false});
+function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,stencilBuffer:true,samples:fxMS()}); IM.b1=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false}); IM.b2=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false});
   // 실루엣 마스크를 가로·세로로 부드럽게 흐려요(1/4 해상도) → 글로우·충격파가 실루엣 모양 그대로 번져요
   const bm=new THREE.ShaderMaterial({uniforms:{tM:{value:null},uStep:{value:new THREE.Vector2()}},vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
     fragmentShader:`uniform sampler2D tM; uniform vec2 uStep; varying vec2 vUv; void main(){ float a=0.,w=0.; for (int i=-8;i<=8;i++){ float f=float(i), k=exp(-f*f/18.); a+=k*texture2D(tM,vUv+uStep*f).a; w+=k; } gl_FragColor=vec4(a/w); }`,depthTest:false,depthWrite:false});
@@ -3185,7 +3210,7 @@ function pfxHit(s,ix,iy){ const sen=S['충돌민감도']??0.5; if (S['타격임�
   if (S['물결링']) for (let i=0;i<(s>0.45?2:1);i++) A.push({k:'ripple',t:-0.11*i,life:0.65,x,y,a:Math.atan2(P.ty,P.tx),flat:hasN?0.38:1,R:70*sc*(0.6+0.6*s)});
   if (S['타격임팩트']){ const fl=S['섬광크기']??1; if (fl>0.01 && (S['섬광밝기']??0.9)>0.01) A.push({k:'flash',t:0,life:0.18,x,y,R:95*sc*(0.7+0.5*s)*fl,a:S['섬광밝기']??0.9});
     // 먼지 구름 파편: 외곽선 없는 동글동글 덩어리(크기 제각각) → 사방으로 터졌다가 중력으로 후두둑, 떨어지며 더 잘게 쪼개지고 줄어들며 사라져요
-    const nf=Math.min(Math.round((S['파편양']??24)*(0.5+0.5*s)),Math.max(0,360-A.length)), fs=S['파편크기']??1, dv=S['파편크기편차']??0.6, sp0=S['터지는속도']??1, gv=S['파편중력']??1, lf=S['사라지는시간']??1;
+    const nf=Math.min(Math.round((S['파편양']??24)*(0.5+0.5*s)),Math.max(0,Math.round(360*pcK())-A.length)), fs=S['파편크기']??1, dv=S['파편크기편차']??0.6, sp0=S['터지는속도']??1, gv=S['파편중력']??1, lf=S['사라지는시간']??1;
     for (let i=0;i<nf;i++){ const a=hasN?Math.atan2(ny,nx)+(i%2?1:-1)*rr(0.55,1.55):rr(0,6.2832), sp=rr(4,13)*sc*sp0*(0.6+0.5*s), r=5.5*sc*fs*Math.max(0.25,1+dv*rr(-0.75,1.25));
       A.push(dustChunk(x+Math.cos(a)*r*0.5,y+Math.sin(a)*r*0.5,Math.cos(a)*sp,Math.sin(a)*sp-rr(0,2)*sc*sp0,r,0.42*sc*gv,rr(0.55,1.1)*lf,0)); }
     HSTOP=Math.max(HSTOP,Math.round((S['히트스톱']??6)*(0.4+0.6*s))); PFX.shT=S['흔들림시간']??0.28; PFX.shT0=PFX.shT; PFX.shA=Math.max(PFX.shA,(S['화면흔들림']??10)*(0.4+0.6*s)*Math.min(1.4,sc));
@@ -3205,7 +3230,7 @@ function pfxTick(){ if (!PFX) return; if (PFX.shT>0){ PFX.shT-=1/60; if (PFX.shT
     else if (p.k==='puff'){ p.x+=p.vx; p.y+=p.vy; p.vx*=0.9; p.vy*=0.9; }
     else if (p.k==='shard'){ p.vy+=p.g; p.vx*=0.97; p.x+=p.vx; p.y+=p.vy; p.rot+=p.w; }
     else if (p.k==='dust'){ p.vy+=p.g*ks; const dr=Math.pow(0.975,ks); p.vx*=dr; p.vy*=dr; p.x+=p.vx*ks; p.y+=p.vy*ks;
-      if (p.brk>0 && p.t>=p.brk && A.length<420){ const m=2+((Math.random()*2)|0), rem=p.life-p.t; for (let j=0;j<m;j++){ const a=rr(0,6.2832), q=rr(0.8,2.4)*(p.r/6); A.push(dustChunk(p.x,p.y,p.vx*0.7+Math.cos(a)*q,p.vy*0.6+Math.sin(a)*q-q*0.3,p.r*rr(0.45,0.65),p.g*1.1,rem*rr(0.7,1.05),p.gen+1)); } A.splice(i,1); continue; } }
+      if (p.brk>0 && p.t>=p.brk && A.length<420*pcK()){ const m=2+((Math.random()*2)|0), rem=p.life-p.t; for (let j=0;j<m;j++){ const a=rr(0,6.2832), q=rr(0.8,2.4)*(p.r/6); A.push(dustChunk(p.x,p.y,p.vx*0.7+Math.cos(a)*q,p.vy*0.6+Math.sin(a)*q-q*0.3,p.r*rr(0.45,0.65),p.g*1.1,rem*rr(0.7,1.05),p.gen+1)); } A.splice(i,1); continue; } }
     else if (p.k==='bit'){ const c=Math.cos(p.cw), s_=Math.sin(p.cw), vx=p.vx*c-p.vy*s_, vy=p.vx*s_+p.vy*c; p.vx=vx*0.97; p.vy=vy*0.97; p.cw*=0.93; p.x+=p.vx; p.y+=p.vy; }
     else if (p.k==='swirl'){ p.rot+=dt*(16-10*p.t/p.life); if (p.t>0.12 && p.t<0.5){ const n=2; for (let j=0;j<n;j++){ const a=p.rot+j*3.1416+rr(-0.3,0.3), rr_=p.R*rr(0.7,1.05), sp=rr(3,6)*(p.R/30);
           A.push({k:'bit',t:0,life:rr(0.4,0.6),x:p.x+Math.cos(a)*rr_,y:p.y+Math.sin(a)*rr_,vx:-Math.sin(a)*sp+Math.cos(a)*sp*0.5,vy:Math.cos(a)*sp+Math.sin(a)*sp*0.5,cw:0.12,r:rr(2.2,4.2)*(p.R/30),c:j?'#ffffff':'#8fd8ff'}); } } } }
@@ -3260,7 +3285,7 @@ function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) ret
   g.globalAlpha=1; }
 window.__pfx=PFX; window.__hit=(s,ix,iy)=>pfxHit(s,ix||0,iy||0);
 function prTick(){ buttTick(); const b=FX.big||1, cl=!!(MOT&&MOT.name==='복제'); let w=PRK; if (b>1.6) w=0.5; else if (b>1.2 && PRK>0.72) w=0.72; else if (cl) w=Math.min(w,window.__clk||0.62); else if (b<1.1) w=1; if (w!==PRK){ PRK=w; applyQL(); } }
-function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); tkPropsUpd(); mdPre(); puPre(); if (AW&&((AW.cnt2=(AW.cnt2|0)+1)%60===1)) awPatchAll(); if (AW&&AW.on) awRender(); else if (TK&&TK.k>0.001) tkRender(); else if (IM.active()) impactRender(); else if (PU&&PU.a>0.001) puRender(); else if (awActive()) awRender(); else { renderer.render(scene,cam); renderClone(); } }
+function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); tkPropsUpd(); mdPre(); puPre(); if (TIER>=3 && MD && MD.mesh && MD.mesh.visible && ((AW&&AW.on)||(TK&&TK.k>0.001)||(PU&&PU.a>0.001))) MD.mesh.visible=false; /* 저화질: 무거운 효과가 겹치면 하나만 */ if (AW&&((AW.cnt2=(AW.cnt2|0)+1)%60===1)) awPatchAll(); if (AW&&AW.on) awRender(); else if (TK&&TK.k>0.001) tkRender(); else if (IM.active()) impactRender(); else if (PU&&PU.a>0.001) puRender(); else if (awActive()) awRender(); else { renderer.render(scene,cam); renderClone(); } }
 
 // ============================================================ pt749u: 염동력 (공간 굴절 후처리) + 테스트 소품
 // 상태: idle → start(염동력시작 초) → sustain → end(염동력종료 초). 세기 k>0 일 때만 후처리 (평소엔 추가 비용 0)
@@ -3306,7 +3331,7 @@ function tkPropsUpd(){ if (!TK) return; const on=S['테스트소품']!==false; i
   for (const g of G.children){ const u=g.userData, lift=u.bob?(E*0.35+0.05*Math.sin(time*1.3+u.fx*7))+E*0.08*Math.sin(TK.tt*3.1+u.fy):0;
     g.position.set(u.fx*W,B+u.fy+u.s*0.5+lift,z); g.scale.setScalar(u.s); g.quaternion.copy(cam.quaternion).multiply(_tkq.setFromAxisAngle(_tkz,u.rot+(u.bob?E*0.12*Math.sin(TK.tt*1.7+u.fx*5):0))); } }
 // ---------- 후처리: 배경+소품 / 캐릭터만 따로 그려서, 반경 안 배경만 굴절 + RGB 분리 + 방사형 블러. 캐릭터는 맨 위에 선명하게
-function tkInit(){ const o={depthBuffer:true,stencilBuffer:true,samples:LOWQ?0:4}; TK.rb=new THREE.WebGLRenderTarget(4,4,o); TK.rc=new THREE.WebGLRenderTarget(4,4,o);
+function tkInit(){ const o={depthBuffer:true,stencilBuffer:true,samples:fxMS()}; TK.rb=new THREE.WebGLRenderTarget(4,4,o); TK.rc=new THREE.WebGLRenderTarget(4,4,o);
   const mat=new THREE.ShaderMaterial({uniforms:{tB:{value:TK.rb.texture},tC:{value:TK.rc.texture},uC:{value:new THREE.Vector2(.5,.5)},uAsp:{value:1},uRad:{value:.3},uK:{value:0},uAmp:{value:0},uRGB:{value:0},uBlur:{value:0},uN:{value:4},uT:{value:0},uPh:{value:0},uGh:{value:0.55}},
     vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
     fragmentShader:`precision highp float; uniform sampler2D tB,tC; uniform vec2 uC; uniform float uAsp,uRad,uK,uAmp,uRGB,uBlur,uT,uPh,uGh; uniform int uN; varying vec2 vUv;
@@ -3332,7 +3357,8 @@ void main(){ vec4 c0=texture2D(tC,vUv); vec2 q=(vUv-uC)*vec2(uAsp,1.); float d=l
   const qm=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat); qm.frustumCulled=false; TK.q=new THREE.Scene(); TK.q.add(qm); TK.u=mat.uniforms; TK.oc=new THREE.OrthographicCamera(-1,1,1,-1,0,1); }
 const _tkc=new THREE.Color(), _tkHid=[];
 // 배경+소품(TK.rb) / 캐릭터만(TK.rc, 알파 = 실루엣) 두 장으로 나눠 그려요 — 염동력·각성모드가 같이 씀
-function layersRender(){ if (!TK.rb) tkInit(); if (TK.rb.width!==_dbs.x||TK.rb.height!==_dbs.y){ TK.rb.setSize(_dbs.x,_dbs.y); TK.rc.setSize(_dbs.x,_dbs.y); }
+function layersRender(){ if (!TK.rb) tkInit(); const fk=fxK(), bw=Math.max(4,Math.ceil(_dbs.x*fk)), bh=Math.max(4,Math.ceil(_dbs.y*fk));   // 배경층은 화질에 따라 절반 해상도 (캐릭터층은 항상 선명하게 원래 해상도)
+  if (TK.rb.width!==bw||TK.rb.height!==bh) TK.rb.setSize(bw,bh); if (TK.rc.width!==_dbs.x||TK.rc.height!==_dbs.y) TK.rc.setSize(_dbs.x,_dbs.y);
   const ca=renderer.getClearAlpha(); renderer.getClearColor(_tkc);
   hupi.visible=false; renderer.setRenderTarget(TK.rb); renderer.clear(); renderer.render(scene,cam); hupi.visible=true;   // 1) 배경+소품 (캐릭터 빼고)
   const bg=scene.background; scene.background=null; renderer.setClearColor(0x000000,0); _tkHid.length=0;                     // 2) 캐릭터만 (알파 = 실루엣)
@@ -3358,7 +3384,7 @@ function tkBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.
 window.__tk={on:()=>{ TK.latch=true; tkSet(true); },off:()=>tkSet(false),TK};
 
 // 충돌이펙트(IM) 경로: 소품이 실루엣 마스크에 섞이지 않게 — 소품은 배경 쪽(tBG)으로 따로 그려 합성
-function tkIMPre(bg){ if (!TK) return false; const L=[TK.props,(typeof MD!=='undefined'&&MD)?MD.mesh:null].filter(o=>o&&o.visible); TK.__imHid=L; if (!L.length && !(bg&&bg.isTexture)) return false; if (!TK.rb) tkInit(); if (TK.rb.width!==_dbs.x||TK.rb.height!==_dbs.y){ TK.rb.setSize(_dbs.x,_dbs.y); TK.rc.setSize(_dbs.x,_dbs.y); }
+function tkIMPre(bg){ if (!TK) return false; const L=[TK.props,(typeof MD!=='undefined'&&MD)?MD.mesh:null].filter(o=>o&&o.visible); TK.__imHid=L; if (!L.length && !(bg&&bg.isTexture)) return false; if (!TK.rb) tkInit(); { const fk=fxK(), bw=Math.max(4,Math.ceil(_dbs.x*fk)), bh=Math.max(4,Math.ceil(_dbs.y*fk)); if (TK.rb.width!==bw||TK.rb.height!==bh) TK.rb.setSize(bw,bh); }
   const b0=scene.background; scene.background=bg; root.visible=false; renderer.setRenderTarget(TK.rb); renderer.clear(); renderer.render(scene,cam); root.visible=true; scene.background=b0; for (const o of L) o.visible=false; return true; }
 
 // ============================================================ 각성모드 (일식 각성): 몸이 짙은 실루엣으로 → 실루엣 가장자리에서 백금빛이 새어 나와 번짐 → 눈에 빛 → 절정 맥동 → 유지 → 복구 (+ 은은한 발광이 남음)
@@ -3456,9 +3482,9 @@ function mdFloat(){ if (!MD||MD.a<=0) return 0; return mdE()*(0.22*R+0.035*R*mdB
 function mdPuff(){ if (!MD||(MD.a<=0&&MD.f<=0)) return 0; return mdE()*0.022*mdBr()+mdF()*0.035; }          // 숨쉬듯 부풀고, 충만할수록 통통
 function mdEye(){ if (!MD||MD.a<=0) return 1; return 1-0.97*sstep(0,1,Math.min(1,MD.a*1.6)); }
 function mdMesh(){ if (MD.mesh) return MD.mesh;
-  const mat=new THREE.ShaderMaterial({uniforms:{uCol:{value:new THREE.Color(1,0.55,0.2)},uOp:{value:0.55},uA:{value:0},uT:{value:0},uSpd:{value:1},uRg:{value:2.6},uDk:{value:0}},transparent:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,depthWrite:false,
+  const mat=new THREE.ShaderMaterial({uniforms:{uCol:{value:new THREE.Color(1,0.55,0.2)},uOp:{value:0.55},uA:{value:0},uT:{value:0},uSpd:{value:1},uRg:{value:2.6},uDk:{value:0},uLow:{value:0}},transparent:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,depthWrite:false,
     vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-    fragmentShader:`precision highp float; uniform vec3 uCol; uniform float uOp,uA,uT,uSpd,uRg,uDk; varying vec2 vUv;
+    fragmentShader:`precision highp float; uniform vec3 uCol; uniform float uOp,uA,uT,uSpd,uRg,uDk,uLow; varying vec2 vUv;
 float h3(vec3 p){ return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
 float n3(vec3 p){ vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
   return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z); }
@@ -3466,8 +3492,9 @@ void main(){ vec2 q=(vUv-.5)*2.*uRg; float r=length(q); if (r>uRg){ discard; }
   vec2 dir=q/max(r,1e-3); float tw=1.25/(r+0.3);                                   // 몸에 가까울수록 더 휘어 감겨 들어와요
   vec2 dr=vec2(cos(tw)*dir.x-sin(tw)*dir.y, sin(tw)*dir.x+cos(tw)*dir.y);
   float fl=uT*uSpd*0.45; vec3 P=vec3(dr*1.6, r*1.5+fl);                           // r + 시간 → 무늬가 안쪽으로 흘러요 (흡수 방향)
-  vec3 w=vec3(n3(P*1.2+vec3(0.,0.,uT*0.07)), n3(P*1.2+vec3(5.2,1.3,2.1)), n3(P*1.2+vec3(2.7,8.1,4.4)))-.5;
-  float a1=n3(P+w*1.5), a2=n3(P*1.9+w*2.2+vec3(11.,3.,7.));
+  vec3 w; float a2; if (uLow>.5){ float w0=n3(P*1.2+vec3(0.,0.,uT*0.07))-.5; w=vec3(w0,-w0,w0*.5); }   // 저화질: 노이즈 수를 줄여요
+  else w=vec3(n3(P*1.2+vec3(0.,0.,uT*0.07)), n3(P*1.2+vec3(5.2,1.3,2.1)), n3(P*1.2+vec3(2.7,8.1,4.4)))-.5;
+  float a1=n3(P+w*1.5); a2=uLow>.5?n3(P*1.9+w*1.4+vec3(11.,3.,7.)):n3(P*1.9+w*2.2+vec3(11.,3.,7.));
   float s1=pow(1.-abs(2.*a1-1.),5.), s2=pow(1.-abs(2.*a2-1.),9.);                // 얇은 결
   float x=max(r-0.75,0.)/max(uRg-0.75,0.1);
   float env=exp(-x*x*3.2)*(1.-smoothstep(uRg*0.82,uRg,r));                         // 넓고 부드럽게, 경계 안 보이게
@@ -3485,7 +3512,7 @@ function mdPre(){ if (!MD) return; const G=awU().g.value; G.set(0,0,0); const ac
   if (MD.a<=0.001) return; const m=mdMesh(); m.visible=true; const rg=S['흡수범위']??2.6;
   _mdv.set(hPos[0],hPos[1],-hPos[2]); _mdc.copy(cam.position); const d=_mdv.distanceTo(_mdc), back=1.6, k=(d+back)/Math.max(1e-3,d);
   m.position.copy(_mdc).addScaledVector(_mdv.sub(_mdc),k); m.quaternion.copy(cam.quaternion); m.scale.setScalar(2*rg*R*Math.max(hScl[0],hScl[1])*k);
-  const u=MD.u; u.uCol.value.setRGB(c.r,c.g,c.b); u.uOp.value=S['오로라투명도']??0.55; u.uA.value=mdE(); u.uT.value=MD.t; u.uSpd.value=S['흐름속도']??1; u.uRg.value=rg; u.uDk.value=bgLum<0.3?1:0; }
+  const u=MD.u; u.uCol.value.setRGB(c.r,c.g,c.b); u.uOp.value=S['오로라투명도']??0.55; u.uA.value=mdE(); u.uT.value=MD.t; u.uSpd.value=S['흐름속도']??1; u.uRg.value=rg; u.uDk.value=bgLum<0.3?1:0; u.uLow.value=TIER>=3?1:0; }
 function mdChip(){ const b=document.createElement('button'); b.className='md'+(MD.on?' on':''); b.innerHTML='🧘 명상';
   b.onclick=()=>{ unlockAudio(); lastTouch=time; mdSet(!MD.on); }; chipsEl.appendChild(b); }
 function mdBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='명상 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } mdSet(!MD.on); }
@@ -3570,7 +3597,8 @@ cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.o
 cvs.addEventListener('contextmenu',e=>e.preventDefault());
 window.__v3={ pal(i){ applyPalette(S,i); refreshAll(); renderChips(); }, set(o){ for (const k in o){ S[k]=o[k]; if (k==='얼굴') applyFace(S,o[k]); if (k==='모양'&&o[k]===7) applyFace(S,1); if (k==='팔레트') applyPalette(S,o[k]); } refreshAll(); renderChips(); }, face:(k)=>{ applyFace(S,k); refreshAll(); renderChips(); },
   facePts(){ const P_=o=>{ const v=new THREE.Vector3(); o.getWorldPosition(v); v.project(cam); return [+((v.x+1)/2*W).toFixed(1),+((1-v.y)/2*H).toFixed(1)]; }; return {eyeL:P_(EYE[0].g),eyeR:P_(EYE[1].g),mouth:P_(mouthG)}; },
-  q:()=>({lvl:QL.lvl,pr:renderer.getPixelRatio(),fps:+QL.fps.toFixed(1),lost:GL_LOST,restored:GL_RESTORED,errs:ERRS.slice(),mem:{...renderer.info.memory},calls:renderer.info.render.calls,NV,LOWQ}), rot:()=>({hRot:hRot.map(v=>+v.toFixed(4)),hScl:hScl.map(v=>+v.toFixed(3)),yaw:+yaw.toFixed(3),pitch:+pitch.toFixed(3),tilt:+tilt.toFixed(4),cam:[cam.position.x,cam.position.y,cam.position.z].map(v=>+v.toFixed(3)),camQ:[cam.quaternion.x,cam.quaternion.y,cam.quaternion.z,cam.quaternion.w].map(v=>+v.toFixed(4)),root:[root.position.x,root.position.y,root.position.z,root.quaternion.x,root.quaternion.y,root.quaternion.z,root.quaternion.w].map(v=>+v.toFixed(4)),hupiQ:[hupi.quaternion.x,hupi.quaternion.y,hupi.quaternion.z,hupi.quaternion.w].map(v=>+v.toFixed(4))}), loseGL(){ const x=renderer.getContext().getExtension('WEBGL_lose_context'); x.loseContext(); setTimeout(()=>x.restoreContext(),600); }, renderChips, st:()=>({hold:+HOLDP.toFixed(2), pins:GR.pins.length, mot:MOT?MOT.name:null, ex:EX&&!EX.out?EX.name:null, gaze:EYE[0].pl.map(v=>+v.toFixed(2)), base:basePos.map(v=>+v.toFixed(2))}) };
+  tier:(n,f)=>{ if (n!=null){ S['화질']=n; setTier(); } if (f!=null) S['FPS표시']=!!f; save(); return {tier:TIER,auto:TIER_AUTO,gpu:GPUS}; },
+  q:()=>({tier:TIER,qfx:QL.fx,qpc:QL.pc,auto:QL.auto,lvl:QL.lvl,pr:renderer.getPixelRatio(),fps:+QL.fps.toFixed(1),lost:GL_LOST,restored:GL_RESTORED,errs:ERRS.slice(),mem:{...renderer.info.memory},calls:renderer.info.render.calls,NV,LOWQ}), rot:()=>({hRot:hRot.map(v=>+v.toFixed(4)),hScl:hScl.map(v=>+v.toFixed(3)),yaw:+yaw.toFixed(3),pitch:+pitch.toFixed(3),tilt:+tilt.toFixed(4),cam:[cam.position.x,cam.position.y,cam.position.z].map(v=>+v.toFixed(3)),camQ:[cam.quaternion.x,cam.quaternion.y,cam.quaternion.z,cam.quaternion.w].map(v=>+v.toFixed(4)),root:[root.position.x,root.position.y,root.position.z,root.quaternion.x,root.quaternion.y,root.quaternion.z,root.quaternion.w].map(v=>+v.toFixed(4)),hupiQ:[hupi.quaternion.x,hupi.quaternion.y,hupi.quaternion.z,hupi.quaternion.w].map(v=>+v.toFixed(4))}), loseGL(){ const x=renderer.getContext().getExtension('WEBGL_lose_context'); x.loseContext(); setTimeout(()=>x.restoreContext(),600); }, renderChips, st:()=>({hold:+HOLDP.toFixed(2), pins:GR.pins.length, mot:MOT?MOT.name:null, ex:EX&&!EX.out?EX.name:null, gaze:EYE[0].pl.map(v=>+v.toFixed(2)), base:basePos.map(v=>+v.toFixed(2))}) };
 
 // 테스트용 훅
 window.__moti={ get S(){return S;}, look(kind,i){ S[{bg:'배경',light:'조명',mat:'재질'}[kind]]=i; lookPreset(kind); refreshAll(); }, lookReset(){ const D=defaults(); for (const g of SCHEMA) if (g.h==='화면·재질') for (const f of g.f) S[f.k]=clone(D[f.k]); refreshAll(); }, tipSharp(){ const P=bodyGeo.attributes.position.array, W=LON+1; const out=[];
