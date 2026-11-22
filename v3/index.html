@@ -46,6 +46,7 @@
   #bar button{flex:none;border:0;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.82);color:#2b2320;font:700 12.5px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
   #bar button i{font-style:normal;font-weight:500;opacity:.6;margin-left:5px}
   #bar button:active{transform:scale(.95)}
+  #bar button.tk.on{background:#2b2320;color:#fff}
   #bar .sw{display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:6px;vertical-align:-1px;box-shadow:0 0 0 1.5px rgba(0,0,0,.18)}
   #hint{pointer-events:none;text-align:center;font-size:11px;color:rgba(43,35,32,.55);transition:opacity .8s}
   #ttl{position:absolute;left:14px;top:12px;z-index:4;font:800 15px inherit;font-family:inherit;color:#2b2320;pointer-events:none}
@@ -223,6 +224,16 @@ const SCHEMA = [
   {k:'사라지는시간',r:[0.3,3],d:1,tip:'파편이 남아 있는 시간 배율'},
   {k:'파편밝기',r:[0,1],d:0.35,tip:'0 = 배경보다 살짝 진한 먼지색, 1 = 하얀 구름'},
   {k:'파편불투명도',r:[0.1,1],d:0.95,tip:'파편 진하기'}]},
+ {h:'염동력 설정', btns:'tk', f:[
+  {k:'테스트소품',t:'bool',d:true,tip:'캐릭터 주변 작은 돌·풀·블록 (굴절이 잘 보이게). 끄면 사라져요'},
+  {k:'염동력반경',r:[1,3.5],d:2.2,tip:'공간이 일그러지는 반경 (몸 크기 배율)'},
+  {k:'굴절강도',r:[0,3],d:1,tip:'공간이 휘는 세기'},
+  {k:'진동속도',r:[0,3],d:1,tip:'지이잉 떨림·맥동 빠르기'},
+  {k:'파동반복속도',r:[0,4],d:1.6,tip:'바깥으로 흘러가는 동심원 물결이 1초에 몇 번'},
+  {k:'RGB분리강도',r:[0,3],d:1,tip:'휜 경계의 빨강·초록·파랑 갈라짐'},
+  {k:'방사형블러',r:[0,1],d:0.5,tip:'바깥쪽으로 갈수록 방사형으로 번짐 (0 = 끔, 조금 가벼워져요)'},
+  {k:'염동력시작',r:[0.1,1.5],d:0.4,tip:'스킬 시작 때 차오르는 시간(초)'},
+  {k:'염동력종료',r:[0.1,2],d:0.6,tip:'스킬 끝날 때 사그라드는 시간(초)'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -1683,7 +1694,7 @@ function UpdateEyes(tt){
     u.uWhite.value.setRGB(wc.r,wc.g,wc.b); u.uPupilC.value.setRGB(pc.r,pc.g,pc.b); u.uLight.value.setRGB(lt[0],lt[1],lt[2]); u.uBlushC.value.setRGB(bk.r,bk.g,bk.b); u.uRing.value=S['눈스타일']===1?1:0; }
   const mini=MINI(); let A=null, mbl=0; if (mini){ A=mAnim(); for (const b of blinkQ) { const v=mBlinkCl(tt-b); if (Math.abs(v)>Math.abs(mbl)) mbl=v; } if (!A.blink) mbl=0; }
   for (let i=0;i<2;i++){ const u=EYE[i].u; u.uMin.value=mini?1:0; if (!mini) continue;
-    const o=A.o[i]; u.uMO.value=Math.max(0,o*(1-mbl)); u.uMB.value=A.b[i]; u.uMC.value=c01(A.c[i]); u.uMK.value=clamp(A.k[i],-1.2,1.2);
+    const o=A.o[i]*tkEye(); u.uMO.value=Math.max(0,o*(1-mbl)); u.uMB.value=A.b[i]; u.uMC.value=c01(A.c[i]); u.uMK.value=clamp(A.k[i],-1.2,1.2);
     u.uMZ.value=Math.max(0.2,A.z[i]); u.uMSX.value=A.sx[i]*(1+0.1*Math.max(0,mbl)); u.uMR.value=A.r[i];
     const s0=EYE_STYLE[st].wr, pl=EYE[i].pl, pup=S['눈스타일']===1&&EYE_STYLE[st].w?1:0, sh=pup?0.35:1;   // 검은자가 있으면 시선은 주로 검은자가 움직여요
     u.uMOff.value.set(pl[0]*0.35*sh+A.gx*0.15*sh*Math.max(0.6,s0[0]/0.42)+A.x[i], pl[1]*0.3*sh+A.gy*0.12*sh*Math.max(0.6,s0[1]/0.42)+A.y[i]);
@@ -2779,7 +2790,7 @@ function screenEdges(){ const C=cam.position; const hit=(nx,ny)=>{ _v3a.set(nx,n
   _pm.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse); _fr.setFromProjectionMatrix(_pm); const pl=_fr.planes[2]; FB=[pl.normal.x,pl.normal.y,-pl.normal.z,pl.constant]; }
 let FB=[0,1,0,7], BMIN=-R, BMK=''; function bodyMinB(){ const k=BSHK+'|'+FB[1].toFixed(3)+FB[2].toFixed(3); if (k===BMK) return BMIN; BMK=k; let m=1e9; for (let i=0;i<BSH.length;i+=3){ const v=FB[1]*BSH[i+1]+FB[2]*BSH[i+2]; if (v<m) m=v; } m-=(ANIK>=0&&ANI[ANIK]&&ANI[ANIK].drop||0)*R; BMIN=m; return m; }
 let LFLOOR=-1e9, floorY=0, rawFloor=0, camU=[0,0,-14], camOverride=null, camAbs=null, idleYaw=1;
-function step(){ const skip=slowTick(); pfxTick(); if (HSTOP>0){ HSTOP--; return; } if (skip) return;
+function step(){ const skip=slowTick(); pfxTick(); tkTick(); if (HSTOP>0){ HSTOP--; return; } if (skip) return;
   const tt=time, m={x:M.x,y:M.y};
   if (S['잡기모드']) grabInput(tt); else {
   if (M.down){ M.down=false; mouseDown=true; downTime=tt; downPos={...m}; lastMouse={...m}; lastTouch=tt;
@@ -2836,7 +2847,7 @@ function step(){ const skip=slowTick(); pfxTick(); if (HSTOP>0){ HSTOP--; return
   UpdateActions(tt);
   const s=1+Math.sin(BPH)*S['숨쉬기부풀기']+boing, fy=FX.sy, gw=clamp01(1-FX.off[1]/0.8);
   hPos=add(add(basePos,[0,Math.sin(BPH)*S['숨쉬기위아래']+jump,0]),[FX.off[0],FX.off[1]+((fy-1)*R*0.95-FX.press*R*0.55)*gw,FX.off[2]]);
-  hRot=qMul(qMul(MOT_Q,qEuler(FX.rx,FX.ry,FX.rz)),qEuler(0,-Math.sin(tt/1.4)*0.25*R2D*idleYaw,(-tilt)*R2D));
+  hPos[1]+=tkFloat(); hRot=qMul(qMul(MOT_Q,qEuler(FX.rx,FX.ry,FX.rz)),qEuler(0,-Math.sin(tt/1.4)*0.25*R2D*idleYaw,(-tilt)*R2D));
   { const sq_=UpdateSpin(1/60); if (sq_) hRot=qMul(sq_,hRot); if (SPIN.sway>1e-3){ const sw=SPIN.sway; hPos=add(hPos,[0.35*sw*Math.sin(tt*5.2),0,0]); hRot=qMul(qAxis(9*sw*Math.sin(tt*4.1+0.6),FWD),hRot); } }
   const BG=FX.big||1, ws=FX.sx/Math.sqrt(Math.max(0.3,fy))*BG; hScl=[ws/s,s*fy*BG,ws/s]; setTRS(hupi,hPos,hRot,hScl); gDown=qRot(qInv(hRot),[0,-1,0]);
   { const q=hRot, x=q[0],y=q[1],z=q[2],w=q[3]; WL.m=[1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w), 2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w), 2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y)]; WL.s=hScl; WL.p=hPos; WL.tt=tt;
@@ -2996,9 +3007,9 @@ function impactBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g
   if (!S['타격임팩트']){ S['타격임팩트']=true; save(); refreshAll(); }
   if (nm.includes('다시')) land(1); else vel=[Math.random()<0.5?-0.7:0.7,0.18,0]; }
 function btnGrid(det,kind){ const gd=document.createElement('div'); gd.className='grid';
-  const items=kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
+  const items=kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
   for (const nm of items){ const b=document.createElement('button'); b.textContent=nm; b.title=nm;
-    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
+    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
     gd.appendChild(b); actBtns.push({b,kind,nm}); }
   det.appendChild(gd);
   if (kind==='hand'){ const h=document.createElement('div'); h.className='hint'; h.textContent='몸 젤리가 가늘게 늘어나 팔이 되고, 더 뻗으면 엄지 → 손가락 순서로 갈라져 나와요. 손동작 버튼을 누르면 그 자세로 손을 뻗어요. 팔다리가 있으면 팔 위쪽에서 나와요.'; det.appendChild(h); } }
@@ -3060,11 +3071,11 @@ function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,s
     fragmentShader:`uniform sampler2D tM; uniform vec2 uStep; varying vec2 vUv; void main(){ float a=0.,w=0.; for (int i=-8;i<=8;i++){ float f=float(i), k=exp(-f*f/18.); a+=k*texture2D(tM,vUv+uStep*f).a; w+=k; } gl_FragColor=vec4(a/w); }`,depthTest:false,depthWrite:false});
   const bq=new THREE.Mesh(new THREE.PlaneGeometry(2,2),bm); bq.frustumCulled=false; IM.bs=new THREE.Scene(); IM.bs.add(bq); IM.bu=bm.uniforms;
   const mat=new THREE.ShaderMaterial({uniforms:{tC:{value:IM.rt.texture},tM:{value:IM.rt.texture},tB:{value:IM.b2.texture},uRes:{value:new THREE.Vector2()},uDir:{value:new THREE.Vector2(1,0)},uPR:{value:1},uBg:{value:new THREE.Color()},
-      uGlow:{value:0},uGhost:{value:0},uHolo:{value:0},uRing:{value:0},uRingL:{value:0.5},uSW:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]},uSWw:{value:[1,1,1]},uSWca:{value:0}},
+      uGlow:{value:0},uGhost:{value:0},uHolo:{value:0},uRing:{value:0},uRingL:{value:0.5},uSW:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]},uSWw:{value:[1,1,1]},uSWca:{value:0},tBG:{value:null},uUseBG:{value:0}},
     vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
-    fragmentShader:`precision highp float; uniform sampler2D tC,tM,tB; uniform vec2 uRes,uDir; uniform vec3 uBg; uniform float uPR,uGlow,uGhost,uHolo,uRing,uRingL,uSWca; uniform vec4 uSW[3]; uniform float uSWw[3]; varying vec2 vUv;
+    fragmentShader:`precision highp float; uniform sampler2D tC,tM,tB,tBG; uniform float uUseBG; uniform vec2 uRes,uDir; uniform vec3 uBg; uniform float uPR,uGlow,uGhost,uHolo,uRing,uRingL,uSWca; uniform vec4 uSW[3]; uniform float uSWw[3]; varying vec2 vUv;
 float M(vec2 uv){ return texture2D(tM,uv).a; }
-vec3 C(vec2 uv){ vec4 t=texture2D(tC,uv); return t.rgb+uBg*(1.-t.a); }   // 알파 0으로 지운 자리에 배경색을 되살려요
+vec3 C(vec2 uv){ vec4 t=texture2D(tC,uv); return t.rgb+(uUseBG>.5?texture2D(tBG,uv).rgb:uBg)*(1.-t.a); }   // 알파 0으로 지운 자리에 배경색을 되살려요
 void main(){ vec2 px=1./uRes; vec3 col=C(vUv);
   { vec2 P=vUv*uRes, off=vec2(0.); for (int i=0;i<3;i++){ vec4 q=uSW[i]; if (q.w>.01){ vec2 dv=P-q.xy; float d=length(dv)+.001, f=(d-q.z)/uSWw[i]; off+=dv/d*(-f)*exp(-f*f)*q.w; } }   // 링 자리만 바깥↔안쪽으로 굴절
     if (dot(off,off)>.01){ vec2 o2=off*px; col=C(vUv+o2); if (uSWca>.01) col=vec3(C(vUv+o2*(1.+uSWca)).r,col.g,C(vUv+o2*(1.-uSWca)).b); } } float m0=M(vUv); vec3 o=col;
@@ -3094,7 +3105,7 @@ function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=(time-I
   // 한 번만 그려요: 배경색으로 지우되 알파 0 → 색은 평소와 같고, 알파가 곧 캐릭터 실루엣 마스크
   const bg=scene.background; renderer.getClearColor(_icc); const ca=renderer.getClearAlpha();
   if (bg && bg.isColor){ scene.background=null; renderer.setClearColor(bg,0); }
-  renderer.setRenderTarget(IM.rt); renderer.clear(); renderer.render(scene,cam); renderClone();
+  const _ub=tkIMPre(bg); renderer.setRenderTarget(IM.rt); renderer.clear(); renderer.render(scene,cam); renderClone(); if (_ub) TK.props.visible=true; IM.u.uUseBG.value=_ub?1:0; if (_ub) IM.u.tBG.value=TK.rb.texture;
   scene.background=bg; renderer.setClearColor(_icc,ca); renderer.setRenderTarget(null);
   const pr=renderer.getPixelRatio(); if (md===1||md===4){ const sg=16*pr/(_dbs.x/IM.b1.width)/3;   // 한 칸 = 시그마의 1/3
     IM.bu.tM.value=IM.rt.texture; IM.bu.uStep.value.set(sg/IM.b1.width,0); renderer.setRenderTarget(IM.b1); renderer.render(IM.bs,IM.oc);
@@ -3215,7 +3226,103 @@ function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) ret
   g.globalAlpha=1; }
 window.__pfx=PFX; window.__hit=(s,ix,iy)=>pfxHit(s,ix||0,iy||0);
 function prTick(){ buttTick(); const b=FX.big||1, cl=!!(MOT&&MOT.name==='복제'); let w=PRK; if (b>1.6) w=0.5; else if (b>1.2 && PRK>0.72) w=0.72; else if (cl) w=Math.min(w,window.__clk||0.62); else if (b<1.1) w=1; if (w!==PRK){ PRK=w; applyQL(); } }
-function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); if (IM.active()) impactRender(); else { renderer.render(scene,cam); renderClone(); } }
+function renderFrame(){ prTick(); pfxDraw(); root.traverse(o=>{ if (o.isMesh) markFill(o.material); }); renderer.getDrawingBufferSize(_dbs); OUTLINE.res.value.copy(_dbs); OUTLINE.px.value=Math.max(1,S['외곽선두께']*76*renderer.getPixelRatio()); tkPropsUpd(); if (TK&&TK.k>0.001) tkRender(); else if (IM.active()) impactRender(); else { renderer.render(scene,cam); renderClone(); } }
+
+// ============================================================ pt749u: 염동력 (공간 굴절 후처리) + 테스트 소품
+// 상태: idle → start(염동력시작 초) → sustain → end(염동력종료 초). 세기 k>0 일 때만 후처리 (평소엔 추가 비용 0)
+var TK={on:false,latch:false,k:0,gr:0,T:0,ph:0,tt:0,age:0,st:'idle',rb:null,rc:null,props:null};
+function tkTick(){ if (!TK) return; const dt=1/60, su=Math.max(0.05,S['염동력시작']??0.4), en=Math.max(0.05,S['염동력종료']??0.6);
+  if (TK.on){ TK.k=Math.min(1,TK.k+dt/su); TK.gr=Math.max(TK.gr,TK.k); TK.age+=dt; } else { TK.k=Math.max(0,TK.k-dt/en); TK.age=0; if (TK.k<=0) TK.gr=0; }
+  if (TK.k>0){ TK.T+=dt*(S['진동속도']??1); TK.ph+=dt*(S['파동반복속도']??1.6); TK.tt+=dt; }
+  TK.st=TK.on?(TK.k<1?'start':'sustain'):(TK.k>0?'end':'idle'); }
+function tkSet(on){ if (!TK) return; TK.on=!!on; if (!on) TK.latch=false; const b=document.querySelector('#chips button.tk'); if (b) b.classList.toggle('on',TK.on); }
+// 살짝 떠오르는 몸 + 집중하듯 눈을 감았다 가늘게 뜸
+function tkFloat(){ if (!TK||TK.k<=0) return 0; const E=sstep(0,1,TK.k); return E*(0.3*R+0.06*R*Math.sin(TK.tt*2.4)); }
+function tkEye(){ if (!TK||TK.k<=0) return 1; const E=sstep(0,1,TK.k), c=TK.on&&TK.age<0.55?Math.sin(Math.PI*TK.age/0.55):0; return Math.max(0,1-0.9*c-0.25*E); }
+// ---------- 테스트 소품: 외곽선 있는 납작한 돌·풀·블록 (카메라를 바라보는 판). 바닥/공중 고정 위치
+function tkPoly(kind){ const P=[]; if (kind==='stone'){ for (let i=0;i<20;i++){ const a=i/20*6.2832; const w=1+0.07*Math.sin(a*3+1)+0.04*Math.sin(a*5); P.push([Math.cos(a)*w,Math.max(-0.5,Math.sin(a)*0.66*w)]); } }
+  else if (kind==='block'){ const r=0.2; for (const [cx,cy,a0] of [[0.5-r,0.5-r,0],[-0.5+r,0.5-r,1.5708],[-0.5+r,-0.5+r,3.1416],[0.5-r,-0.5+r,4.7124]]) for (let i=0;i<=5;i++){ const a=a0+i/5*1.5708; P.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]); } }
+  else if (kind==='leaf'){ for (let i=0;i<=12;i++){ const t=i/12; P.push([0.16*Math.sin(Math.PI*t)*(1-0.35*t),t]); } for (let i=11;i>0;i--){ const t=i/12; P.push([-0.16*Math.sin(Math.PI*t)*(1-0.35*t),t]); } }
+  else { for (let i=0;i<16;i++){ const a=i/16*6.2832; P.push([Math.cos(a),Math.sin(a)]); } }
+  return P; }
+function tkGrow(P,t){ const n=P.length; return P.map((p,i)=>{ const a=P[(i-1+n)%n], b=P[(i+1)%n]; let nx=b[1]-a[1], ny=-(b[0]-a[0]); const l=Math.hypot(nx,ny)||1; return [p[0]+nx/l*t,p[1]+ny/l*t]; }); }
+function tkMesh(P,col,z,sx,sy,ox,oy,rot){ const c=Math.cos(rot||0), s_=Math.sin(rot||0); const sh=new THREE.Shape(P.map(p=>{ const x=p[0]*sx, y=p[1]*sy; return new THREE.Vector2(ox+x*c-y*s_, oy+x*s_+y*c); }));
+  const m=new THREE.Mesh(new THREE.ShapeGeometry(sh),new THREE.MeshBasicMaterial({color:new THREE.Color().setRGB(col[0],col[1],col[2]),fog:false})); m.position.z=z; m.userData.tkFill=1; return m; }
+function tkPart(g,kind,col,hi,sx,sy,ox,oy,rot,ol){ const P=tkPoly(kind), oc=[OUTLINE.c.value.r,OUTLINE.c.value.g,OUTLINE.c.value.b];
+  const scale=Math.min(sx,sy); g.add(tkMesh(tkGrow(P.map(p=>[p[0]*sx/scale,p[1]*sy/scale]),ol/scale),oc,-0.02,scale,scale,ox,oy,rot)); g.add(tkMesh(P,col,0,sx,sy,ox,oy,rot));
+  if (hi) g.add(tkMesh(tkPoly('dot'),hi,0.01,sx*0.22,sy*0.16,ox-sx*0.3,oy+sy*(kind==='block'?0.22:0.2),rot)); }
+function tkProps(){ if (TK.props) return TK.props; const G=new THREE.Group(); G.name='tkProps'; const ol=0.075;
+  const stone=[0.76,0.72,0.68], stoneH=[0.9,0.87,0.83], coral=[0.96,0.6,0.47], coralH=[1,0.8,0.7], yel=[0.98,0.82,0.42], yelH=[1,0.93,0.7], grass=[0.5,0.78,0.43], grassD=[0.38,0.64,0.34];
+  const mk=(fx,fy,s,rot,f,bob)=>{ const g=new THREE.Group(); f(g); g.userData={fx,fy,s,rot,bob}; G.add(g); return g; };
+  const tuft=(g,c1,c2)=>{ tkPart(g,'leaf',c2,null,0.75,0.8,-0.22,0,0.5,ol); tkPart(g,'leaf',c2,null,0.75,0.75,0.24,0,-0.55,ol); tkPart(g,'leaf',c1,null,0.95,1.05,0,0,0.05,ol); };
+  // 바닥 (fx: 화면 반폭 배율, fy: 바닥에서 위로 world)
+  mk(-0.84,0.0,0.62,0,g=>tuft(g,grass,grassD),0);
+  mk(0.8,0.3,0.62,0,g=>tkPart(g,'stone',stone,stoneH,1,1,0,0,0,ol),0);
+  mk(0.62,0.0,0.42,0,g=>tuft(g,grass,grassD),0);
+  mk(-0.66,0.18,0.3,0,g=>tkPart(g,'stone',stone,stoneH,1,1,0,0,0,ol),0);
+  // 공중 (염동력이 켜지면 살짝 더 떠올라요)
+  mk(-0.78,3.6,0.6,0.25,g=>tkPart(g,'block',coral,coralH,1,1,0,0,0,ol),1);
+  mk(0.8,4.5,0.42,0,g=>tkPart(g,'stone',stone,stoneH,1,1,0,0,0,ol),1);
+  mk(-0.42,5.7,0.26,0,g=>tkPart(g,'stone',stone,stoneH,1,1,0,0,0,ol),1);
+  mk(0.4,6.0,0.42,-0.35,g=>tkPart(g,'block',yel,yelH,1,1,0,0,0,ol),1);
+  scene.add(G); TK.props=G; return G; }
+const _tkq=new THREE.Quaternion(), _tkz=new THREE.Vector3(0,0,1);
+function tkPropsUpd(){ if (!TK) return; const on=S['테스트소품']!==false; if (!on){ if (TK.props) TK.props.visible=false; return; }
+  const G=tkProps(); G.visible=true; const E=sstep(0,1,TK.k), z=-1.2, W=SCRW||3, B=SCRB||-7;
+  for (const g of G.children){ const u=g.userData, lift=u.bob?(E*0.35+0.05*Math.sin(time*1.3+u.fx*7))+E*0.08*Math.sin(TK.tt*3.1+u.fy):0;
+    g.position.set(u.fx*W,B+u.fy+u.s*0.5+lift,z); g.scale.setScalar(u.s); g.quaternion.copy(cam.quaternion).multiply(_tkq.setFromAxisAngle(_tkz,u.rot+(u.bob?E*0.12*Math.sin(TK.tt*1.7+u.fx*5):0))); } }
+// ---------- 후처리: 배경+소품 / 캐릭터만 따로 그려서, 반경 안 배경만 굴절 + RGB 분리 + 방사형 블러. 캐릭터는 맨 위에 선명하게
+function tkInit(){ const o={depthBuffer:true,stencilBuffer:true,samples:LOWQ?0:4}; TK.rb=new THREE.WebGLRenderTarget(4,4,o); TK.rc=new THREE.WebGLRenderTarget(4,4,o);
+  const mat=new THREE.ShaderMaterial({uniforms:{tB:{value:TK.rb.texture},tC:{value:TK.rc.texture},uC:{value:new THREE.Vector2(.5,.5)},uAsp:{value:1},uRad:{value:.3},uK:{value:0},uAmp:{value:0},uRGB:{value:0},uBlur:{value:0},uN:{value:4},uT:{value:0},uPh:{value:0},uGh:{value:0.55}},
+    vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
+    fragmentShader:`precision highp float; uniform sampler2D tB,tC; uniform vec2 uC; uniform float uAsp,uRad,uK,uAmp,uRGB,uBlur,uT,uPh,uGh; uniform int uN; varying vec2 vUv;
+float h1(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float n2(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h1(i),h1(i+vec2(1.,0.)),f.x),mix(h1(i+vec2(0.,1.)),h1(i+vec2(1.,1.)),f.x),f.y); }
+void main(){ vec4 c0=texture2D(tC,vUv); vec2 q=(vUv-uC)*vec2(uAsp,1.); float d=length(q), r=d/uRad;
+  float fall=(1.-smoothstep(.62,1.,r))*smoothstep(.0,.22,r)*uK;
+  if (fall<.002){ vec4 b=texture2D(tB,vUv); gl_FragColor=vec4(b.rgb*(1.-c0.a)+c0.rgb,1.); return; }
+  vec2 dir=q/max(d,1e-4), tg=vec2(-dir.y,dir.x);
+  // 바깥으로 흘러가는 동심원 물결 2겹 + 느린 노이즈 울렁임(아지랑이)
+  float w=sin(r*19.-uPh*6.2832)*.55+sin(r*33.-uPh*9.4+1.3)*.22;
+  float nA=n2(q/uRad*5.+vec2(uT*1.9,-uT*1.4))-.5, nB=n2(q/uRad*11.-vec2(uT*2.6,uT*1.7))-.5;
+  vec2 off=(dir*(w+nA*1.1)+tg*nB*.9)*uAmp*fall; off.x/=uAsp;
+  vec2 sp=(dir*.75+vec2(.55,0.))*uRGB*fall*(1.+.35*w); sp.x/=uAsp;      // 방사 + 가로 색 분리
+  vec2 bd=-dir*uBlur*fall; bd.x/=uAsp;
+  vec3 b=vec3(0.); vec3 ca=vec3(0.), cc=vec3(0.); float n=0.;
+  for (int i=0;i<4;i++){ if (i>=uN) break; float f=float(i)/4.; vec2 u0=vUv+off*(1.-.2*f)+bd*f;
+    vec4 cr=texture2D(tC,u0+sp*1.5), cg=texture2D(tC,u0), cb=texture2D(tC,u0-sp*1.5);
+    b+=vec3(texture2D(tB,u0+sp).r,texture2D(tB,u0).g,texture2D(tB,u0-sp).b); cc+=vec3(cr.r,cg.g,cb.b); ca+=vec3(cr.a,cg.a,cb.a); n+=1.; }
+  b/=n; cc/=n; ca/=n; float G=uGh*min(1.,fall*1.6);
+  vec3 o=b*(1.-ca*G)+cc*G;                                               // 캐릭터 잔상(색 갈라짐)은 바깥에만 은은히
+  gl_FragColor=vec4(o*(1.-c0.a)+c0.rgb,1.); }`,depthTest:false,depthWrite:false});
+  const qm=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat); qm.frustumCulled=false; TK.q=new THREE.Scene(); TK.q.add(qm); TK.u=mat.uniforms; TK.oc=new THREE.OrthographicCamera(-1,1,1,-1,0,1); }
+const _tkc=new THREE.Color(), _tkHid=[];
+function tkRender(){ if (!TK.rb) tkInit(); if (TK.rb.width!==_dbs.x||TK.rb.height!==_dbs.y){ TK.rb.setSize(_dbs.x,_dbs.y); TK.rc.setSize(_dbs.x,_dbs.y); }
+  const ca=renderer.getClearAlpha(); renderer.getClearColor(_tkc);
+  hupi.visible=false; renderer.setRenderTarget(TK.rb); renderer.clear(); renderer.render(scene,cam); hupi.visible=true;   // 1) 배경+소품 (캐릭터 빼고)
+  const bg=scene.background; scene.background=null; renderer.setClearColor(0x000000,0); _tkHid.length=0;                     // 2) 캐릭터만 (알파 = 실루엣)
+  for (const c of scene.children) if (c!==root && !c.isLight && c.visible){ c.visible=false; _tkHid.push(c); }
+  for (const c of root.children) if (c!==hupi && c.visible){ c.visible=false; _tkHid.push(c); }
+  renderer.setRenderTarget(TK.rc); renderer.clear(); renderer.render(scene,cam); renderClone();
+  for (const c of _tkHid) c.visible=true; scene.background=bg; renderer.setClearColor(_tkc,ca); renderer.setRenderTarget(null);
+  const g=pfxGeom(), u=TK.u, E=sstep(0,1,TK.k), t=TK.T*6.2832;
+  const pulse=0.74+0.26*(0.5*Math.sin(t*4.7)+0.3*Math.sin(t*7.9+1.1)+0.2*Math.sin(t*12.6+2.3));        // 여러 주파수로 빠르고 부드럽게 맥동
+  u.uC.value.set(g.cx/g.W,1-g.cy/g.H); u.uAsp.value=g.W/g.H; u.uRad.value=(S['염동력반경']??2.2)*Math.max(g.rx,g.ry)/g.H*(0.5+0.5*sstep(0,1,TK.gr));
+  u.uK.value=E*pulse; u.uAmp.value=14*(S['굴절강도']??1)/g.H; u.uRGB.value=6*(S['RGB분리강도']??1)/g.H; const bl=S['방사형블러']??0.5; u.uBlur.value=16*bl/g.H; u.uN.value=bl>0.02?4:1;
+  u.uT.value=TK.T; u.uPh.value=TK.ph; renderer.render(TK.q,TK.oc); }
+// 상단 '염동력' 버튼: 꾹 누르는 동안 유지 → 떼면 끝 / 짧게 톡 = 켜 두기, 다시 톡 = 끄기
+function tkChip(){ const b=document.createElement('button'); b.className='tk'+(TK.on?' on':''); b.innerHTML='🌀 염동력'; b.style.touchAction='none';
+  b.onpointerdown=e=>{ e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){} unlockAudio(); lastTouch=time;
+    if (TK.on && TK.latch){ TK.skipUp=true; tkSet(false); } else { TK.skipUp=false; TK.pd=performance.now(); TK.latch=false; tkSet(true); } };
+  b.onpointerup=b.onpointercancel=()=>{ if (TK.skipUp){ TK.skipUp=false; return; } if (!TK.on) return; if (performance.now()-TK.pd<300) TK.latch=true; else tkSet(false); };
+  b.oncontextmenu=e=>e.preventDefault(); chipsEl.appendChild(b); }
+function tkBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='염동력 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; }
+  if (TK.on) tkSet(false); else { TK.latch=true; tkSet(true); } }
+window.__tk={on:()=>{ TK.latch=true; tkSet(true); },off:()=>tkSet(false),TK};
+
+// 충돌이펙트(IM) 경로: 소품이 실루엣 마스크에 섞이지 않게 — 소품은 배경 쪽(tBG)으로 따로 그려 합성
+function tkIMPre(bg){ if (!TK||!TK.props||!TK.props.visible) return false; if (!TK.rb) tkInit(); if (TK.rb.width!==_dbs.x||TK.rb.height!==_dbs.y){ TK.rb.setSize(_dbs.x,_dbs.y); TK.rc.setSize(_dbs.x,_dbs.y); }
+  const b0=scene.background; scene.background=bg; root.visible=false; renderer.setRenderTarget(TK.rb); renderer.clear(); renderer.render(scene,cam); root.visible=true; scene.background=b0; TK.props.visible=false; return true; }
 
 // ============================================================ ver3: 아래 칩 바 (폰에서 바로 비교)
 const chipsEl=document.getElementById('chips'), ttlSub=document.getElementById('ttlSub');
@@ -3223,7 +3330,7 @@ const hexOf=c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(clamp01(v)*255).toString(16).
 let exprI=0, motI=0; const MOTS=Object.keys(MOTIONS).filter(n=>!['등장','퇴장','움찔','쓰다듬기 반응'].includes(n)); const EXS=EXPRS.filter(n=>n!=='기본');
 function chip(lab,val,fn,sw){ const b=document.createElement('button'); b.innerHTML=lab+(val!==undefined?'<i>'+val+'</i>':'')+(sw?'<span class="sw" style="background:'+sw+'"></span>':''); b.onclick=()=>{ unlockAudio(); lastTouch=time; fn(); save(); refreshAll(); renderChips(); }; chipsEl.appendChild(b); }
 const earLab=()=>S['얼굴']>=2&&ANI[S['얼굴']]&&S['귀']===ANI[S['얼굴']].ear?'동물 기본':EARS[S['귀']];
-function renderChips(){ chipsEl.innerHTML='';
+function renderChips(){ chipsEl.innerHTML=''; tkChip();
   chip('🌀 스핀',undefined,()=>spinKick(SPINDIR*(Math.random()<0.5?-1:1)*(16+Math.random()*6)));
   chip('😮 쩌억',undefined,()=>playMotion('입 쩌억'));
   chip('👯 복제',undefined,()=>playMotion('복제'));
