@@ -194,17 +194,35 @@ const SCHEMA = [
   {k:'충돌이펙트',t:'enum',o:['끔','외곽 글로우','중첩','홀로그램','전부'],d:4,tip:'부딪히는 순간 캐릭터 실루엣에 붙는 효과 (끔이면 비용 0)'},
   {k:'엉덩이',t:'bool',d:true,tip:'뒤 아래쪽에 동글동글한 엉덩이 (몸 살이 그대로 부풀어요). 끄면 천천히 원래 몸으로'}]},
  {h:'충격 파티클', f:[
-  {k:'기본반짝이',t:'bool',d:true,tip:'원래 있던 알록달록 동그란 반짝이 (착지할 때)'},
-  {k:'말랑방울',t:'bool',d:false,tip:'몸 색 젤리 방울이 톡톡 튀었다가 몸으로 쏙 흡수'},
-  {k:'만화충격선',t:'bool',d:false,tip:'부딪힌 자리에서 짧은 검은 선이 방사형으로 팟'},
-  {k:'먼지구름',t:'bool',d:false,tip:'동글동글 구름이 부딪힌 면(바닥·벽·천장)을 따라 퐁'},
-  {k:'물결링',t:'bool',d:false,tip:'납작한 동그라미 테두리가 1~2겹 조용히 퍼져요'},
-  {k:'타격임팩트',t:'bool',d:false,tip:'하얀 섬광 + 거미줄 균열 + 히트스톱·화면 흔들림 + 강한 파편'},
-  {k:'나선파편',t:'bool',d:false,tip:'소용돌이 구슬이 잠깐 돌다가 파편이 휘말려 흩어져요'},
-  {k:'쇼크웨이브',t:'bool',d:false,tip:'두꺼운 링이 빠르게 퍼지며 안쪽 공간이 살짝 굴절'},
-  {k:'초현실충격파',t:'bool',d:false,tip:'여러 겹 링이 시차를 두고 퍼지며 색 번짐·잔상, 공기가 일그러지듯 사라져요'},
-  {k:'만화충격파',t:'bool',d:false,tip:'외곽선 있는 톱니 별 터짐 + 팍 속도선'},
-  {k:'파티클크기',r:[0.5,1.8],d:1,tip:'충격 파티클 전체 크기'}]},
+  {k:'기본반짝이',hide:1,t:'bool',d:false,tip:'원래 있던 알록달록 동그란 반짝이 (착지할 때)'},
+  {k:'말랑방울',hide:1,t:'bool',d:false,tip:'몸 색 젤리 방울이 톡톡 튀었다가 몸으로 쏙 흡수'},
+  {k:'만화충격선',hide:1,t:'bool',d:false,tip:'부딪힌 자리에서 짧은 검은 선이 방사형으로 팟'},
+  {k:'먼지구름',hide:1,t:'bool',d:false,tip:'동글동글 구름이 부딪힌 면(바닥·벽·천장)을 따라 퐁'},
+  {k:'물결링',hide:1,t:'bool',d:false,tip:'납작한 동그라미 테두리가 1~2겹 조용히 퍼져요'},
+  {k:'타격임팩트',t:'bool',d:true,tip:'박는 순간 하얀 섬광 + 먼지 구름 파편이 후두둑 + 히트스톱·화면 흔들림·슬로우모션 (세부는 아래 「타격 임팩트 설정」)'},   // pt745u: 나머지 9개는 hide:1(꺼짐) — 코드는 남겨 둬서 hide만 빼면 되살아나요
+  {k:'나선파편',hide:1,t:'bool',d:false,tip:'소용돌이 구슬이 잠깐 돌다가 파편이 휘말려 흩어져요'},
+  {k:'쇼크웨이브',hide:1,t:'bool',d:false,tip:'두꺼운 링이 빠르게 퍼지며 안쪽 공간이 살짝 굴절'},
+  {k:'초현실충격파',hide:1,t:'bool',d:false,tip:'여러 겹 링이 시차를 두고 퍼지며 색 번짐·잔상, 공기가 일그러지듯 사라져요'},
+  {k:'만화충격파',hide:1,t:'bool',d:false,tip:'외곽선 있는 톱니 별 터짐 + 팍 속도선'},
+  {k:'파티클크기',hide:1,r:[0.5,1.8],d:1,tip:'충격 파티클 전체 크기'}]},
+ {h:'타격 임팩트 설정', btns:'impact', f:[
+  {k:'충돌민감도',r:[0,1],d:0.5,tip:'높을수록 약하게 부딪혀도 나와요 (세기도 조금 세져요)'},
+  {k:'슬로우모션',r:[0,0.9],d:0,tip:'박는 순간 전체 시간이 느려졌다가 돌아와요 (0 = 없음, 0.9 = 거의 멈춤)'},
+  {k:'슬로우지속',r:[0.1,2],d:0.45,tip:'슬로우모션이 이어지는 시간(초)'},
+  {k:'히트스톱',r:[0,16],d:6,tip:'박는 순간 멈추는 프레임 수 (세게 박을수록 꽉 채워요)'},
+  {k:'화면흔들림',r:[0,24],d:10,tip:'화면 흔들림 세기(px)'},
+  {k:'흔들림시간',r:[0.05,0.8],d:0.28,tip:'화면 흔들림 시간(초)'},
+  {k:'섬광크기',r:[0,2.5],d:1,tip:'하얀 섬광 크기 (0 = 없음)'},
+  {k:'섬광밝기',r:[0,1],d:0.9,tip:'하얀 섬광 진하기'},
+  {k:'파편양',r:[0,100],d:24,tip:'먼지 구름 파편 개수 (세기에 따라 절반~전부)'},
+  {k:'파편크기',r:[0.3,3],d:1,tip:'파편 덩어리 크기'},
+  {k:'파편크기편차',r:[0,1],d:0.6,tip:'크고 작은 파편이 얼마나 제각각인지'},
+  {k:'터지는속도',r:[0.2,3],d:1,tip:'사방으로 튀어 나가는 속도'},
+  {k:'파편중력',r:[0,3],d:1,tip:'후두둑 떨어지는 힘 (0 = 둥둥 떠요)'},
+  {k:'부서짐',r:[0,1],d:0.55,tip:'떨어지면서 더 작은 조각으로 쪼개지는 정도'},
+  {k:'사라지는시간',r:[0.3,3],d:1,tip:'파편이 남아 있는 시간 배율'},
+  {k:'파편밝기',r:[0,1],d:0.35,tip:'0 = 배경보다 살짝 진한 먼지색, 1 = 하얀 구름'},
+  {k:'파편불투명도',r:[0.1,1],d:0.95,tip:'파편 진하기'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -2583,7 +2601,7 @@ function screenEdges(){ const C=cam.position; const hit=(nx,ny)=>{ _v3a.set(nx,n
   _pm.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse); _fr.setFromProjectionMatrix(_pm); const pl=_fr.planes[2]; FB=[pl.normal.x,pl.normal.y,-pl.normal.z,pl.constant]; }
 let FB=[0,1,0,7], BMIN=-R, BMK=''; function bodyMinB(){ const k=BSHK+'|'+FB[1].toFixed(3)+FB[2].toFixed(3); if (k===BMK) return BMIN; BMK=k; let m=1e9; for (let i=0;i<BSH.length;i+=3){ const v=FB[1]*BSH[i+1]+FB[2]*BSH[i+2]; if (v<m) m=v; } BMIN=m; return m; }
 let LFLOOR=-1e9, floorY=0, rawFloor=0, camU=[0,0,-14], camOverride=null, camAbs=null, idleYaw=1;
-function step(){ pfxTick(); if (HSTOP>0){ HSTOP--; return; }
+function step(){ const skip=slowTick(); pfxTick(); if (HSTOP>0){ HSTOP--; return; } if (skip) return;
   const tt=time, m={x:M.x,y:M.y};
   if (S['잡기모드']) grabInput(tt); else {
   if (M.down){ M.down=false; mouseDown=true; downTime=tt; downPos={...m}; lastMouse={...m}; lastTouch=tt;
@@ -2796,10 +2814,13 @@ function slider(parent,label,tip,min,max,get,set,f){ const r=rowEl(label,tip); c
   const upd=()=>{ i.value=get(); v.textContent=fmt(+get(),f); }; i.addEventListener('input',()=>{ set(+i.value); v.textContent=fmt(+i.value,f); save(); }); r.append(i,v); parent.appendChild(r); refreshers.push(upd); upd(); }
 const actEl=document.getElementById('actFields'), actBtns=[];
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); fieldsEl.hidden=b.dataset.t!=='opt'; actEl.hidden=b.dataset.t!=='act'; });
+function impactBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='타격 임팩트 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; }
+  if (!S['타격임팩트']){ S['타격임팩트']=true; save(); refreshAll(); }
+  if (nm.includes('다시')) land(1); else vel=[Math.random()<0.5?-0.7:0.7,0.18,0]; }
 function btnGrid(det,kind){ const gd=document.createElement('div'); gd.className='grid';
-  const items=kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
+  const items=kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
   for (const nm of items){ const b=document.createElement('button'); b.textContent=nm; b.title=nm;
-    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
+    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
     gd.appendChild(b); actBtns.push({b,kind,nm}); }
   det.appendChild(gd);
   if (kind==='hand'){ const h=document.createElement('div'); h.className='hint'; h.textContent='몸 젤리가 가늘게 늘어나 팔이 되고, 더 뻗으면 엄지 → 손가락 순서로 갈라져 나와요. 손동작 버튼을 누르면 그 자세로 손을 뻗어요. 팔다리가 있으면 팔 위쪽에서 나와요.'; det.appendChild(h); } }
@@ -2911,12 +2932,23 @@ function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=(time-I
 var HSTOP=0; var PFX={L:[],cv:null,g:null,T:0,shT:0,shA:0,sw:[],swOn:false,live:false};
 const PFX_KEYS=['말랑방울','만화충격선','먼지구름','물결링','타격임팩트','나선파편','쇼크웨이브','초현실충격파','만화충격파'];
 const rr=(a,b)=>a+Math.random()*(b-a), _pv=new THREE.Vector3();
+// 슬로우모션: 박는 순간부터 시간이 느려졌다가(지속시간 뒤 부드럽게) 원래대로. 실제 시간 기준이라 히트스톱과 따로 놀아요
+var SLOW={t:9,dur:0.45,k:0,acc:0,spd:1};
+function slowTick(){ if (!SLOW) return false; SLOW.t+=1/60; let e=0; if (SLOW.k>0 && SLOW.t<SLOW.dur*1.6){ const h=SLOW.dur; e=SLOW.t<h?1:1-sstep(h,h*1.6,SLOW.t); } SLOW.spd=1-SLOW.k*e; if (e<=0) SLOW.k=0;
+  SLOW.acc+=SLOW.spd; if (SLOW.acc>=1){ SLOW.acc-=1; return false; } return true; }   // true = 이번 프레임은 몸 시뮬레이션 건너뜀
+// 먼지 구름 덩어리 모양 6가지를 작은 캔버스에 미리 그려 두고(색 바뀔 때만 다시) drawImage로 찍어요 — 수백 개여도 가벼움
+var DSPR=null;
+function dustSprites(col){ if (DSPR && DSPR.col===col) return DSPR.l; const l=[], N=96, k=N/2.8; for (let v=0;v<6;v++){ const c=document.createElement('canvas'); c.width=c.height=N; const x=c.getContext('2d'); x.fillStyle=col; x.translate(N/2,N/2); x.beginPath(); x.arc(0,0,k,0,6.2832);
+    const n=2+(v%2), a0=v*1.7; for (let i=0;i<n;i++){ const a=a0+i*6.2832/n+(i?0.5:0), d=k*(0.42+0.12*((v+i)%3)), rb=k*(0.52+0.1*((v*2+i)%3)); x.moveTo(Math.cos(a)*d+rb,Math.sin(a)*d); x.arc(Math.cos(a)*d,Math.sin(a)*d,rb,0,6.2832); } x.fill(); l.push(c); }
+  DSPR={col,l}; return l; }
+function dustChunk(x,y,vx,vy,r,g,life,gen){
+  return {k:'dust',t:0,life,x,y,vx,vy,r,g,v:(Math.random()*6)|0,gen,brk:Math.random()<(S['부서짐']??0.55)&&gen<2?rr(0.18,0.55)*life:-1}; }
 function pfxCanvas(){ if (PFX.cv) return; const c=document.createElement('canvas'); c.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2;display:block';
   view.appendChild(c); PFX.cv=c; PFX.g=c.getContext('2d'); }
 function pfxGeom(){ const W_=view.clientWidth, H_=view.clientHeight; _pv.set(hPos[0],hPos[1],-hPos[2]).project(cam); const cx=(_pv.x+1)/2*W_, cy=(1-_pv.y)/2*H_;
   _pv.set(hPos[0]+R*hScl[0],hPos[1],-hPos[2]).project(cam); const rx=Math.max(8,Math.abs((_pv.x+1)/2*W_-cx)); _pv.set(hPos[0],hPos[1]+R*hScl[1],-hPos[2]).project(cam); const ry=Math.max(8,Math.abs((1-_pv.y)/2*H_-cy));
   return {cx,cy,rx:Math.min(rx,W_*0.6),ry:Math.min(ry,H_*0.6),W:W_,H:H_}; }
-function pfxHit(s,ix,iy){ if (s<0.12 || !PFX_KEYS.some(k=>S[k])) return; pfxCanvas(); const G=pfxGeom(), l=Math.hypot(ix,iy), hasN=l>1e-3;
+function pfxHit(s,ix,iy){ const sen=S['충돌민감도']??0.5; if (S['타격임팩트']){ if (s<0.03+0.22*(1-sen)) return; s=Math.min(1,s*(0.7+0.6*sen)); } else if (s<0.12) return; if (!PFX_KEYS.some(k=>S[k])) return; pfxCanvas(); const G=pfxGeom(), l=Math.hypot(ix,iy), hasN=l>1e-3;
   let x=G.cx, y=G.cy, nx=0, ny=-1; if (hasN){ ix/=l; iy/=l; x=G.cx+ix*G.rx; y=G.cy-iy*G.ry; nx=-ix; ny=iy; }
   x=clamp(x,3,G.W-3); y=clamp(y,3,G.H-3);
   const sc=clamp(Math.min(G.rx,G.ry)/80,0.55,1.8)*(S['파티클크기']||1), P={x,y,nx,ny,tx:-ny,ty:nx,hasN,s,sc,G}, A=PFX.L;
@@ -2928,11 +2960,13 @@ function pfxHit(s,ix,iy){ if (s<0.12 || !PFX_KEYS.some(k=>S[k])) return; pfxCanv
       else { const a=rr(0,6.2832), v=rr(1.5,3.5)*sc; ox=Math.cos(a)*G.rx*0.6; oy=Math.sin(a)*G.ry*0.6; vx=Math.cos(a)*v; vy=Math.sin(a)*v; }
       A.push({k:'puff',t:0,life:rr(0.45,0.65),x:x+ox,y:y+oy,vx,vy,r:rr(5,9)*sc*(0.7+0.5*s)}); } }
   if (S['물결링']) for (let i=0;i<(s>0.45?2:1);i++) A.push({k:'ripple',t:-0.11*i,life:0.65,x,y,a:Math.atan2(P.ty,P.tx),flat:hasN?0.38:1,R:70*sc*(0.6+0.6*s)});
-  if (S['타격임팩트']){ A.push({k:'flash',t:0,life:0.16,x,y,R:95*sc*(0.7+0.5*s)});
-    const rays=[], nr=7+Math.round(3*s); for (let i=0;i<nr;i++){ let a=6.2832*(i+rr(0.15,0.85))/nr, px_=0, py_=0; const pts=[[0,0]]; for (let j=0;j<5;j++){ a+=rr(-0.32,0.32); const L=rr(9,19)*sc*(0.7+0.5*s); px_+=Math.cos(a)*L; py_+=Math.sin(a)*L; pts.push([px_,py_]); } rays.push(pts); }
-    A.push({k:'crack',t:0,life:0.62,x,y,rays});
-    const nf=10+Math.round(10*s); for (let i=0;i<nf;i++){ const a=ang(1.35), sp=rr(6,15)*sc*(0.6+0.5*s); A.push({k:'shard',t:0,life:rr(0.45,0.75),x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:rr(4,9)*sc,rot:rr(0,6.28),w:rr(-0.5,0.5),wh:i%3!==0,g:0.4*sc}); }
-    HSTOP=Math.max(HSTOP,Math.round(3+4*s)); PFX.shT=0.28; PFX.shA=Math.max(PFX.shA,(4+7*s)*Math.min(1.4,sc)); }
+  if (S['타격임팩트']){ const fl=S['섬광크기']??1; if (fl>0.01 && (S['섬광밝기']??0.9)>0.01) A.push({k:'flash',t:0,life:0.18,x,y,R:95*sc*(0.7+0.5*s)*fl,a:S['섬광밝기']??0.9});
+    // 먼지 구름 파편: 외곽선 없는 동글동글 덩어리(크기 제각각) → 사방으로 터졌다가 중력으로 후두둑, 떨어지며 더 잘게 쪼개지고 줄어들며 사라져요
+    const nf=Math.min(Math.round((S['파편양']??24)*(0.5+0.5*s)),Math.max(0,360-A.length)), fs=S['파편크기']??1, dv=S['파편크기편차']??0.6, sp0=S['터지는속도']??1, gv=S['파편중력']??1, lf=S['사라지는시간']??1;
+    for (let i=0;i<nf;i++){ const a=hasN?Math.atan2(ny,nx)+(i%2?1:-1)*rr(0.55,1.55):rr(0,6.2832), sp=rr(4,13)*sc*sp0*(0.6+0.5*s), r=5.5*sc*fs*Math.max(0.25,1+dv*rr(-0.75,1.25));
+      A.push(dustChunk(x+Math.cos(a)*r*0.5,y+Math.sin(a)*r*0.5,Math.cos(a)*sp,Math.sin(a)*sp-rr(0,2)*sc*sp0,r,0.42*sc*gv,rr(0.55,1.1)*lf,0)); }
+    HSTOP=Math.max(HSTOP,Math.round((S['히트스톱']??6)*(0.4+0.6*s))); PFX.shT=S['흔들림시간']??0.28; PFX.shT0=PFX.shT; PFX.shA=Math.max(PFX.shA,(S['화면흔들림']??10)*(0.4+0.6*s)*Math.min(1.4,sc));
+    const sl=S['슬로우모션']??0; if (sl>0.01){ SLOW.t=0; SLOW.dur=S['슬로우지속']??0.45; SLOW.k=sl*(0.5+0.5*s); } }
   if (S['나선파편']) A.push({k:'swirl',t:0,life:0.62,x:hasN?x+nx*14*sc:x,y:hasN?y+ny*14*sc:y,R:30*sc*(0.7+0.5*s),rot:rr(0,6.28),sp:0,s});
   if (S['쇼크웨이브']){ A.push({k:'sring',t:0,life:0.36,x,y,R:125*sc*(0.6+0.5*s),w:13*sc}); PFX.sw.push({t:0,life:0.36,x,y,R:125*sc*(0.6+0.5*s),amp:12*s,w:16*sc,ca:0}); }
   if (S['초현실충격파']) for (let i=0;i<3;i++){ A.push({k:'hring',t:-0.085*i,life:0.75,x,y,R:(150-25*i)*sc*(0.6+0.5*s)}); PFX.sw.push({t:-0.085*i,life:0.75,x,y,R:(150-25*i)*sc*(0.6+0.5*s),amp:(9-2*i)*s,w:20*sc,ca:0.35}); }
@@ -2940,13 +2974,15 @@ function pfxHit(s,ix,iy){ if (s<0.12 || !PFX_KEYS.some(k=>S[k])) return; pfxCanv
     A.push({k:'star',t:0,life:0.34,x,y,R:46*sc*(0.7+0.5*s),sp,rot:rr(0,6.28)});
     for (let i=0;i<11;i++){ const a=hasN?Math.atan2(ny,nx)+rr(-1.4,1.4):rr(0,6.2832); A.push({k:'speed',t:0,life:rr(0.18,0.28),x,y,a,r0:50*sc*(0.7+0.5*s)*rr(0.9,1.2),len:rr(18,34)*sc}); } }
   if (A.length>260) A.splice(0,A.length-260); PFX.live=true; }
-function pfxTick(){ if (!PFX) return; const dt=1/60; PFX.T+=dt; if (window.__noSW) PFX.sw.length=0; if (PFX.shT>0){ PFX.shT-=dt; if (PFX.shT<=0) PFX.shA=0; }
+function pfxTick(){ if (!PFX) return; if (PFX.shT>0){ PFX.shT-=1/60; if (PFX.shT<=0) PFX.shA=0; } const ks=SLOW?SLOW.spd:1, dt=ks/60; PFX.T+=dt; if (window.__noSW) PFX.sw.length=0;
   for (let i=PFX.sw.length-1;i>=0;i--){ const w=PFX.sw[i]; w.t+=dt; if (w.t>=w.life) PFX.sw.splice(i,1); } PFX.swOn=PFX.sw.length>0;
   const A=PFX.L; if (!A.length) return; let G=null;
   for (let i=A.length-1;i>=0;i--){ const p=A[i]; p.t+=dt; if (p.t>=p.life){ A.splice(i,1); continue; } if (p.t<0) continue;
     if (p.k==='drop'){ if (p.t<p.home){ p.vy+=p.g; p.vx*=0.985; p.x+=p.vx; p.y+=p.vy; } else { G=G||pfxGeom(); const dx=G.cx-p.x, dy=G.cy-p.y, d=Math.hypot(dx,dy); p.vx=p.vx*0.7+dx*0.06; p.vy=p.vy*0.7+dy*0.06; p.x+=p.vx; p.y+=p.vy; if (d<Math.min(G.rx,G.ry)*0.95){ p.r*=0.72; if (p.r<0.8){ A.splice(i,1); continue; } } } }
     else if (p.k==='puff'){ p.x+=p.vx; p.y+=p.vy; p.vx*=0.9; p.vy*=0.9; }
     else if (p.k==='shard'){ p.vy+=p.g; p.vx*=0.97; p.x+=p.vx; p.y+=p.vy; p.rot+=p.w; }
+    else if (p.k==='dust'){ p.vy+=p.g*ks; const dr=Math.pow(0.975,ks); p.vx*=dr; p.vy*=dr; p.x+=p.vx*ks; p.y+=p.vy*ks;
+      if (p.brk>0 && p.t>=p.brk && A.length<420){ const m=2+((Math.random()*2)|0), rem=p.life-p.t; for (let j=0;j<m;j++){ const a=rr(0,6.2832), q=rr(0.8,2.4)*(p.r/6); A.push(dustChunk(p.x,p.y,p.vx*0.7+Math.cos(a)*q,p.vy*0.6+Math.sin(a)*q-q*0.3,p.r*rr(0.45,0.65),p.g*1.1,rem*rr(0.7,1.05),p.gen+1)); } A.splice(i,1); continue; } }
     else if (p.k==='bit'){ const c=Math.cos(p.cw), s_=Math.sin(p.cw), vx=p.vx*c-p.vy*s_, vy=p.vx*s_+p.vy*c; p.vx=vx*0.97; p.vy=vy*0.97; p.cw*=0.93; p.x+=p.vx; p.y+=p.vy; }
     else if (p.k==='swirl'){ p.rot+=dt*(16-10*p.t/p.life); if (p.t>0.12 && p.t<0.5){ const n=2; for (let j=0;j<n;j++){ const a=p.rot+j*3.1416+rr(-0.3,0.3), rr_=p.R*rr(0.7,1.05), sp=rr(3,6)*(p.R/30);
           A.push({k:'bit',t:0,life:rr(0.4,0.6),x:p.x+Math.cos(a)*rr_,y:p.y+Math.sin(a)*rr_,vx:-Math.sin(a)*sp+Math.cos(a)*sp*0.5,vy:Math.cos(a)*sp+Math.sin(a)*sp*0.5,cw:0.12,r:rr(2.2,4.2)*(p.R/30),c:j?'#ffffff':'#8fd8ff'}); } } } }
@@ -2955,13 +2991,14 @@ function pfxSWU(u,pr){ const H_=_dbs.y; for (let i=0;i<3;i++){ const w=PFX.sw[i]
     q.set(w.x*pr, H_-w.y*pr, w.R*e*pr, w.amp*pr*(1-k)*Math.min(1,w.t/0.04)); u.uSWw.value[i]=Math.max(2,w.w*pr*(1-0.5*k)); }
   u.uSWca.value=PFX.sw.some(w=>w.ca>0)?0.35:0; }
 function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) return; const A=PFX.L, sh=PFX.shA>0&&PFX.shT>0;
-  const tf=sh?`translate(${(Math.random()*2-1)*PFX.shA*PFX.shT/0.28}px,${(Math.random()*2-1)*PFX.shA*PFX.shT/0.28}px)`:'';
+  const shk=PFX.shA*PFX.shT/(PFX.shT0||0.28), tf=sh?`translate(${((Math.random()*2-1)*shk).toFixed(1)}px,${((Math.random()*2-1)*shk).toFixed(1)}px)`:'';
   if (renderer.domElement.style.transform!==tf){ renderer.domElement.style.transform=tf; c.style.transform=tf; }
   if (!A.length && !PFX.live) return; const g=PFX.g, dpr=Math.max(0.75,Math.min(1.5,renderer.getPixelRatio())), W_=view.clientWidth, H_=view.clientHeight;
   if (c.width!==Math.round(W_*dpr)||c.height!==Math.round(H_*dpr)){ c.width=Math.round(W_*dpr); c.height=Math.round(H_*dpr); }
   g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W_,H_); if (!A.length){ PFX.live=false; c.style.display='none'; return; } if (c.style.display==='none') c.style.display='block';   // 비어 있으면 캔버스를 숨겨서 합성 비용도 0
+  const _bgc=S['배경색']||{r:1,g:0.95,b:0.85}, _db=S['파편밝기']??0.35, DC=hexOf({r:lerp(_bgc.r*0.86,1,_db),g:lerp(_bgc.g*0.84,1,_db),b:lerp(_bgc.b*0.8,1,_db)}), DA=S['파편불투명도']??0.95;
   const OL=hexOf(S['외곽선색']), BD=hexOf(S['몸색']), lw0=Math.max(1.5,S['외곽선두께']*40); g.lineCap='round'; g.lineJoin='round';
-  const BH={crack:1,ripple:1,sring:1,hring:1,star:1,speed:1,cline:1}, Gm=pfxGeom();   // 이 종류들은 캐릭터 뒤(실루엣 바깥)에만 보여요
+  const BH={flash:1,crack:1,ripple:1,sring:1,hring:1,star:1,speed:1,cline:1}, Gm=pfxGeom();   // 이 종류들은 캐릭터 뒤(실루엣 바깥)에만 보여요
   const clipOut=()=>{ g.save(); g.beginPath(); g.rect(-10,-10,W_+20,H_+20); g.ellipse(Gm.cx,Gm.cy,Gm.rx*0.97,Gm.ry*0.97,0,0,6.2832); g.clip('evenodd'); };
   for (const pass of [1,0]){   // 1: 캐릭터 뒤 → 몸 자리만 지우개로 지움, 0: 앞
   if (pass===0){
@@ -2969,11 +3006,12 @@ function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) ret
   let pf=false; for (const p of A) if (p.k==='puff'&&p.t>=0){ pf=true; const u=p.t/p.life, r=p.r*(1+1.1*Math.sqrt(u))*(u>0.7?1-(u-0.7)/0.3:1); if (r<=0.3) continue; g.beginPath(); g.arc(p.x,p.y,r+lw0*0.5,0,6.2832); g.fillStyle=OL; g.fill(); }
   if (pf) for (const p of A) if (p.k==='puff'&&p.t>=0){ const u=p.t/p.life, r=p.r*(1+1.1*Math.sqrt(u))*(u>0.7?1-(u-0.7)/0.3:1); if (r<=0.3) continue; g.beginPath(); g.arc(p.x,p.y,Math.max(0,r-lw0*0.5),0,6.2832); g.fillStyle='#fffdf6'; g.fill(); }
   }
+  let dn=null;
   for (const p of A){ if (p.t<0) continue; if ((BH[p.k]===1)!==(pass===1)) continue; const u=p.t/p.life; g.globalAlpha=1;
     if (p.k==='drop'){ const v=Math.hypot(p.vx,p.vy), st=1+Math.min(0.7,v*0.06); g.save(); g.translate(p.x,p.y); g.rotate(Math.atan2(p.vy,p.vx)); g.beginPath(); g.ellipse(0,0,p.r*st,p.r/st,0,0,6.2832); g.fillStyle=BD; g.fill(); g.lineWidth=lw0*0.85; g.strokeStyle=OL; g.stroke(); g.restore(); }
     else if (p.k==='cline'){ const gr=Math.min(1,u/0.22), r0=p.r0+38*u*(p.len/20), L=p.len*gr*(1-0.75*Math.max(0,u-0.4)/0.6); g.globalAlpha=u>0.75?1-(u-0.75)/0.25:1; g.beginPath(); g.moveTo(p.x+Math.cos(p.a)*r0,p.y+Math.sin(p.a)*r0); g.lineTo(p.x+Math.cos(p.a)*(r0+L),p.y+Math.sin(p.a)*(r0+L)); g.lineWidth=lw0*1.5; g.strokeStyle=OL; g.stroke(); }
     else if (p.k==='ripple'){ const e=1-Math.pow(1-u,3), R_=p.R*e; if (R_<6) continue; g.globalAlpha=Math.min(1,(1-u)*1.3); g.beginPath(); g.ellipse(p.x,p.y,R_,R_*p.flat,p.a,0,6.2832); g.lineWidth=lw0*(2-1.4*u); g.strokeStyle=OL; g.stroke(); }
-    else if (p.k==='flash'){ const R_=p.R*(0.45+0.8*u); g.globalAlpha=1-u*u; const gd=g.createRadialGradient(p.x,p.y,0,p.x,p.y,R_); gd.addColorStop(0,'rgba(255,255,255,1)'); gd.addColorStop(0.45,'rgba(255,255,255,0.95)'); gd.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gd; g.beginPath(); g.arc(p.x,p.y,R_,0,6.2832); g.fill(); }
+    else if (p.k==='flash'){ const R_=p.R*(0.45+0.8*u); g.globalAlpha=(1-u*u)*(p.a??1); const gd=g.createRadialGradient(p.x,p.y,0,p.x,p.y,R_); gd.addColorStop(0,'rgba(255,255,255,1)'); gd.addColorStop(0.45,'rgba(255,255,255,0.95)'); gd.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gd; g.beginPath(); g.arc(p.x,p.y,R_,0,6.2832); g.fill(); }
     else if (p.k==='crack'){ const gr=Math.min(1,u/0.1); g.globalAlpha=u>0.6?1-(u-0.6)/0.4:1; g.strokeStyle=OL;
       for (const ry of p.rays){ const n=Math.max(1,Math.round(gr*(ry.length-1))); g.beginPath(); g.moveTo(p.x,p.y); for (let j=1;j<=n;j++) g.lineTo(p.x+ry[j][0],p.y+ry[j][1]); g.lineWidth=lw0*1.2; g.stroke(); }
       if (gr>=1){ g.lineWidth=lw0*0.7; for (const lv of [2,4]){ g.beginPath(); p.rays.forEach((ry,j)=>{ const q=ry[Math.min(lv,ry.length-1)]; if (j===0) g.moveTo(p.x+q[0],p.y+q[1]); else g.lineTo(p.x+q[0],p.y+q[1]); }); g.closePath(); g.stroke(); } } }
@@ -2993,7 +3031,8 @@ function pfxDraw(){ if (!PFX||window.__no2D) return; const c=PFX.cv; if (!c) ret
     else if (p.k==='star'){ const sc_=u<0.12?1.18*u/0.12:(u<0.25?1.18-0.18*(u-0.12)/0.13:1), al=u>0.7?1-(u-0.7)/0.3:1, R_=p.R*sc_; g.globalAlpha=al;
       const path=(k)=>{ g.beginPath(); p.sp.forEach((f,i)=>{ const a=p.rot+i*Math.PI/13, r=R_*f*k; const X=p.x+Math.cos(a)*r, Y=p.y+Math.sin(a)*r; i?g.lineTo(X,Y):g.moveTo(X,Y); }); g.closePath(); };
       path(1); g.fillStyle='#ffe066'; g.fill(); g.lineWidth=lw0*1.3; g.strokeStyle=OL; g.stroke(); path(0.58); g.fillStyle='#ffffff'; g.fill(); }
-    else if (p.k==='speed'){ const r0=p.r0+60*u*(p.len/26), L=p.len*(1-u); g.globalAlpha=1-u; g.beginPath(); g.moveTo(p.x+Math.cos(p.a)*r0,p.y+Math.sin(p.a)*r0); g.lineTo(p.x+Math.cos(p.a)*(r0+L),p.y+Math.sin(p.a)*(r0+L)); g.lineWidth=lw0; g.strokeStyle=OL; g.stroke(); } }
+    else if (p.k==='speed'){ const r0=p.r0+60*u*(p.len/26), L=p.len*(1-u); g.globalAlpha=1-u; g.beginPath(); g.moveTo(p.x+Math.cos(p.a)*r0,p.y+Math.sin(p.a)*r0); g.lineTo(p.x+Math.cos(p.a)*(r0+L),p.y+Math.sin(p.a)*(r0+L)); g.lineWidth=lw0; g.strokeStyle=OL; g.stroke(); }
+    else if (p.k==='dust'){ const sh=u>0.55?1-(u-0.55)/0.45:Math.min(1,0.6+u*6), r=p.r*sh*1.4; if (r<0.5) continue; if (!dn){ dn=dustSprites(DC); g.globalAlpha=DA; } g.drawImage(dn[p.v],p.x-r,p.y-r,2*r,2*r); } }
   if (pass){ g.globalAlpha=1; g.globalCompositeOperation='destination-out'; g.beginPath(); g.ellipse(Gm.cx,Gm.cy,Gm.rx*0.97,Gm.ry*0.97,0,0,6.2832); g.fill(); g.globalCompositeOperation='source-over'; } }
   g.globalAlpha=1; }
 window.__pfx=PFX; window.__hit=(s,ix,iy)=>pfxHit(s,ix||0,iy||0);
