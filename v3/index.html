@@ -61,6 +61,7 @@
   <div id="view"><div id="ttl">Moti ver3 · 동물형<small id="ttlSub"></small></div><button id="toggle">옵션</button><div id="bar"><div class="chips" id="chips"></div><div id="hint">톡 · 꾹 · 잡아당기기 · 쓰다듬기 · 옆 빈 곳을 슥 밀면 스핀</div></div></div>
   <div id="panel">
     <div class="top"><h1>Moti 옵션</h1>
+      <div class="btns" style="margin-bottom:6px"><button id="bCopy" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a">📋 현재 값 복사</button><button id="bPaste">값 붙여넣기</button></div>
       <div class="btns"><button id="bReset">기본값으로</button><button id="bExport">JSON 내보내기</button><button id="bImport">JSON 가져오기</button></div>
       <input id="fImport" type="file" accept=".json,application/json" hidden>
       <div class="tabs"><button data-t="opt" class="on">옵션</button><button data-t="act">표정 액션</button></div>
@@ -3094,6 +3095,30 @@ const refreshAll=()=>refreshers.forEach(f=>f()); refreshAll();
 document.getElementById('toggle').onclick=()=>{ panel.classList.toggle('closed'); };
 document.getElementById('bReset').onclick=()=>{ S=defaults(); save(); refreshAll(); };
 document.getElementById('bExport').onclick=()=>{ const blob=new Blob([JSON.stringify(toUnityJSON(S),null,4)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='moti-tuning.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
+// ============================================================ ver3: 현재 값 복사 / 붙여넣기 (앱에 넣을 고정값 정하기용)
+function exRound(v){ if (typeof v==='number') return Math.round(v*10000)/10000; if (v&&typeof v==='object'){ const o={}; for (const k in v) o[k]=exRound(v[k]); return o; } return v; }
+function exJSON(){ const o={_moti:'v3', _at:new Date().toISOString()}; for (const k in FIELDS) o[k]=exRound(S[k]); return JSON.stringify(o); }
+function exToast(t){ let el=document.getElementById('exToast'); if (!el){ el=document.createElement('div'); el.id='exToast'; el.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:60;background:rgba(20,18,17,.92);color:#fff;font:600 13px/1 system-ui,sans-serif;padding:10px 16px;border-radius:999px;pointer-events:none;transition:opacity .25s;opacity:0'; document.body.appendChild(el); }
+  el.textContent=t; el.style.opacity='1'; clearTimeout(el._t); el._t=setTimeout(()=>el.style.opacity='0',1600); }
+function exModal(mode,text){ let m=document.getElementById('exModal'); if (m) m.remove(); m=document.createElement('div'); m.id='exModal';
+  m.style.cssText='position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px';
+  const box=document.createElement('div'); box.style.cssText='background:#fff;border-radius:14px;padding:14px;width:100%;max-width:420px;font:13px system-ui,sans-serif;color:#1a1a1a';
+  const h=document.createElement('div'); h.style.cssText='font-weight:700;margin-bottom:8px'; h.textContent=mode==='copy'?'자동 복사가 안 돼서 여기 띄웠어요. 길게 눌러 전체 선택 → 복사하세요':'복사해 둔 값(JSON)을 붙여넣고 적용을 누르세요';
+  const ta=document.createElement('textarea'); ta.id='exTA'; ta.style.cssText='width:100%;height:180px;box-sizing:border-box;font:11px ui-monospace,monospace;border:1px solid #ddd;border-radius:8px;padding:8px'; ta.value=text||''; if (mode==='copy') ta.readOnly=true;
+  const row=document.createElement('div'); row.className='btns'; row.style.marginTop='10px';
+  const close=document.createElement('button'); close.textContent='닫기'; close.onclick=()=>m.remove();
+  if (mode==='paste'){ const ok=document.createElement('button'); ok.id='exApply'; ok.textContent='적용'; ok.onclick=()=>{ if (exApply(ta.value)) m.remove(); }; row.appendChild(ok); }
+  row.appendChild(close); box.append(h,ta,row); m.appendChild(box); m.onclick=e=>{ if (e.target===m) m.remove(); }; document.body.appendChild(m);
+  if (mode==='copy'){ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length); } else ta.focus(); }
+async function exCopy(){ const t=exJSON(); window.__exLast=t;
+  try{ if (!navigator.clipboard||!window.isSecureContext) throw 0; await navigator.clipboard.writeText(t); exToast('복사됐어요'); return 'clip'; }catch(_){}
+  try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand&&document.execCommand('copy'); ta.remove(); if (ok){ exToast('복사됐어요'); return 'exec'; } }catch(_){}
+  exModal('copy',t); return 'modal'; }
+// 붙여넣은 값을 적용 → 저장 후 새로고침 (얼굴·배경·화질 같은 연결된 설정까지 그대로 다시 맞춰요)
+function exApply(txt){ let j; try{ j=JSON.parse(String(txt).trim()); if (!j||typeof j!=='object') throw new Error('객체가 아니에요'); }catch(e){ alert('JSON을 읽지 못했어요: '+e.message); return false; }
+  S=applyJSON(clone(S),j); try{ localStorage.setItem(LS_KEY,JSON.stringify(S)); }catch(_){} exToast('적용했어요'); setTimeout(()=>location.reload(),350); return true; }
+document.getElementById('bCopy').onclick=()=>exCopy();
+document.getElementById('bPaste').onclick=()=>exModal('paste','');
 const fi=document.getElementById('fImport');
 document.getElementById('bImport').onclick=()=>fi.click();
 fi.onchange=async()=>{ const f=fi.files[0]; if (!f) return; try{ S=applyJSON(defaults(),JSON.parse(await f.text())); save(); refreshAll(); }catch(e){ alert('JSON을 읽지 못했어요: '+e.message); } fi.value=''; };
@@ -3597,6 +3622,7 @@ cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.o
 cvs.addEventListener('contextmenu',e=>e.preventDefault());
 window.__v3={ pal(i){ applyPalette(S,i); refreshAll(); renderChips(); }, set(o){ for (const k in o){ S[k]=o[k]; if (k==='얼굴') applyFace(S,o[k]); if (k==='모양'&&o[k]===7) applyFace(S,1); if (k==='팔레트') applyPalette(S,o[k]); } refreshAll(); renderChips(); }, face:(k)=>{ applyFace(S,k); refreshAll(); renderChips(); },
   facePts(){ const P_=o=>{ const v=new THREE.Vector3(); o.getWorldPosition(v); v.project(cam); return [+((v.x+1)/2*W).toFixed(1),+((1-v.y)/2*H).toFixed(1)]; }; return {eyeL:P_(EYE[0].g),eyeR:P_(EYE[1].g),mouth:P_(mouthG)}; },
+  schema:()=>{ const D=defaults(); return SCHEMA.map(g=>({h:g.h,hide:!!g.hide,tab:g.tab||'opt',btns:g.btns?g.btns.slice?g.btns.slice(0,40):String(g.btns):null,f:g.f.map(f=>({k:f.k,t:f.t||'range',r:f.r||null,o:f.o||null,hide:!!f.hide,tip:f.tip||'',d:exRound(D[f.k]),cur:exRound(S[f.k])}))})); },
   tier:(n,f)=>{ if (n!=null){ S['화질']=n; setTier(); } if (f!=null) S['FPS표시']=!!f; save(); return {tier:TIER,auto:TIER_AUTO,gpu:GPUS}; },
   q:()=>({tier:TIER,qfx:QL.fx,qpc:QL.pc,auto:QL.auto,lvl:QL.lvl,pr:renderer.getPixelRatio(),fps:+QL.fps.toFixed(1),lost:GL_LOST,restored:GL_RESTORED,errs:ERRS.slice(),mem:{...renderer.info.memory},calls:renderer.info.render.calls,NV,LOWQ}), rot:()=>({hRot:hRot.map(v=>+v.toFixed(4)),hScl:hScl.map(v=>+v.toFixed(3)),yaw:+yaw.toFixed(3),pitch:+pitch.toFixed(3),tilt:+tilt.toFixed(4),cam:[cam.position.x,cam.position.y,cam.position.z].map(v=>+v.toFixed(3)),camQ:[cam.quaternion.x,cam.quaternion.y,cam.quaternion.z,cam.quaternion.w].map(v=>+v.toFixed(4)),root:[root.position.x,root.position.y,root.position.z,root.quaternion.x,root.quaternion.y,root.quaternion.z,root.quaternion.w].map(v=>+v.toFixed(4)),hupiQ:[hupi.quaternion.x,hupi.quaternion.y,hupi.quaternion.z,hupi.quaternion.w].map(v=>+v.toFixed(4))}), loseGL(){ const x=renderer.getContext().getExtension('WEBGL_lose_context'); x.loseContext(); setTimeout(()=>x.restoreContext(),600); }, renderChips, st:()=>({hold:+HOLDP.toFixed(2), pins:GR.pins.length, mot:MOT?MOT.name:null, ex:EX&&!EX.out?EX.name:null, gaze:EYE[0].pl.map(v=>+v.toFixed(2)), base:basePos.map(v=>+v.toFixed(2))}) };
 
