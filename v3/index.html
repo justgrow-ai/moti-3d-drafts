@@ -274,10 +274,12 @@ const SCHEMA = [
   {k:'발광 강도',r:[0,1.5],d:0.6,tip:'빛 방울·큰 빛 덩어리의 따뜻한 밝기'},
   {k:'공전 속도',r:[0.2,3],d:1,tip:'중심 주위를 도는 빠르기'},
   {k:'흡수 속도',r:[0.3,3],d:1,tip:'궤도가 안쪽으로 감겨 가운데 빛에 쌓이는 빠르기'},
-  {k:'형성 시간',r:[2,15],d:6,tip:'들어오기부터 큰 빛 덩어리가 다 찰 때까지의 시간(초) — 빛 빠지는 시간은 따로'},
+  {k:'형성 시간',r:[2,15],d:7,tip:'들어오기부터 구체가 다 뭉칠 때까지의 시간(초) — 빛 빠짐·부풀기는 따로'},
   {k:'완성 후 발광 강도',r:[0,1.5],d:0.35,tip:'완성된 뒤 몸에 남는 은은한 빛 (0 = 없음)'},
-  {k:'빛 흐림 정도',r:[0,1],d:0.6,tip:'빛 방울과 큰 빛 덩어리 가장자리가 흐릿하게 번지는 정도'},
-  {k:'빛 빠지는 시간',r:[0.4,5],d:1.8,tip:'큰 빛 덩어리가 서서히 빠지며 캐릭터가 드러나는 시간(초)'}]},
+  {k:'빛 흐림 정도',r:[0,1],d:0.6,tip:'빛 방울과 압축 구체 가장자리가 흐릿하게 번지는 정도'},
+  {k:'빛 빠지는 시간',r:[0.1,2],d:0.35,tip:'가장 밝게 압축된 구체에서 빛이 쫙 빠지며 작은 캐릭터가 드러나는 시간(초)'},
+  {k:'압축 구체 크기',r:[0.2,0.6],d:0.42,tip:'다 뭉쳤을 때 구체 크기 (= 처음 드러나는 작은 캐릭터 크기, 원래 몸 대비)'},
+  {k:'부풀기 시간',r:[0.4,3],d:1.4,tip:'작은 캐릭터가 풍선처럼 부풀어 원래 크기가 되는 시간(초)'}]},
  {h:'눈', f:[
   {k:'눈모양',t:'enum',o:EYES,d:0},
   {k:'눈크기',r:[0.5,2],d:1},
@@ -389,7 +391,7 @@ const SCHEMA = [
 const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레트":3,"무늬색":{"r":0.298,"g":0.3725,"b":0.2157,"a":1},"눈스타일":0,"귀안쪽색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"귀안쪽":true,"볼색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"입안색":{"r":0.7098,"g":0.2824,"b":0.2471,"a":1},"잡기모드":true,"잡는힘":0.7382,"늘어남":0.448,"뒤따라옴":0.6,"무게감":0.5,"덩어리감":0.842,"치즈지수":0.916,"복원력":0.753,"끊김":false,"끊김거리":14,"잡는범위":0.2621,"끝둥글기":0.7997,"배경":0,"배경색":{"r":0.9647,"g":0.9255,"b":0.8745,"a":1},"배경그라데이션":false,"배경위색":{"r":0.84,"g":0.93,"b":1,"a":1},"배경아래색":{"r":1,"g":0.97,"b":0.91,"a":1},"스튜디오배경":false,"바닥그림자":false,"그림자부드러움":0,"조명":0,"키라이트각도":30,"키라이트높이":35,"키라이트세기":1.1,"키라이트색":{"r":1,"g":1,"b":1,"a":1},"채움빛":1,"채움색1":{"r":0.431,"g":0.659,"b":1,"a":1},"채움색2":{"r":1,"g":0.478,"b":0.612,"a":1},"주변광":1,"주변광색":{"r":0.22,"g":0.22,"b":0.3,"a":1},"림라이트":0,"림라이트색":{"r":1,"g":1,"b":1,"a":1},"환경반사":0,"재질":0,"몸광택":1,"반사":0,"빛통과":0,"클리어코트":0,"테두리빛세기":0,"안쪽빛남":0,"안쪽빛색":{"r":1,"g":0.75,"b":0.65,"a":1},"질감":0,"벨벳":0,"몸색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"몸색섞기":1,"팔다리도같이":true,"모양":0,"모양정도":1,"위홈깊이":0.5,"아래뾰족":1,"앞뒤두께":0.88,"얼굴무늬":1,"얼굴무늬색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"눈썹점":true,"외곽선":false,"외곽선두께":0.0857,"외곽선색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"충돌이펙트":4,"엉덩이":false,"기본반짝이":false,"말랑방울":false,"만화충격선":false,"먼지구름":false,"물결링":false,"타격임팩트":true,"나선파편":false,"쇼크웨이브":false,"초현실충격파":false,"만화충격파":false,"파티클크기":1,"충돌민감도":0.481,"슬로우모션":0,"슬로우지속":0.1988,"히트스톱":1.904,"화면흔들림":2.616,"흔들림시간":0.28,"섬광크기":0.8075,"섬광밝기":0.303,"파편양":42,"파편크기":1.2423,"파편크기편차":0.618,"터지는속도":1.1296,"파편중력":0.696,"부서짐":0.288,"사라지는시간":0.3,"파편밝기":0.847,"파편불투명도":0.3736,"테스트소품":false,"염동력반경":2.2,"굴절강도":1,"진동속도":1,"파동반복속도":1.6,"RGB분리강도":1,"방사형블러":0.5,"염동력시작":0.4,"염동력종료":0.6,"어두워지는정도":0.92,"테두리두께":1.2099,"광채강도":0.608,"어두워짐시간":2.258,"빛새어남시간":1.2752,"절정맥동시간":2,"유지시간":2,"복구시간":2.3091,"남는발광":0,"오로라색상":{"r":1,"g":0.55,"b":0.2,"a":1},"오로라투명도":0.484,"흐름속도":1.179,"흡수범위":3.165,"몸발광강도":0.8805,"차오름시간":3.7775,"기본발광강도":1.5,"맥동강도":2,"맥동주기":1.8954,"파동속도":2.5089,"파동폭":0.794,"확산반경":1.805,"주변밝힘강도":0.918,"눈모양":4,"눈크기":1,"눈동자크기":0.9885,"눈동자이동":0.349,"눈간격":1,"눈높이":0,"왼눈위치":{"x":-0.46,"y":0.32},"오른눈위치":{"x":0.46,"y":0.32},"깜빡임간격":4,"눈색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1},"귀":0,"귀크기":1,"귀간격":1,"귀출렁임":1,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1},"벼슬색":{"r":1,"g":0.42,"b":0.48,"a":1},"팔다리":0,"팔크기":1,"다리크기":1,"팔다리출렁임":1,"착지찌그러짐":1,"팔다리몸색":false,"팔다리색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"발톱색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"발바닥색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"꼬리":true,"팔손가락수":3,"팔손가락길이":1,"팔손가락굵기":1,"표정모드":0,"눈곡선":0,"눈윗기울기":0,"검은자":true,"검은자 크기":1,"하이라이트":false,"시선X":0,"시선Y":0,"표정":0,"표정재생":0,"표정세기":1,"자동표정":0,"자동간격":6,"표정소리":true,"눈썹표시":1,"눈뜸왼":1,"눈뜸오른":1,"눈꺼풀기울기":0,"입모양":1,"눈썹각도":0,"볼터치":1,"모션크기":1,"모션속도":1,"모션표정":true,"탭반응":1,"쓰다듬기감지":true,"시작때등장":true,"손쪽":1,"손방향":0,"뿌리굵기":0.3,"뿌리높이":0.1,"뿌리각도":15,"이음매부드러움":0.1,"팔길이":1.9,"팔굵기":0.2,"팔가늘어짐":0.12,"팔꿈치굽힘":20,"팔출렁임":1,"근육량":0,"근질":0,"손크기":1.25,"손모양":0,"손가락수":4,"손가락길이":1,"손가락굵기":1,"손가락벌림":0.6,"손가락굽힘":0.08,"마디굽힘":0.25,"손끝둥글기":0.8,"엄지":true,"엄지각도":55,"손가락나오는지점":0.6,"손동작":1,"손속도":1,"오버슈트":1,"넣는방식":0,"손항상":false,"손색":0,"손색상":{"r":1,"g":0.6039,"b":0.5255,"a":1},"손색세기":0.7,"따라오는속도":0.4911,"출렁임잡기":0.4,"늘어남시작":2.388,"최대늘어남":3.1325,"가운데잘록":0.7921,"일렁임크기":0.0597,"일렁임속도":0.996,"숨쉬기위아래":0.0876,"숨쉬기부풀기":0.0268,"테두리빛두께":0.5,"테두리색1":{"r":0.35,"g":0.65,"b":1,"a":1},"테두리색2":{"r":1,"g":0.45,"b":0.6,"a":1},"중력":0,"바닥탄력":0.5254,"던지기최대속도":0.8168,"클릭띠용":0.004,"클릭점프":0.0236,"파티클개수":0,"소리켜기":true,"소리크기":0.6,"튀는소리높이":1,"부딪힘소리높이":1,"각성유지시간":3.59,"놓을때출렁임":0.39,"되돌아오는속도":0.5};
 // 패널 정리: 얼굴·눈 / 스킬 강도 / 일렁임·숨쉬기 / 앱 설정만 보이고, 나머지는 숨김(= 열 때마다 위 기본값으로 고정)
 { const G=h=>SCHEMA.find(g=>g.h===h), take=k=>{ for (const g of SCHEMA){ const i=g.f.findIndex(f=>f.k===k); if (i>=0) return g.f.splice(i,1)[0]; } };
-  const SHOW={'염동력 설정':['굴절강도','RGB분리강도','염동력반경'],'각성모드 설정':['광채강도','어두워지는정도'],'명상 설정':['몸발광강도','오로라투명도'],'맥동 설정':['기본발광강도','맥동강도'],'소환 설정':['파편 수','파편 크기','발광 강도','공전 속도','흡수 속도','형성 시간','완성 후 발광 강도','빛 흐림 정도','빛 빠지는 시간'],'몸 일렁임':['일렁임크기','숨쉬기위아래','숨쉬기부풀기'],'성능':['화질']};
+  const SHOW={'염동력 설정':['굴절강도','RGB분리강도','염동력반경'],'각성모드 설정':['광채강도','어두워지는정도'],'명상 설정':['몸발광강도','오로라투명도'],'맥동 설정':['기본발광강도','맥동강도'],'소환 설정':['파편 수','파편 크기','발광 강도','공전 속도','흡수 속도','형성 시간','완성 후 발광 강도','빛 흐림 정도','빛 빠지는 시간','압축 구체 크기','부풀기 시간'],'몸 일렁임':['일렁임크기','숨쉬기위아래','숨쉬기부풀기'],'성능':['화질']};
   const face=take('얼굴'), eye=take('눈모양'); face.o=face.o.map((n,i)=>i?'동물형 · '+n:'기본형'); face.tip='기본형 또는 동물 얼굴을 골라요'; eye.tip='눈 모양 (기본: 점 눈)';
   const snd=['소리켜기','소리크기'].map(take);
   for (const g of SCHEMA){ if (g.tab==='act') continue; const keep=SHOW[g.h]||[]; for (const f of g.f) if (!keep.includes(f.k)) f.hide=1; }
@@ -3749,7 +3751,7 @@ var SU={on:false,t:0,T:6,N:0,F:null,sg:null,post:0,postT:-1,lastPop:0,meshes:nul
 function suCap(){ return TIER>=3?48:TIER===2?96:240; }
 const SU_U={uMC:{value:new THREE.Vector3()},uQ:{value:1},uMA:{value:0},uMB:{value:1},uBl:{value:0.6},uGl:{value:0.6},uBodyC:null,uH:{value:0},uQc:{value:0.1},uCA:{value:0}};
 const SU_GLSL=`uniform vec3 uMC; uniform float uQ; uniform float uMA; uniform float uMB; uniform float uBl; uniform float uGl; uniform vec3 uBodyC; uniform float uH; uniform float uQc; uniform float uCA;
-float suCore(float r){ float e0=mix(0.92,0.35,uBl); return 1.-smoothstep(e0,1.+0.25*uBl,r); }`;
+float suCore(float r){ return 1.-smoothstep(0.93,1.+0.3*uBl,r); }`;
 function suInit(){ if (SU.meshes) return; SU_U.uBodyC=bodyColU.c; const cap=240;
   // 파편 = 화면을 향한 부드러운 빛 방울 (가장자리가 흐릿하게 번짐). 큰 빛 덩어리 뒤에 있는 방울은 그 빛에 가려져요
   const fm=new THREE.ShaderMaterial({uniforms:SU_U,transparent:true,depthTest:true,depthWrite:false,fog:false,
@@ -3772,9 +3774,9 @@ void main(){ float r=length(vUv); if (r>1.) discard; float e0=mix(0.7,0.0,uBl);
     vertexShader:SU_GLSL+`
 varying vec2 vUv; void main(){ vec4 mv=viewMatrix*vec4(uMC,1.); mv.xy+=position.xy*uQ; vUv=position.xy; gl_Position=projectionMatrix*mv; }`,
     fragmentShader:SU_GLSL+`
-varying vec2 vUv; void main(){ float r=length(vUv)/0.62; float core=suCore(r); float halo=exp(-r*r*mix(5.,1.6,uBl))*0.45;
+varying vec2 vUv; void main(){ float r=length(vUv)/0.62; float core=suCore(r); float halo=exp(-r*r*mix(9.,3.,uBl))*0.5;
   float a=clamp(core+halo*(1.-core),0.,1.)*uMA; vec3 warm=vec3(1.,0.93,0.8);
-  vec3 c=mix(uBodyC,warm,clamp((0.12+0.45*(1.-smoothstep(0.,1.,r)))*uGl/0.6,0.,0.8))*uMB; c=mix(c,vec3(1.,0.97,0.9),uH*(0.55+0.45*(1.-r))); gl_FragColor=vec4(min(c,vec3(1.)),a); }`});
+  vec3 c=mix(uBodyC,warm,clamp((0.12+0.45*(1.-smoothstep(0.,1.,r)))*uGl/0.6,0.,0.8))*uMB; c=mix(c,vec3(1.,0.97,0.9),uH*(0.35+0.65*(1.-r*r))); gl_FragColor=vec4(min(c,vec3(1.)),a); }`});
   // 압축된 뜨거운 점 = 가운데 아주 작고 하얗게 뜨거운 빛 + 좁은 번짐 (작을수록 세고, 커지면 지금 밝기로 풀려요)
   const cm=new THREE.ShaderMaterial({uniforms:SU_U,transparent:true,depthTest:false,depthWrite:false,fog:false,blending:THREE.AdditiveBlending,
     vertexShader:SU_GLSL+`
@@ -3789,7 +3791,7 @@ varying vec2 vUv; void main(){ float r=length(vUv); if (r>1.) discard; float pt=
 function suUnit(){ const z=Math.random()*2-1, a=Math.random()*Math.PI*2, r=Math.sqrt(1-z*z); return [r*Math.cos(a),r*Math.sin(a),z]; }
 const smt=x=>{ x=clamp01(x); return x*x*x*(x*(x*6-15)+10); };   // smootherstep (속도·가속도 모두 0에서 시작/끝)
 function triggerSummon(){ suInit(); if (SU.on) return; unlockAudio(); lastTouch=time;
-  const T=Math.max(2,S['형성 시간']??6), N=Math.max(8,Math.min(suCap(),Math.round(S['파편 수']??120))), av=Math.max(0.3,S['흡수 속도']??1), sp=S['공전 속도']??1;
+  const T=Math.max(2,S['형성 시간']??7), N=Math.max(8,Math.min(suCap(),Math.round(S['파편 수']??120))), av=Math.max(0.3,S['흡수 속도']??1), sp=S['공전 속도']??1;
   // 공전 궤도면 5개: 화면에서 본 기울기가 36°씩 다른 타원 고리 (몸 앞뒤로 지나감). 면마다 속도·방향·반지름이 조금씩 달라요. 감겨 들어오면서 궤도면이 천천히 틀어져요(세차 + 비틀림)
   const F=[], NC=5, CL=[], DIRW=[1,-1,1,1,-1], SPW=[1.0,0.82,1.15,0.92,1.08], RAD=[1.0,1.08,0.94,1.04,0.98];
   const a0=Math.random()*Math.PI/5;
@@ -3804,24 +3806,29 @@ function triggerSummon(){ suInit(); if (SU.on) return; unlockAudio(); lastTouch=
   const LB=L0+0.15*T, nb=Math.max(4,Math.round(N*0.2));   // 처음 20%는 거의 함께 한 점으로 모여 압축돼요
   ord.forEach((p,i)=>{ p.land=i<nb?L0+(LB-L0)*Math.pow((i+0.5)/nb,1.2):LB+(L1-LB)*Math.pow((i-nb+0.5)/(N-nb),0.9); const dsp=(0.32+0.18*Math.random())*T/Math.sqrt(av); p.ts=Math.max(p.tin+0.35,p.land-dsp); });
   let mx=0; for (const p of F) mx=Math.max(mx,p.land);
-  const Tr=mx+0.45+0.35, D=Math.max(0.4,S['빛 빠지는 시간']??1.8);
-  Object.assign(SU,{on:true,t:-0.3,T,N,F,CL,sp,Tr,D,Tend:Tr+D+0.15,post:SU.post,postT:-1,lastPop:0,M:0,Rm:0,MA:0,sb:0,sgv:-1,dbg:window.__suDbg?[]:null});
+  const Tr=mx+0.35, D=Math.max(0.1,S['빛 빠지는 시간']??0.35), Ti=Math.max(0.4,S['부풀기 시간']??1.4), Ts=Tr+D*0.55;   // 가장 압축·가장 밝을 때(마지막 방울 직후) 그 크기 그대로 빛을 쫙 빼고 → 작은 캐릭터 → 풍선처럼 부풀어요
+  const ks=clamp(S['압축 구체 크기']??0.42,0.15,0.7);
+  Object.assign(SU,{on:true,t:-0.3,T,N,F,CL,sp,Tr,D,Ti,Ts,ks,Tend:Ts+Ti+0.05,post:SU.post,postT:-1,lastPop:0,M:0,Rm:0,MA:0,sb:0,sgv:-1,dbg:window.__suDbg?[]:null});
   for (const m of SU.meshes){ m.visible=true; m.count=0; } SU.mass.visible=true; SU.core.visible=true;
   Sfx('whoosh',0.25,0.7); }
 function suTick(){ if (!SU||!SU.on) return; const dt=1/60; SU.t+=dt; const t=SU.t, F=SU.F, Rw=R*(hScl?hScl[0]:1);
   let M=0; for (const p of F) M+=smt((t-(p.land-0.05))/0.5); M/=F.length; SU.M=M;   // 쌓인 양 = 도착한 방울들의 부드러운 합
-  const rv=smt((t-SU.Tr)/SU.D); SU.rv=rv;   // 빛 빠짐 진행
-  const Rpk=1.45*Rw, Rg=Rpk*(0.05*smt(M/0.2)+0.95*smt((M-0.15)/0.85)); SU.Rm=Rg*(1-0.42*smt(rv/0.6));   /* 빛이 빠질 때 가장자리가 몸 안쪽으로 걷혀요 (반투명 고리가 남지 않게) */ SU.Rg=Rg;   // 반지름 = 도착해 쌓인 양만큼 (0에서 시작 → 처음 20%는 아주 작은 점 → 방울이 더해질수록 커짐)
-  SU.heat=Math.pow(1-clamp01(Rg/Rpk),2.2);   // 작을수록 뜨겁고(하얗게) 강렬, 커지면 풀려요
-  SU.CA=smt(M/0.18)*(0.2+1.9*SU.heat)*(1-rv);   // 부피만큼 커져요 (세제곱근) → 쌓일수록 천천히 커짐
-  SU.MA=smt(M/0.12)*(1-smt((rv-0.4)/0.6)); SU.MB=0.86+0.14*M;   // 불투명도는 첫 방울부터 천천히 진해져요
-  SU.sb=smt((M-0.2)/0.75)*(0.85+0.15*smt(rv/0.55));   // 빛 속에선 85%까지만 (가장자리가 비치지 않게), 빛이 빠지며 제 크기로   // 몸은 빛 안에서 함께 자라고, 빛이 다 찬 뒤 완성
-  SU.sgv=Math.round(clamp(0.85*(1-rv)*Math.min(1,(S['발광 강도']??0.6)/0.6+0.3),0,0.85)*200)/200;
+  const rv=smt((t-SU.Tr)/SU.D); SU.rv=rv;   // 빛 빠짐 (짧고 빠르게)
+  const Rsph=SU.ks*Rw, Rg=Rsph*(0.12*smt(M/0.2)+0.88*smt((M-0.12)/0.88)); SU.Rg=Rg; SU.Rm=Rg;   // 압축 구체: 쌓인 양만큼 0에서부터 계속 커짐 (빛이 빠질 때도 거의 같은 크기)
+  SU.heat=(0.8-0.18*smt(Rg/Rsph)+0.3*smt((M-0.75)/0.25))*(1-rv);   // 계속 뜨겁고 촘촘 — 마지막에 가장 밝아요
+  SU.CA=smt(M/0.18)*(1.1+0.9*smt((M-0.55)/0.45))*(1-rv);
+  SU.MA=smt(M/0.12)*(1-rv); SU.MB=(0.95+0.2*M)*(1-0.3*rv);
+  // 몸: 구체 안에 숨어 있다가 빛이 빠지기 시작할 때 구체 크기(95%)로 등장 → 풍선처럼 몇 번 부풀며 정확히 100%에서 멈춤
+  const s0=Rsph*0.95/Rw, u=clamp01((t-SU.Ts)/SU.Ti);
+  if (t<SU.Tr){ SU.sb=s0*Rg/Rsph; SU.sw=0; }   /* 구체와 함께 그 안에서 자람 (하얗게 달궈진 채로 가려져 있음) */
+  else { const b_=smt(u)+0.12*Math.sin(5*Math.PI*u)*Math.pow(1-u,2)*Math.min(1,u*6);   // 숨 들이쉬듯 몇 번 살짝 부풀었다 가라앉음 (u=1에서 정확히 1, 속도 0)
+    SU.sb=s0+(1-s0)*b_; SU.sw=0.075*Math.sin(6*Math.PI*u)*Math.pow(1-u,2)*Math.min(1,u*5); }   // 풍선 출렁임 (가로·세로 번갈아)
+  SU.sgv=t<SU.Tr?0.85:Math.round(clamp(0.85*(1-smt((t-SU.Tr)/(SU.D*1.8)))*Math.min(1,(S['발광 강도']??0.6)/0.6+0.3),0,0.85)*200)/200;
   for (const p of F){ if (t>=p.land && !p.popped){ p.popped=true; if (time-SU.lastPop>0.15){ SU.lastPop=time; Sfx('bump',0.04,1.6+Math.random()*0.4); } } }
   const _b=document.querySelector('#bar button.su'); if (_b) _b.classList.toggle('on',t<SU.Tend);
   if (t>SU.Tend){ SU.on=false; SU.postT=time; for (const m of SU.meshes){ m.visible=false; m.count=0; } SU.mass.visible=false; SU.core.visible=false; SU.sg.fill(0); SU.sgAttr.needsUpdate=true; } }
 // 몸 정점: 빛 안에서 부드럽게 한꺼번에 커질 뿐 (울퉁불퉁·움푹한 중간 모양 없음)
-function suDeform(ox,oy,oz){ const t=SU.t; const s=t<0?1-sstep(-0.3,0,t):SU.sb; DX*=s; DY*=s; DZ*=s; }
+function suDeform(ox,oy,oz){ const t=SU.t; if (t<0){ const s=1-sstep(-0.3,0,t); DX*=s; DY*=s; DZ*=s; return; } const s=SU.sb, w=SU.sw||0; DX*=s*(1+w); DZ*=s*(1+w); DY*=s*(1-1.6*w); }
 const _suM=new THREE.Matrix4(), _suV=new THREE.Vector3(), _suQ=new THREE.Quaternion(), _suS=new THREE.Vector3();
 function suRotY(v,a){ const c=Math.cos(a), s=Math.sin(a); return [c*v[0]+s*v[2],v[1],-s*v[0]+c*v[2]]; }
 function suRotAx(v,ax,a){ const q=qAxis(a*180/Math.PI,ax); return qRot(q,v); }
@@ -3831,10 +3838,10 @@ function suPre(){ if (!SU||!SU.meshes) return;
   if (!SU.on) return;
   { const sv=SU.sgv; if (SU.sg[0]!==sv){ SU.sg.fill(sv); SU.sgAttr.needsUpdate=true; }
     const pg=((S['완성 후 발광 강도']??0.35)*0.22)*SU.rv; G.x+=pg; G.y+=0.86*pg; G.z+=0.62*pg; }   // 빛이 빠지는 동안 몸의 남는 빛으로 이어져요
-  if (SU.sb<0.98){ for (const e of EYE) e.g.visible=false; mouthG.visible=false; if (typeof nose!=='undefined') nose.visible=false; }
+  if (SU.t<SU.Tr){ for (const e of EYE) e.g.visible=false; mouthG.visible=false; if (typeof nose!=='undefined') nose.visible=false; }
   const t=SU.t, F=SU.F, CL=SU.CL, Rw=R*(hScl?hScl[0]:1), C=hupi.getWorldPosition(new THREE.Vector3());
   const sz=(S['파편 크기']??1), sp=SU.sp, dt=1/60, Rm=SU.Rm;
-  SU_U.uMC.value.copy(C); SU_U.uQ.value=Math.max(1e-3,Rm/0.62); SU_U.uMA.value=SU.MA; SU_U.uMB.value=SU.MB; SU_U.uBl.value=S['빛 흐림 정도']??0.6; SU_U.uGl.value=ge; SU_U.uH.value=Math.min(0.9,SU.heat*1.1); SU_U.uCA.value=SU.CA; SU_U.uQc.value=Math.max(0.42*Rw,Rm*1.25)*(0.85+0.3*(S['빛 흐림 정도']??0.6));
+  SU_U.uMC.value.copy(C); SU_U.uQ.value=Math.max(1e-3,Rm/0.62); SU_U.uMA.value=SU.MA; SU_U.uMB.value=SU.MB; SU_U.uBl.value=S['빛 흐림 정도']??0.6; SU_U.uGl.value=ge; SU_U.uH.value=Math.min(0.95,SU.heat); SU_U.uCA.value=SU.CA; SU_U.uQc.value=Math.max(0.42*Rw,Rm*1.7)*(0.85+0.3*(S['빛 흐림 정도']??0.6));
   const lim=Math.max(SCRW*1.02,Rw*1.2), spawnD=1.5*Math.hypot(SCRW,(SCRT-SCRB)/2), mesh=SU.meshes[0], aB=mesh.geometry.attributes.aBr.array, aA=mesh.geometry.attributes.aA.array; let k=0;
   const pr=SU.dbg?[[0,0],[0,0],[0,0],[0,0],[0,0]]:null;
   for (const p of F){
@@ -3856,7 +3863,7 @@ function suPre(){ if (!SU||!SU.meshes) return;
     _suS.set(scl,scl,scl); _suV.set(o[0],o[1],o[2]); _suQ.identity(); _suM.compose(_suV,_suQ,_suS); mesh.setMatrixAt(k,_suM);
     aB[k]=p.br*(1+0.45*(1-nc)); aA[k]=(1-sink)*(t<p.tin?smt(t/p.tin*1.5):1); k++; }
   mesh.count=k; mesh.instanceMatrix.needsUpdate=true; mesh.geometry.attributes.aBr.needsUpdate=true; mesh.geometry.attributes.aA.needsUpdate=true;
-  if (SU.dbg) SU.dbg.push([+t.toFixed(3),+(Rm/Rw).toFixed(4),+SU.MA.toFixed(4),+SU.sb.toFixed(4),SU.sgv,+(SU.heat||0).toFixed(4),+(SU.CA||0).toFixed(4),+(SU.M||0).toFixed(4),...pr.map(a=>a[1]?+(a[0]/a[1]).toFixed(4):null),k,F.map(p=>t<0||t>p.land+0.5?null:p.rr),F.map(p=>p.cl)]); }
+  if (SU.dbg) SU.dbg.push([+t.toFixed(3),+(Rm/Rw).toFixed(4),+SU.MA.toFixed(4),+SU.sb.toFixed(4),SU.sgv,+(SU.heat||0).toFixed(4),+(SU.CA||0).toFixed(4),+(SU.M||0).toFixed(4),...pr.map(a=>a[1]?+(a[0]/a[1]).toFixed(4):null),k,F.map(p=>t<0||t>p.land+0.5?null:p.rr),F.map(p=>p.cl),+(SU.sw||0).toFixed(4),+(SU.MB||0).toFixed(4)]); }
 function suChip(){ const b=document.createElement('button'); b.className='su'; b.innerHTML='🪐 소환'; b.onclick=()=>triggerSummon(); chipsEl.appendChild(b); }
 function suBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='소환 설정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } triggerSummon(); }
 window.triggerSummon=triggerSummon; window.__su={go:triggerSummon,SU};
