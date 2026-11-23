@@ -987,10 +987,13 @@ vec4 minEye(vec2 p){
     col=mix(col,uPupilC,inP);
     if (uMHi>0.5){ float hr=0.26*min(pr.x,pr.y); float dh=length(pq-vec2(0.36,0.4)*pr)-hr; float ah=fwidth(dh)*0.75+1e-4; col=mix(col,vec3(1.),(1.-smoothstep(-ah,ah,dh))*inP); } }
   else if (uShp>-0.5){ if (uMHi>0.5 && d<0.02){ float best=-1e3; vec2 bc=vec2(0.);   // 도형 안 가장 넉넉한 자리(오른쪽 위 우선)에 하이라이트, 도형 밖으로는 안 나가요
-      for (int k=0;k<7;k++){ vec2 cd=k==0?vec2(0.36,0.4):k==1?vec2(0.22,0.24):k==2?vec2(0.,0.):k==3?vec2(0.42,0.):k==4?vec2(-0.3,0.36):k==5?vec2(0.,0.5):vec2(0.,-0.45);
+      vec4 HS=uShp<0.5?vec4(0.22,0.24,0.,0.):(uShp>7.5&&uShp<8.5)?vec4(0.34,0.38,0.,0.):(uShp>19.5&&uShp<20.5)?vec4(0.16,0.36,0.,0.):uShp>20.5?vec4(0.2,0.17,0.,0.08):vec4(-9.);
+      if (HS.x>-5.){ bc=vec2(HS.x*uSide,HS.w+HS.y);   // 4가지 도형: 눈의 시각 중심(사람 눈은 0.08 위)에서 화면 기준 같은 방향·같은 거리 → 두 눈이 같은 곳(정면)을 봐요
+        best=min(-eyeSD(uShp,bc),-eyeSD(uShp,vec2(-bc.x,bc.y))); }               // 크기도 양쪽 중 좁은 쪽에 맞춰 같게 (사람 눈은 바깥 꼬리가 올라가 좌우가 달라요)
+      else for (int k=0;k<7;k++){ vec2 cd=k==0?vec2(0.36,0.4):k==1?vec2(0.22,0.24):k==2?vec2(0.,0.):k==3?vec2(0.42,0.):k==4?vec2(-0.3,0.36):k==5?vec2(0.,0.5):vec2(0.,-0.45);
         cd.x*=uSide; float dd=-eyeSD(uShp,cd); if (best<0.3 && dd>best){ best=dd; bc=cd; } }
       float hr0=clamp(best*0.6,0.,0.3), hr=hr0*smoothstep(0.45,0.25,eC)*(1.-smoothstep(0.3,0.55,uMLo))*smoothstep(0.62,0.45,eC+uMLo*0.8)*(1.-0.5*uLF.x); float dh=(length(qS-bc)-hr)*scS; float ah=fwidth(dh)*0.75+1e-4;
-      float hv=step(0.1,hr0)*step(0.012,hr)*(1.-smoothstep(-a,a,d));
+      float hv=step(0.1,hr0)*smoothstep(0.035,0.07,hr)*(1.-smoothstep(-a,a,d));   // 반쯤 감기면 양쪽 다 부드럽게 사라져요 (한쪽에만 작은 점이 남아 사시처럼 보이지 않게)
       col=mix(col,vec3(1.),(1.-smoothstep(-ah,ah,dh))*hv); } }
   else if (uMHi>0.5){ // ver3: 잉크 눈 위 단색 점 하나
     float rr=min(rx,ryF); float hr=0.24*rr; vec2 hc=vec2(0.34*rx,0.4*ryF*clamp(uMO,0.,1.));
