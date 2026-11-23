@@ -395,6 +395,21 @@ const SCHEMA = [
  {h:'소리', f:[
   {k:'소리켜기',t:'bool',d:true},{k:'소리크기',r:[0,1],d:0.6},
   {k:'튀는소리높이',r:[0.5,2],d:1,tip:'통통 튈 때 소리 높이'},{k:'부딪힘소리높이',r:[0.5,2],d:1,tip:'부딪힐 때 소리 높이'}]},
+ {h:'자연스러운 눈', tab:'act', f:[
+  {k:'자연 시선',t:'bool',d:true,tip:'머물기 → 휙 → 머물기. 손가락을 대고 있을 때만 부드럽게 따라가요'},
+  {k:'시선 머무름',r:[0.4,2.5],d:1,tip:'한 곳을 보는 시간 (클수록 오래 머물러요)'},
+  {k:'미세 떨림',r:[0,2],d:1,tip:'머무는 동안 1~2초에 한 번 아주 작게 움직여요'},
+  {k:'눈꺼풀 따라가기',r:[0,1.2],d:0.6,tip:'아래를 보면 위 눈꺼풀이 살짝 덮이고, 위를 보면 조금 더 떠요'},
+  {k:'이유 있는 깜빡임',t:'bool',d:true,tip:'큰 시선 이동·몸 돌기·표정 바뀔 때 + 드문드문 불규칙하게 깜빡여요'},
+  {k:'깜빡임 길이',r:[0.6,1.8],d:1,tip:'1 = 약 0.26초 (빨리 감고 천천히 떠요)'},
+  {k:'깜빡일 때 내려가기',r:[0,2],d:1,tip:'깜빡일 때 눈이 살짝 아래로, 눈썹도 살짝 따라 내려와요'},
+  {k:'몸 따라 돌기',t:'bool',d:true,tip:'멀리 볼 때 눈이 먼저 가고 몸(얼굴)이 따라 돌아요'},
+  {k:'몸 돌기 정도',r:[0,26],d:10,tip:'좌우 최대 각도(도). 위아래는 약 0.7배'},
+  {k:'표정 전환 자연스럽게',t:'bool',d:true,tip:'끄면 예전 방식(예비동작 + 크게 튕김)'},
+  {k:'표정 전환 방식',t:'enum',o:['표정별 자동','깜빡이며 바뀌기','바로 바뀌기'],d:0,tip:'깜빡이며: 감은 사이에 바꾸고 뜰 때 살짝 더 열림 / 바로: 0.28초, 튕김 없이'},
+  {k:'불규칙 유지 움직임',t:'bool',d:true,tip:'표정 유지 중 움직임을 일정 박자 대신 불규칙하게'},
+  {k:'유지 중 움직임',r:[0,2],d:1,tip:'표정 유지 중 작은 움직임의 크기'},
+  {k:'대화 시선 규칙',t:'bool',d:true,tip:'경청: 7초 안팎마다 1초쯤 살짝 피함 / 생각중: 위나 옆으로 휙 보고 머묾'}]},
 ];
 // ver3 최종값 (2026-11-22 대표님 확정) — 코드 기본값. 각성 유지시간은 손 옵션과 키를 분리했어요
 const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레트":3,"무늬색":{"r":0.298,"g":0.3725,"b":0.2157,"a":1},"눈스타일":0,"귀안쪽색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"귀안쪽":true,"볼색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"입안색":{"r":0.7098,"g":0.2824,"b":0.2471,"a":1},"잡기모드":true,"잡는힘":0.7382,"늘어남":0.448,"뒤따라옴":0.6,"무게감":0.5,"덩어리감":0.842,"치즈지수":0.916,"복원력":0.753,"끊김":false,"끊김거리":14,"잡는범위":0.2621,"끝둥글기":0.7997,"배경":0,"배경색":{"r":0.9647,"g":0.9255,"b":0.8745,"a":1},"배경그라데이션":false,"배경위색":{"r":0.84,"g":0.93,"b":1,"a":1},"배경아래색":{"r":1,"g":0.97,"b":0.91,"a":1},"스튜디오배경":false,"바닥그림자":false,"그림자부드러움":0,"조명":0,"키라이트각도":30,"키라이트높이":35,"키라이트세기":1.1,"키라이트색":{"r":1,"g":1,"b":1,"a":1},"채움빛":1,"채움색1":{"r":0.431,"g":0.659,"b":1,"a":1},"채움색2":{"r":1,"g":0.478,"b":0.612,"a":1},"주변광":1,"주변광색":{"r":0.22,"g":0.22,"b":0.3,"a":1},"림라이트":0,"림라이트색":{"r":1,"g":1,"b":1,"a":1},"환경반사":0,"재질":0,"몸광택":1,"반사":0,"빛통과":0,"클리어코트":0,"테두리빛세기":0,"안쪽빛남":0,"안쪽빛색":{"r":1,"g":0.75,"b":0.65,"a":1},"질감":0,"벨벳":0,"몸색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"몸색섞기":1,"팔다리도같이":true,"모양":0,"모양정도":1,"위홈깊이":0.5,"아래뾰족":1,"앞뒤두께":0.88,"얼굴무늬":1,"얼굴무늬색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"눈썹점":true,"외곽선":false,"외곽선두께":0.0857,"외곽선색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"충돌이펙트":4,"엉덩이":false,"기본반짝이":false,"말랑방울":false,"만화충격선":false,"먼지구름":false,"물결링":false,"타격임팩트":true,"나선파편":false,"쇼크웨이브":false,"초현실충격파":false,"만화충격파":false,"파티클크기":1,"충돌민감도":0.481,"슬로우모션":0,"슬로우지속":0.1988,"히트스톱":1.904,"화면흔들림":2.616,"흔들림시간":0.28,"섬광크기":0.8075,"섬광밝기":0.303,"파편양":42,"파편크기":1.2423,"파편크기편차":0.618,"터지는속도":1.1296,"파편중력":0.696,"부서짐":0.288,"사라지는시간":0.3,"파편밝기":0.847,"파편불투명도":0.3736,"테스트소품":false,"염동력반경":2.2,"굴절강도":1,"진동속도":1,"파동반복속도":1.6,"RGB분리강도":1,"방사형블러":0.5,"염동력시작":0.4,"염동력종료":0.6,"어두워지는정도":0.92,"테두리두께":1.2099,"광채강도":0.608,"어두워짐시간":2.258,"빛새어남시간":1.2752,"절정맥동시간":2,"유지시간":2,"복구시간":2.3091,"남는발광":0,"오로라색상":{"r":1,"g":0.55,"b":0.2,"a":1},"오로라투명도":0.484,"흐름속도":1.179,"흡수범위":3.165,"몸발광강도":0.8805,"차오름시간":3.7775,"기본발광강도":1.5,"맥동강도":2,"맥동주기":1.8954,"파동속도":2.5089,"파동폭":0.794,"확산반경":1.805,"주변밝힘강도":0.918,"눈모양":4,"눈크기":1,"눈동자크기":0.9885,"눈동자이동":0.349,"눈간격":1,"눈높이":0,"왼눈위치":{"x":-0.46,"y":0.32},"오른눈위치":{"x":0.46,"y":0.32},"깜빡임간격":4,"눈색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1},"귀":0,"귀크기":1,"귀간격":1,"귀출렁임":1,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1},"벼슬색":{"r":1,"g":0.42,"b":0.48,"a":1},"팔다리":0,"팔크기":1,"다리크기":1,"팔다리출렁임":1,"착지찌그러짐":1,"팔다리몸색":false,"팔다리색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"발톱색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"발바닥색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"꼬리":true,"팔손가락수":3,"팔손가락길이":1,"팔손가락굵기":1,"표정모드":0,"눈곡선":0,"눈윗기울기":0,"검은자":true,"검은자 크기":1,"하이라이트":false,"시선X":0,"시선Y":0,"표정":0,"표정재생":0,"표정세기":1,"자동표정":0,"자동간격":6,"표정소리":true,"눈썹표시":1,"눈뜸왼":1,"눈뜸오른":1,"눈꺼풀기울기":0,"입모양":1,"눈썹각도":0,"볼터치":1,"모션크기":1,"모션속도":1,"모션표정":true,"탭반응":1,"쓰다듬기감지":true,"시작때등장":true,"손쪽":1,"손방향":0,"뿌리굵기":0.3,"뿌리높이":0.1,"뿌리각도":15,"이음매부드러움":0.1,"팔길이":1.9,"팔굵기":0.2,"팔가늘어짐":0.12,"팔꿈치굽힘":20,"팔출렁임":1,"근육량":0,"근질":0,"손크기":1.25,"손모양":0,"손가락수":4,"손가락길이":1,"손가락굵기":1,"손가락벌림":0.6,"손가락굽힘":0.08,"마디굽힘":0.25,"손끝둥글기":0.8,"엄지":true,"엄지각도":55,"손가락나오는지점":0.6,"손동작":1,"손속도":1,"오버슈트":1,"넣는방식":0,"손항상":false,"손색":0,"손색상":{"r":1,"g":0.6039,"b":0.5255,"a":1},"손색세기":0.7,"따라오는속도":0.4911,"출렁임잡기":0.4,"늘어남시작":2.388,"최대늘어남":3.1325,"가운데잘록":0.7921,"일렁임크기":0.0597,"일렁임속도":0.996,"숨쉬기위아래":0.0876,"숨쉬기부풀기":0.0268,"테두리빛두께":0.5,"테두리색1":{"r":0.35,"g":0.65,"b":1,"a":1},"테두리색2":{"r":1,"g":0.45,"b":0.6,"a":1},"중력":0,"바닥탄력":0.5254,"던지기최대속도":0.8168,"클릭띠용":0.004,"클릭점프":0.0236,"파티클개수":0,"소리켜기":true,"소리크기":0.6,"튀는소리높이":1,"부딪힘소리높이":1,"각성유지시간":3.59,"놓을때출렁임":0.39,"되돌아오는속도":0.5};
@@ -1208,30 +1223,82 @@ function fx2Pose(def){ const a=FX2_ZERO.slice(); if (!def) return a;
     if (e) for (const k in e){ const i=FX2K.indexOf(k); if (i>=0 && i<8) a[o+i]=e[k]; }
     if (b) for (const k in b){ const i={y:8,tilt:9,bend:10,pull:11,x:12}[k]; if (i!==undefined) a[o+i]=b[k]; } }
   const B=def.body||{}; if (B.sy!==undefined) a[26]=B.sy; a[27]=B.hop||0; a[28]=B.rz||0; a[29]=B.rx||0; return a; }
-const FX2={cur:FX2_ZERO.slice(), from:FX2_ZERO.slice(), to:FX2_ZERO.slice(), def:null, name:'', t:0, out:false, ot:0, ia:0};
-function fx2Play(name,mode){ name=FX2_ALIAS[name]||name; const def=FX2_DEF[name]; if (!def) return;
-  if (name==='기본'){ if (FX2.def){ FX2.from=FX2.cur.slice(); FX2.to=FX2_ZERO.slice(); FX2.out=true; FX2.t=0; } if (EX) EX.out=true; return; }
+// ---- 자연스러운 눈 단계 5·6: 유지 중 움직임은 일정 박자(사인파) 대신 불규칙한 노이즈 + 무작위 타이밍 이벤트, 시선은 시선 엔진이 맡아요
+// R.n(x,c): 부드러운 노이즈(-1~1, 반복 안 보임) · R.ev(키,t,최소간격,최대간격,폭): 무작위 타이밍의 작은 이벤트(0~약1)
+function fx2R(){ const sd=Math.random()*200, E={};
+  return { sd, n:(x,c)=>N2(x,sd+(c||0)*13.7),
+    ev(k,t,a,b,w){ let e=E[k]; if (!e) e=E[k]={at:t+rnd(a,b)*rnd(0.3,0.8),amp:rnd(0.7,1.3)}; while (t>e.at+w*3){ e.at+=rnd(a,b); e.amp=rnd(0.7,1.3); } return e.amp*Math.exp(-Math.pow((t-e.at)/w,2)); } }; }
+const FX2_IDLE={
+ '웃음'(t,P,R){ const h=R.ev('h',t,0.16,0.42,0.05), f=R.ev('f',t,2,4,0.16); P[27]+=0.045*h; P[26]+=0.028*h;
+   for (let s=0;s<2;s++){ P[s*FX2N+5]+=0.05*h+0.07*f; P[s*FX2N+8]+=0.012*h; } },
+ '행복'(t,P,R){ P[28]+=1.4*R.n(t*0.45,1); P[26]+=0.009*R.n(t*0.8,2); for (let s=0;s<2;s++) P[s*FX2N+5]+=0.05*R.ev('f'+s,t,2.2,4.5,0.2); },
+ '애틋'(t,P,R){ P[28]+=1.2*R.n(t*0.35,1); for (let s=0;s<2;s++) P[s*FX2N+4]+=0.045*R.n(t*0.5,2+s*0.3); },
+ '슬픔'(t,P,R){ const g=R.ev('sigh',t,2.5,5,0.45); for (let s=0;s<2;s++){ P[s*FX2N+9]+=0.018*R.n(t*2.6,3+s); P[s*FX2N+4]+=0.035*R.n(t*0.45,5); P[s*FX2N+8]+=0.015*g; } P[26]-=0.012*g; },
+ '편안'(t,P,R){ const b=R.n(t*0.32,1); P[26]+=0.014*b; for (let s=0;s<2;s++) P[s*FX2N+4]+=0.05*b+0.03*R.n(t*0.7,2+s); },
+ '시원'(t,P,R){ const x=1-Math.exp(-t*0.6), b=R.n(t*0.25,1); P[26]-=0.012*x+0.006*b; P[27]-=0.008*x; for (let s=0;s<2;s++) P[s*FX2N+8]+=0.01*x+0.005*R.n(t*0.4,2+s); },
+ '혼자 생각중'(t,P,R){ P[FX2N+8]+=0.016*R.n(t*0.45,1)+0.03*R.ev('br',t,1.5,3.5,0.18); P[28]+=1.1*R.n(t*0.28,2); },
+ '경청4 흥미로움'(t,P,R){ const f=R.ev('f',t,1.0,2.4,0.06); for (let s=0;s<2;s++){ P[s*FX2N+8]+=0.025*f; P[s*FX2N]+=0.01*R.n(t*1.2,1+s); } },
+ '궁금'(t,P,R){ P[28]+=1.5*R.n(t*0.55,1); P[FX2N+8]+=0.012*R.n(t*0.7,2); },
+ '놀람'(t,P,R){ const k=0.012*R.n(t*14,1)*Math.exp(-t*2.5); P[0]+=k; P[FX2N]+=k*0.9; },
+};
+// 시선 엔진을 쓸 때의 시간표(시선 움직임은 빼고 몸·눈썹만). 끄면 예전(시선 직접 이동) 그대로
+const FX2_ADD={
+ '혼자 생각중':null,
+ '경청1 말하는걸 눈치챔'(t,P){ P[28]+=3*(1-fx2S(0.08,0.3,t)); },
+ '경청3 끄덕끄덕'(t,P,R){ const k=fx2S(0.15,0.4,t); R.ph=(R.ph||0)+(1/60)*2*Math.PI*1.35*(1+0.12*R.n(t*0.4,4)); const n=Math.max(0,Math.sin(R.ph)), sq=Math.pow(n,3);
+   P[29]+=6*n*k*(0.85+0.3*R.n(t*0.5,5)); for (let s=0;s<2;s++){ P[s*FX2N+4]+=0.45*sq*k; P[s*FX2N+5]+=0.2*sq*k; P[s*FX2N+8]-=0.015*sq*k; } },
+ '경청5 공감'(t,P,R){ const k=fx2S(0.3,0.6,t), nd=R.ev('nd',t,1.1,2.4,0.28); P[29]+=3.2*nd*k; for (let s=0;s<2;s++) P[s*FX2N+4]+=0.08*nd*k; },
+};
+// 전환 방식(blink: 감은 사이에 바꾸고 뜰 때 6% 더 열림 / direct: 0.28초, 튕김 없이 길게 안착) · 시선 규칙 · 깜빡임 빈도(br)·길이(bd)
+const FX2_META={'기본':{tr:'blink'},'웃음':{tr:'blink'},'행복':{tr:'blink'},'애틋':{tr:'blink',br:0.7},'슬픔':{tr:'blink',br:1.2},'편안':{tr:'blink',bd:1.4,br:1.3},'시원':{tr:'direct',bd:1.4,br:1.6},
+  '하품':{tr:'direct',bd:1.4},'혼자 생각중':{tr:'direct',gz:'think'},'경청1 말하는걸 눈치챔':{tr:'direct',gz:'notice'},'경청2 아하':{tr:'direct',gz:'listen'},'경청3 끄덕끄덕':{tr:'direct',gz:'nod'},
+  '경청4 흥미로움':{tr:'direct',gz:'listen',br:2.5},'경청5 공감':{tr:'blink',gz:'listen'},'궁금':{tr:'direct',br:0.7},'놀람':{tr:'direct',br:2.5}};
+for (const k in FX2_DEF){ const d=FX2_DEF[k]; d.idleS=d.idle; if (FX2_IDLE[k]) d.idle=FX2_IDLE[k]; else if (d.idle) d.idle=null; d.addS=d.add; if (k in FX2_ADD) d.addN=FX2_ADD[k]; else d.addN=d.add; Object.assign(d,FX2_META[k]||{}); }
+const FX2={cur:FX2_ZERO.slice(), from:FX2_ZERO.slice(), to:FX2_ZERO.slice(), def:null, name:'', t:0, out:false, ot:0, ia:0, pend:null, R:fx2R(), lag:{e:0.06,s:0.025,b:0.03}, tr:'direct', hold:2};
+const fx2Nat=()=>S['표정 전환 자연스럽게']!==false;
+function fx2Tr(def){ const m=S['표정 전환 방식']|0; if (!fx2Nat()) return 'legacy'; if (m===1) return 'blink'; if (m===2) return 'direct'; return (def&&def.tr)||'direct'; }
+function fx2Start(tr){ FX2.tr=tr; FX2.lag={e:0.06*rnd(0.7,1.3), s:0.025*rnd(0.4,1.6), b:0.03*rnd(0.7,1.3)}; FX2.R=fx2R();
+  if (tr==='blink' && typeof gzBlink==='function') gzBlink(time,'swap'); }
+function fx2Play(name,mode,fromPend){ name=FX2_ALIAS[name]||name; const def=FX2_DEF[name]; if (!def) return;
+  if (!fromPend && fx2Nat() && typeof gzBusy==='function' && gzBusy(time)){ FX2.pend=[name,mode]; return; }   // 깜빡이는 중이면 끝날 때까지 기다렸다가
+  if (name==='기본'){ if (FX2.def){ FX2.from=FX2.cur.slice(); FX2.to=FX2_ZERO.slice(); FX2.out=true; FX2.t=0; fx2Start(fx2Tr(FX2_DEF['기본'])); } if (EX) EX.out=true; if (typeof gzSetRule==='function') gzSetRule(null,time); return; }
   FX2.from=FX2.cur.slice(); FX2.to=fx2Pose(def); FX2.def=def; FX2.name=name; FX2.t=0; FX2.out=false; FX2.mode=mode||['once','loop','hold'][S['표정재생']]||'once';
+  FX2.hold=(def.hold||2)*(fx2Nat()?rnd(0.85,1.2):1); fx2Start(fx2Tr(def));
+  if (typeof GZ!=='undefined'){ GZ.rate=fx2Nat()?(def.br||1):1; GZ.bdur=fx2Nat()?(def.bd||1):1; gzSetRule(gzOn()&&gzRuleOn()?(def.gz||null):null,time); }
   EX={name,t:0,mode:FX2.mode,out:false,ot:0};
   if (S['표정소리'] && typeof xs==='function'){ const pt={'웃음':1.5,'행복':1.3,'애틋':1.0,'슬픔':0.7,'편안':0.8,'시원':0.6,'하품':0.55,'혼자 생각중':0.9,'경청1 말하는걸 눈치챔':1.6,'경청2 아하':1.8,'경청3 끄덕끄덕':1.1,'경청4 흥미로움':1.4,'경청5 공감':0.9,'궁금':1.3,'놀람':1.8}[name]||1; try{ xs('pop',0.3,pt); }catch(e){} } }
 const fx2Bo=(x,s)=>{ x=Math.min(1,Math.max(0,x)); const c=s+1; return 1+c*Math.pow(x-1,3)+s*Math.pow(x-1,2); };
 const fx2Eo=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3);
+const fx2E4=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),4);     // 처음엔 빠르게, 끝에서 길게 안착(튕김 없음)
 function fx2Target(dt,F){ const N=neutralP(); for (const k of PK) PT[k]=N[k];
-  const d=FX2.def; if (!d && !FX2.out){ if (FX2.dirty){ FX2.cur.set(FX2_ZERO); fx2Write(); FX2.dirty=false; } return 0; }   // 표정이 없을 땐 __face 를 건드리지 않아요(직접 조절 가능)
+  if (FX2.pend && !(typeof gzBusy==='function'&&gzBusy(time))){ const p=FX2.pend; FX2.pend=null; fx2Play(p[0],p[1],true); }
+  const d=FX2.def; if (!d && !FX2.out){ if (FX2.dirty){ FX2.cur.set(FX2_ZERO); fx2Write(); FX2.dirty=false; } if (typeof GZ!=='undefined'){ GZ.rate=1; GZ.bdur=1; } return 0; }   // 표정이 없을 땐 __face 를 건드리지 않아요(직접 조절 가능)
   FX2.dirty=true;
-  FX2.t+=dt; const t=FX2.t, out=FX2.out, ant=out?0.12:(d.ant??0.25), ta=out?0.07:0.09, tin=out?0.38:(d.tin??0.32), os=out?1.2:(d.os??1.6);
+  FX2.t+=dt; const t=FX2.t, out=FX2.out, ant=out?0.12:(d.ant??0.25), ta=out?0.07:0.09, tin=out?0.38:(d.tin??0.32), os=out?1.2:(d.os??1.6), tr=FX2.tr, L=FX2.lag;
   const P=FX2.cur, A=FX2.from, B=FX2.to, I=S['표정세기'];
-  for (let i=0;i<FX2L;i++){ const side=i<26?(i/FX2N|0):0, k=i<26?FX2K[i%FX2N]:'', eye=FX2_EYE.has(k);
-    const u=t-(eye?0.06:0)-(side?0.025:0)-(i>=26?0.03:0);    // 눈썹이 먼저, 눈은 약 4프레임 뒤, 오른쪽은 조금 늦게
-    const an=A[i]+(A[i]-B[i])*ant; let v;
-    if (u<=0) v=A[i]; else if (u<ta) v=A[i]+(an-A[i])*fx2Eo(u/ta); else v=an+(B[i]-an)*fx2Bo((u-ta)/tin,os);
+  const bd=typeof gzBD==='function'?gzBD():0.26, tsw=bd*0.38;                 // 깜빡이며 바뀌기: 다 감긴 순간 모양을 바꿔요
+  for (let i=0;i<FX2L;i++){ const side=i<26?(i/FX2N|0):0, k=i<26?FX2K[i%FX2N]:'', eye=FX2_EYE.has(k), body=i>=26; let v;
+    if (tr==='legacy'){ const u=t-(eye?0.06:0)-(side?0.025:0)-(body?0.03:0), an=A[i]+(A[i]-B[i])*ant;
+      if (u<=0) v=A[i]; else if (u<ta) v=A[i]+(an-A[i])*fx2Eo(u/ta); else v=an+(B[i]-an)*fx2Bo((u-ta)/tin,os); }
+    else if (body){ const u=t-L.b, an=A[i]+(A[i]-B[i])*ant;          // 몸(들썩·찌그러짐)만 예비동작·튕김을 남겨요
+      if (u<=0) v=A[i]; else if (u<ta) v=A[i]+(an-A[i])*fx2Eo(u/ta); else v=an+(B[i]-an)*fx2Bo((u-ta)/tin,os); }
+    else if (eye){ const u=t-(side?L.s:0);
+      if (tr==='blink') v=u<tsw?A[i]:B[i];
+      else { const ed=Math.max(0.28,out?0.28:(d.tin||0.28)); const w=u-L.e; v=w<=0?A[i]:A[i]+(B[i]-A[i])*fx2E4(w/ed); } }
+    else { const u=t-(side?L.s:0), an=A[i]+(A[i]-B[i])*Math.min(ant,0.25)*0.5, tb=0.07, bdur=Math.max(0.25,out?0.3:tin*0.9);   // 눈썹: 먼저 출발, 아주 작은 예비동작, 거의 안 튕김
+      if (u<=0) v=A[i]; else if (u<tb) v=A[i]+(an-A[i])*fx2Eo(u/tb); else v=an+(B[i]-an)*fx2Bo((u-tb)/bdur,0.5); }
     P[i]=FX2_ZERO[i]+(v-FX2_ZERO[i])*I; }
-  if (!out && d.add){ const Q=FX2_ZERO.slice(); d.add(t,Q); for (let i=0;i<FX2L;i++) P[i]+=(Q[i]-FX2_ZERO[i])*I; }
-  if (!out && d.idle){ FX2.ia=Math.min(1,Math.max(0,(t-0.35)/0.5)); const Q=FX2_ZERO.slice(); d.idle(t,Q); for (let i=0;i<FX2L;i++) P[i]+=(Q[i]-FX2_ZERO[i])*FX2.ia*I; }
-  // 끝: once는 정해진 시간 뒤 기본으로, loop는 처음부터 다시, hold는 계속
-  if (!out && FX2.mode==='once' && t>(d.hold||2)+tin){ FX2.from=P.slice(); FX2.to=FX2_ZERO.slice(); FX2.out=true; FX2.t=0; if (EX) EX.out=true; }
-  else if (!out && FX2.mode==='loop' && t>(d.hold||2)+tin+0.6){ const nm=FX2.name; fx2Play('기본'); FX2.loopName=nm; }
-  if (out && t>ta+tin+0.1){ FX2.def=null; FX2.out=false; EX=null; if (FX2.loopName){ const nm=FX2.loopName; FX2.loopName=null; fx2Play(nm,'loop'); } }
+  if (tr==='blink'){ const ro=tsw+bd*0.35, x=(t-ro)/0.22; if (x>0 && x<1){ const oo=0.06*Math.sin(Math.PI*x)*I; P[0]*=1+oo; P[FX2N]*=1+oo; } }   // 뜰 때만 6% 살짝 더 열렸다 돌아와요
+  const nat=fx2Nat(), R=FX2.R, gzR=nat&&typeof gzOn==='function'&&gzOn()&&gzRuleOn();
+  const addF=out?null:(gzR?d.addN:d.addS);
+  if (addF){ const Q=FX2_ZERO.slice(); addF(t,Q,R); for (let i=0;i<FX2L;i++) P[i]+=(Q[i]-FX2_ZERO[i])*I; }
+  const irr=S['불규칙 유지 움직임']!==false, idF=out?null:(irr?d.idle:d.idleS), am=irr?(S['유지 중 움직임']??1):1;
+  if (idF){ FX2.ia=Math.min(1,Math.max(0,(t-0.35)/0.5)); const Q=FX2_ZERO.slice(); idF(t,Q,R); for (let i=0;i<FX2L;i++) P[i]+=(Q[i]-FX2_ZERO[i])*FX2.ia*I*am; }
+  // 끝: once는 정해진 시간(매번 조금씩 다름) 뒤 기본으로, loop는 처음부터 다시, hold는 계속
+  const hold=S['불규칙 유지 움직임']!==false?FX2.hold:(d.hold||2);
+  if (!out && FX2.mode==='once' && t>hold+tin){ FX2.from=P.slice(); FX2.to=FX2_ZERO.slice(); FX2.out=true; FX2.t=0; if (EX) EX.out=true; fx2Start(fx2Tr(FX2_DEF['기본'])); if (typeof gzSetRule==='function') gzSetRule(null,time); }
+  else if (!out && FX2.mode==='loop' && t>hold+tin+0.6){ const nm=FX2.name; fx2Play('기본',null,true); FX2.loopName=nm; }
+  if (out && t>Math.max(ta+tin,0.45)+0.1){ FX2.def=null; FX2.out=false; EX=null; if (FX2.loopName){ const nm=FX2.loopName; FX2.loopName=null; fx2Play(nm,'loop',true); } }
   if (EX){ EX.t=FX2.out?EX.t:t; EX.out=FX2.out; }
   const bk=S['모션크기'];
   F.sy*=1+(P[26]-1)*bk; F.off[1]+=P[27]*bk; F.rz+=P[28]*bk; F.rx+=P[29]*bk;
@@ -1239,7 +1306,7 @@ function fx2Target(dt,F){ const N=neutralP(); for (const k of PK) PT[k]=N[k];
 function fx2Write(){ const P=FX2.cur; for (let s=0;s<2;s++){ const o=s*FX2N, E=FACEP.eye[s], B=FACEP.brow[s];
     E.scale=P[o]; E.sx=P[o+1]; E.sq=P[o+2]; E.rot=P[o+3]; E.cl=Math.min(1,Math.max(0,P[o+4])); E.lo=Math.min(1,Math.max(0,P[o+5])); E.x=P[o+6]; E.y=P[o+7];
     B.y=P[o+8]; B.tilt=P[o+9]; B.bend=P[o+10]; B.pull=P[o+11]; B.x=P[o+12]; } }
-window.__fx2=()=>({name:FX2.name,t:+FX2.t.toFixed(2),out:FX2.out,on:!!FX2.def,face:JSON.parse(JSON.stringify(FACEP))});
+window.__fx2=()=>({name:FX2.name,t:+FX2.t.toFixed(2),out:FX2.out,on:!!FX2.def,tr:FX2.tr,pend:FX2.pend,face:JSON.parse(JSON.stringify(FACEP))});
 
 let EX=null; // 지금 재생 중인 표정 {name,t,mode}
 const Pc=neutralP(); const PT={};
@@ -1961,7 +2028,7 @@ function UpdateActions(tt){ const dt=1/60;
   UpdateMotion(dt,F); BPH+=dt/0.55*BRK;
   HOLDP+=(HOLDT-HOLDP)*(HOLDT>HOLDP?0.12:0.25); if (HOLDP>0.01){ F.press+=HOLDP*0.34; F.sx*=1+HOLDP*0.1; }
   if (HOLDREL>0 && time-HOLDREL<1/30){ HOLDREL=0; jumpV+=S['클릭점프']*1.1; boingV+=0.12; Sfx('boing',0.9,S['튀는소리높이']*1.1); if (MINI()) playExpr('웃음','once'); }
-  exprTarget(dt,F);
+  exprTarget(dt,F); if (MINI()) gzBody(dt,F);
   for (const k of PK) Pc[k]+=(PT[k]-Pc[k])*(k[0]==='m'?0.22:0.28);
   if (S['손항상'] && !POD.act) podReach();
   UpdatePod(dt,F);
@@ -1976,12 +2043,101 @@ function UpdateActions(tt){ const dt=1/60;
   UpdateGlyphs(); }
 
 // ---- 눈·입 매 프레임 (눈꺼풀 깜빡임: 빨리 감고 조금 천천히 뜨고, 가끔 두 번)
-let blinkQ=[]; const blinkCl=t=>t<0?0:t<0.075?ease(t/0.075):t<0.11?1:t<0.27?1-ease((t-0.11)/0.16):0;
+let blinkQ=[];
+// ============================================================ ver3 자연스러운 눈 (시선 엔진 · 이유 있는 깜빡임 · 몸 따라 돌기)
+// 원칙: 대부분은 가만히 머물고(0.5~3초) → 아주 빠르게 휙(0.03~0.1초, 처음에 거의 다 감) → 다시 머묾.
+//       머무는 동안 1~2초에 한 번 아주 작은 떨림. 손가락을 대고 있을 때만 부드럽게 따라가요(약 0.1초 반응, 시간 기준).
+//       큰 시선 이동은 눈이 먼저 가고, 약 0.15초 뒤 몸(얼굴)이 따라 돌아요. 몸이 돈 만큼 눈은 가운데로 돌아와요.
+//       깜빡임은 이유가 있을 때(큰 시선 이동·몸 돌기·표정 바뀜) + 드문드문 불규칙하게. 빨리 감고 천천히 떠요(약 0.26초).
+// 좌표: 시선 g = 화면 기준 [-1,1] (x + 오른쪽, y + 아래)
+const GZ={g:[0,0], from:[0,0], to:[0,0], st:-9, sd:0.05, base:[0,0], holdEnd:0, microAt:1.5, track:false, lastMove:-9, mx:null, my:null,
+  bn:[0,0], bnT:[0,0], bodyAt:0, bw:0, lid:0, nb:2.5, lastBlink:-9, rule:null, ruleT:0, ph:'look', phEnd:0, rate:1, bdur:1, eye:[0,0], init:false};
+const gzOn=()=>S['자연 시선']!==false, gzBlinkOn=()=>S['이유 있는 깜빡임']!==false, gzBodyOn=()=>S['몸 따라 돌기']!==false;
+const gzRuleOn=()=>S['대화 시선 규칙']!==false;
+const gzF=x=>Math.sign(x)*Math.max(0,Math.abs(x)-0.28)/0.72;          // 이만큼 넘게 보면 몸이 따라 돌기 시작
+function gzBlink(at,why){ if (why!=='swap' && at-GZ.lastBlink<0.55) return false;
+  for (let i=blinkQ.length-1;i>=0;i--) if (at-blinkQ[i]>2) blinkQ.splice(i,1);
+  blinkQ.push(at); GZ.lastBlink=at; if (why!=='swap' && why!=='rand') GZ.nb=Math.max(GZ.nb,at+gzGap()*0.6); return true; }
+function gzGap(){ const b=Math.max(0.5,S['깜빡임간격']||4)*(GZ.rate||1); return b*clamp(0.3-Math.log(1-Math.random()*0.97)*0.7,0.3,2.4); }   // 2~6초쯤, 들쭉날쭉
+const gzBD=()=>0.26*(S['깜빡임 길이']||1)*(GZ.bdur||1);
+// 빨리 감고(약 35%) 잠깐 멈췄다가(8%) 천천히 떠요(57%)
+function gzBlinkCl(t){ const d=gzBD(); if (t<0||t>d) return 0; const a=d*0.35, h=d*0.08;
+  if (t<a){ const x=t/a; return x*x*(3-2*x); } if (t<a+h) return 1; const x=(t-a-h)/(d-a-h); return (1-x)*(1-x)*(1+0.6*x); }
+function gzBusy(tt){ const d=gzBD(); for (const b of blinkQ) if (tt-b>=-1e-4 && tt-b<d) return true; return false; }
+function gzBlinkTick(tt){ if (tt>GZ.nb){ gzBlink(tt,'rand'); if (Math.random()<0.12) blinkQ.push(tt+gzBD()+rnd(0.06,0.14)); GZ.nb=tt+gzGap(); } }
+function gzSac(x,y,tt,opt){ opt=opt||{}; const lim=1.05, l=Math.hypot(x,y); if (l>lim){ x*=lim/l; y*=lim/l; }
+  GZ.from=[...GZ.g]; GZ.to=[x,y]; GZ.base=[x,y]; GZ.st=tt; const d=Math.hypot(x-GZ.from[0],y-GZ.from[1]);
+  GZ.sd=opt.sd||(0.03+0.07*Math.min(1,d/1.1));
+  GZ.bnT=[gzF(x),gzF(y)]; GZ.bodyAt=tt+0.15;
+  if (d>0.45 && gzBlinkOn() && (opt.blink||Math.random()<0.55)) gzBlink(tt+GZ.sd*0.5,'sac');      // 큰 시선 이동 중간에 깜빡
+  else if (opt.blink && gzBlinkOn()) gzBlink(tt+GZ.sd,'sac'); }
+const gzEase=u=>1-Math.pow(1-Math.min(1,Math.max(0,u)),4);   // 1/3 지점에서 80%
+function gzPick(tt){ const hm=S['시선 머무름']||1, R=gzRuleOn()?GZ.rule:null, at=tt-GZ.ruleT;
+  if (R==='nod'){ gzSac(rnd(-0.04,0.04),rnd(-0.03,0.03),tt); GZ.holdEnd=tt+rnd(1.5,3.5)*hm; return; }
+  if (R==='listen'){   // 들을 때: 대부분 보다가 7초 안팎마다 1초쯤 옆이나 아래로 살짝 피해요
+    if (GZ.ph!=='away' && tt>=GZ.phEnd){ GZ.ph='away'; const s=Math.random()<0.5?-1:1, dn=Math.random()<0.55; gzSac(dn?s*rnd(0.1,0.3):s*rnd(0.35,0.6), dn?rnd(0.3,0.5):rnd(0.05,0.2),tt); GZ.holdEnd=tt+rnd(0.8,1.4); GZ.phEnd=GZ.holdEnd; return; }
+    if (GZ.ph==='away'){ GZ.ph='look'; gzSac(rnd(-0.05,0.05),rnd(-0.03,0.04),tt,{blink:Math.random()<0.4}); GZ.phEnd=tt+rnd(5.5,9); GZ.holdEnd=tt+rnd(1.2,3)*hm; return; }
+    gzSac(rnd(-0.06,0.06),rnd(-0.04,0.05),tt); GZ.holdEnd=Math.min(GZ.phEnd,tt+rnd(1.2,3)*hm); return; }
+  if (R==='think'){    // 생각할 때: 위(자주)나 옆으로 휙 → 2.5~4.5초 머물며 가끔 작게 휙 → 돌아오며 깜빡
+    if (GZ.ph!=='away'){ GZ.ph='away'; const s=Math.random()<0.5?-1:1, up=Math.random()<0.6; gzSac(s*rnd(0.3,0.7), up?-rnd(0.4,0.65):rnd(-0.1,0.15),tt); GZ.phEnd=tt+rnd(2.5,4.5); GZ.holdEnd=tt+rnd(0.8,1.6); return; }
+    if (tt<GZ.phEnd){ gzSac(GZ.base[0]+rnd(-0.12,0.12),GZ.base[1]+rnd(-0.08,0.08),tt); GZ.holdEnd=Math.min(GZ.phEnd,tt+rnd(0.7,1.5)); return; }
+    GZ.ph='look'; gzSac(rnd(-0.05,0.05),rnd(-0.03,0.03),tt,{blink:true}); GZ.holdEnd=tt+rnd(1,2.2); GZ.ph='back'; return; }
+  if (R==='notice'){ if (at<0.1){ GZ.holdEnd=tt+0.12; return; }   // 딴 데 보다가 → 0.06초 만에 휙 돌아보고 깜빡
+    gzSac(0,0,tt,{sd:0.06,blink:true}); GZ.rule='listen'; GZ.ruleT=tt; GZ.ph='look'; GZ.phEnd=tt+rnd(4,7); GZ.holdEnd=tt+rnd(1.5,3); return; }
+  // 평소: 70%는 앞(사용자)을 보고, 가끔 옆이나 아래를 잠깐 봐요
+  const near=Math.hypot(GZ.g[0],GZ.g[1])<0.2;
+  if (Math.random()<(near?0.62:0.85)){ gzSac(rnd(-0.1,0.1),rnd(-0.07,0.08),tt); GZ.holdEnd=tt+rnd(0.5,3)*hm; }
+  else { const s=Math.random()<0.5?-1:1; gzSac(s*rnd(0.3,0.85),rnd(-0.15,0.45),tt); GZ.holdEnd=tt+rnd(0.5,1.6)*hm; } }
+function gzSetRule(r,tt){ if (r===GZ.rule) return; GZ.rule=r; GZ.ruleT=tt; GZ.ph='look';
+  if (r==='notice'){ const s=Math.random()<0.5?-1:1; GZ.g=[s*0.6,0.12]; GZ.from=[...GZ.g]; GZ.to=[...GZ.g]; GZ.base=[...GZ.g]; GZ.st=tt-1; GZ.holdEnd=tt+0.1; }
+  else if (r==='think'){ GZ.holdEnd=tt+rnd(0.15,0.4); }
+  else if (r==='listen'){ GZ.phEnd=tt+rnd(3,6); GZ.holdEnd=Math.min(GZ.holdEnd,tt+0.4); }
+  else if (r===null){ GZ.holdEnd=Math.min(GZ.holdEnd,tt+rnd(0.3,1)); } }
+function gzTick(tt,dt){ if (!GZ.init){ GZ.init=true; GZ.holdEnd=tt+rnd(0.6,1.5); GZ.nb=tt+rnd(1.5,3.5); GZ.microAt=tt+rnd(1,2); }
+  // 손가락/마우스: 누르고 있거나 막 움직였을 때만 따라가요
+  if (GZ.mx!==M.x||GZ.my!==M.y){ if (GZ.mx!==null) GZ.lastMove=tt; GZ.mx=M.x; GZ.my=M.y; }
+  const held=M.held||(typeof PTR!=='undefined'&&PTR.size>0), act=held||tt-GZ.lastMove<0.9;
+  let nd=[M.x/W*2-1, M.y/H*2-1]; const ndl=Math.hypot(nd[0],nd[1]); if (ndl>1) nd=[nd[0]/ndl,nd[1]/ndl];
+  if (act){ if (!GZ.track){ GZ.track=true; gzSac(nd[0],nd[1],tt); }
+    else if (tt-GZ.st>GZ.sd){ const k=1-Math.exp(-dt/0.09); GZ.g[0]+=(nd[0]-GZ.g[0])*k; GZ.g[1]+=(nd[1]-GZ.g[1])*k; GZ.to=[...GZ.g]; GZ.base=[...GZ.g]; GZ.bnT=[gzF(nd[0]),gzF(nd[1])]; GZ.bodyAt=Math.min(GZ.bodyAt,tt); } }
+  else if (GZ.track){ GZ.track=false; GZ.holdEnd=tt+rnd(0.6,1.4); }
+  if (!GZ.track){
+    if (tt>=GZ.holdEnd && tt-GZ.st>GZ.sd) gzPick(tt);
+    else if (tt>=GZ.microAt && tt-GZ.st>GZ.sd){ const a=0.03*(S['미세 떨림']??1); GZ.from=[...GZ.g]; GZ.to=[GZ.base[0]+rnd(-a,a),GZ.base[1]+rnd(-a,a)*0.7]; GZ.st=tt; GZ.sd=0.025; GZ.microAt=tt+rnd(1,2); } }   // 미세 떨림(마이크로 단속)
+  if (tt-GZ.st<=GZ.sd+1e-4){ const e=gzEase((tt-GZ.st)/GZ.sd); GZ.g=[GZ.from[0]+(GZ.to[0]-GZ.from[0])*e, GZ.from[1]+(GZ.to[1]-GZ.from[1])*e]; }
+  else if (!GZ.track) GZ.g=[...GZ.to];
+  // 몸: 0.15초 늦게, 0.4초쯤 걸려 따라와요
+  if (tt>=GZ.bodyAt){ const k=1-Math.exp(-dt/0.14); GZ.bn[0]+=(GZ.bnT[0]-GZ.bn[0])*k; GZ.bn[1]+=(GZ.bnT[1]-GZ.bn[1])*k; }
+  const bOn=gzBodyOn()&&(S['몸 돌기 정도']??10)>0.01, comp=bOn?0.55*GZ.bw:0;
+  GZ.eye=[GZ.g[0]-comp*GZ.bn[0]*0.72, GZ.g[1]-comp*GZ.bn[1]*0.72];        // 몸이 돈 만큼 눈은 가운데로
+  // 위 눈꺼풀이 위아래 시선을 살짝 늦게 따라가요 (아래를 보면 덮이고, 위를 보면 조금 더 떠요)
+  const lt=GZ.eye[1]*(S['눈꺼풀 따라가기']??0.6); GZ.lid+=(lt-GZ.lid)*(1-Math.exp(-dt/0.045));
+  }
+// 몸 돌기: 덧셈으로만 더하고, 소환·잡기·회전·모션 중에는 약해지거나 꺼져요
+function gzBody(dt,F){ if (!gzOn()){ GZ.bw=0; return; }
+  const busy=(typeof SU!=='undefined'&&SU.on)||GONE||(typeof SPIN!=='undefined'&&SPIN.on)||dragging||(typeof GR!=='undefined'&&GR.pins&&GR.pins.length);
+  const wT=!gzBodyOn()||busy?0:(MOT?0.3:1); GZ.bw+=(wT-GZ.bw)*(1-Math.exp(-dt/0.25)); if (GZ.bw<1e-4) return;
+  const Y=(S['몸 돌기 정도']??10), w=GZ.bw;
+  F.ry+=GZ.bn[0]*Y*w*GZ_YS; F.rx+=GZ.bn[1]*Y*0.72*w*GZ_PS; }
+const GZ_YS=-1, GZ_PS=-1, GZ_LS=1;   // 몸 돌기·끄덕·눈꺼풀 방향 부호 (화면에서 확인해 맞춤)
+// 눈 도형별 시선 이동 한계 (도형이 클수록 덜 움직여요) — 도형 단위 반폭·반높이
+const GZ_EXT=[[0.68,0.68],[1,0.66],[0.98,0.5],[1,0.6],[1.06,0.16],[0.62,1],[1.05,0.55],[0.85,0.82],[0.82,0.82],[0.78,1.09],[0.95,0.95],[1.0,0.92],[0.95,0.95],[1.05,1.05],[0.9,0.9],[0.89,0.89],[0.9,0.9],[0.6,1.0],[0.96,0.96],[0.98,0.98]];
+function gzEyePost(i,u,blk){ const k=S['깜빡일 때 내려가기']??1;
+  u.uMOff.value.y-=0.022*blk*k; u.uBrP.value.x-=0.035*blk*k;                // 깜빡일 때 눈은 살짝 아래로, 눈썹도 살짝 따라 내려와요
+  const ex=GZ_EXT[(S['눈 도형']|0)]||GZ_EXT[0], Z=u.uMZ.value, U=0.22*Z;
+  const hw=ex[0]*U*Math.max(1,u.uMSX.value), hh=ex[1]*U*Math.max(1,u.uSq.value);
+  const lx=Math.max(0.05,0.36-hw*0.55), ly=Math.max(0.04,0.3-hh*0.55);       // 눈 그림 영역 안 + 얼굴 위 적당한 범위
+  const o=u.uMOff.value, hx=EYE[i].hx||0, hy=EYE[i].hy||0; o.x=hx+clamp(o.x-hx,-lx,lx); o.y=hy+clamp(o.y-hy,-ly,ly); }
+window.__gz=()=>({g:GZ.g.map(v=>+v.toFixed(3)),eye:GZ.eye.map(v=>+v.toFixed(3)),bn:GZ.bn.map(v=>+v.toFixed(3)),bw:+GZ.bw.toFixed(3),lid:+GZ.lid.toFixed(3),rule:GZ.rule,ph:GZ.ph,track:GZ.track,blinks:blinkQ.length,nb:+GZ.nb.toFixed(2),last:+GZ.lastBlink.toFixed(2)});
+window.__gzBlink=()=>gzBlink(time,"swap");
+window.__gzSac=(x,y,h)=>{ gzSac(x,y,time); GZ.holdEnd=time+(h??2); GZ.microAt=time+(h??2); };
+ const blinkCl=t=>t<0?0:t<0.075?ease(t/0.075):t<0.11?1:t<0.27?1-ease((t-0.11)/0.16):0;
 function UpdateEyes(tt){
   if (S['눈모양']!==builtEye || (S['눈 도형']|0)!==builtShp) rebuildEyes();
   const ep=[S['왼눈위치'],S['오른눈위치']], mid=(ep[0].x+ep[1].x)/2;
   for (let i=0;i<2;i++){ const ex=clamp(mid+(ep[i].x-mid)*S['눈간격'],-2,2), ey=clamp(ep[i].y+S['눈높이'],-2,2); EYE[i].home=[ex,ey,-Math.sqrt(Math.max(0.01,R*R-ex*ex-ey*ey))]; }
-  if (tt>nextBlink){ blinkStart=tt; nextBlink=tt+rnd(S['깜빡임간격']*0.6,S['깜빡임간격']*1.4); blinkQ=[tt]; if (Math.random()<0.22) blinkQ.push(tt+0.46); }
+  if (gzOn()) gzTick(tt,1/60);
+  if (gzBlinkOn()) gzBlinkTick(tt); else if (tt>nextBlink){ blinkStart=tt; nextBlink=tt+rnd(S['깜빡임간격']*0.6,S['깜빡임간격']*1.4); blinkQ=[tt]; if (Math.random()<0.22) blinkQ.push(tt+0.46); }
   let bl=0; for (const b of blinkQ) bl=Math.max(bl,blinkCl(tt-b));
   let nd=[M.x/W*2-1, M.y/H*2-1]; const ndl=Math.hypot(nd[0],nd[1]); if (ndl>1) nd=[nd[0]/ndl,nd[1]/ndl];
   const ink3=S['눈색'], wc={r:1,g:1,b:1}, pc=ink3, lt=S['눈스타일']===0?[ink3.r,ink3.g,ink3.b]:[1,1,1]; const bk=S['볼색'];   // ver3: 잉크 눈 / 흰 눈
@@ -1990,7 +2146,7 @@ function UpdateEyes(tt){
     gluePlane(e.me,e.home,S['눈크기'],0,tt,0.012,q,nn);
     e.g.visible = dot(qRot(hRot,nn), norm(sub(camU,TP(q)))) > -0.02;
     const mv=S['눈동자이동']*(e.free?0.45:1), g=Math.min(1,Math.hypot(Pc.gx,Pc.gy));
-    e.pl[0]+=(nd[0]*mv*(1-g*0.8)-e.pl[0])*0.15; e.pl[1]+=(nd[1]*mv*(1-g*0.8)-e.pl[1])*0.15;
+    if (gzOn()){ e.pl[0]=GZ.eye[0]*mv*(1-g*0.8); e.pl[1]=-GZ.eye[1]*mv*(1-g*0.8); }   // 화면 아래 = 눈 그림 좌표 아래(-) else { e.pl[0]+=(nd[0]*mv*(1-g*0.8)-e.pl[0])*0.15; e.pl[1]+=(nd[1]*mv*(1-g*0.8)-e.pl[1])*0.15; }
     const s0=EYE_STYLE[st].wr; u.uGaze.value.set(e.pl[0]+Pc.gx*s0[0]*0.55, e.pl[1]+Pc.gy*s0[1]*0.5);
     const open=(i===0?Pc.uL:Pc.uR), blk=open>0.2?bl:0; let up=Math.max(0,open)*(1-blk); if (sleepy) up=Math.min(up,1)*0.55+Math.max(0,up-1);
     u.uUp.value=up; u.uLo.value=clamp01(i===0?Pc.loL:Pc.loR); u.uTilt.value=Pc.tilt; u.uCurve.value=clamp(Pc.curve,-1,1);
@@ -1999,7 +2155,7 @@ function UpdateEyes(tt){
     u.uBrow.value=clamp01(Pc.brow); u.uBrowY.value=Pc.browY+(i===1?Pc.bYR:0); u.uBrowA.value=Pc.browA; u.uBrowC.value=Pc.browC;
     u.uBlush.value=S['얼굴']===0?0:clamp01(Pc.blush); u.uSweat.value=clamp01(Pc.sweat); u.uVein.value=clamp01(Pc.vein); u.uFade.value=EYF;
     u.uWhite.value.setRGB(wc.r,wc.g,wc.b); u.uPupilC.value.setRGB(pc.r,pc.g,pc.b); u.uLight.value.setRGB(lt[0],lt[1],lt[2]); u.uBlushC.value.setRGB(bk.r,bk.g,bk.b); u.uRing.value=S['눈스타일']===1?1:0; }
-  const mini=MINI(); let A=null, mbl=0; if (mini){ A=mAnim(); for (const b of blinkQ) { const v=mBlinkCl(tt-b); if (Math.abs(v)>Math.abs(mbl)) mbl=v; } if (!A.blink) mbl=0; }
+  const mini=MINI(); let A=null, mbl=0; if (mini){ A=mAnim(); for (const b of blinkQ) { const v=(gzBlinkOn()||fx2Nat()?gzBlinkCl:mBlinkCl)(tt-b); if (Math.abs(v)>Math.abs(mbl)) mbl=v; } if (!A.blink) mbl=0; }
   for (let i=0;i<2;i++){ const u=EYE[i].u; u.uMin.value=mini?1:0; if (!mini) continue;
     const o=A.o[i]*tkEye()*mdEye(); u.uMO.value=Math.max(0,o*(1-mbl)); u.uMB.value=A.b[i]; u.uMC.value=c01(A.c[i]); u.uMK.value=clamp(A.k[i],-1.2,1.2);
     u.uMZ.value=Math.max(0.2,A.z[i]); u.uMSX.value=A.sx[i]*(1+0.1*Math.max(0,mbl)); u.uMR.value=A.r[i];
@@ -2007,9 +2163,9 @@ function UpdateEyes(tt){
     u.uMOff.value.set(pl[0]*0.35*sh+A.gx*0.15*sh*Math.max(0.6,s0[0]/0.42)+A.x[i], pl[1]*0.3*sh+A.gy*0.12*sh*Math.max(0.6,s0[1]/0.42)+A.y[i]);
     u.uMPup.value=0; u.uShp.value=builtShp; u.uBrw.value=S['눈썹 모양']|0; u.uMHi.value=S['하이라이트']?1:0;
     { const EP=FACEP.eye[i], BP=FACEP.brow[i], ob=Math.max(0,o), blk=clamp01(mbl);   // 표정 뜸(o) → 감김/눌림, 깜빡임 → 감김
-      u.uCl.value=clamp01(1-(1-clamp01(1-ob))*(1-blk)*(1-clamp01(EP.cl))); u.uSq.value=Math.max(1,Math.min(ob,1.6))*EP.sq;
+      const gl=gzOn()?GZ.lid*GZ_LS:0; u.uCl.value=clamp01(1-(1-clamp01(1-ob))*(1-blk)*(1-clamp01(EP.cl))*(1-Math.max(0,gl)*0.3)); u.uSq.value=Math.max(1,Math.min(ob,1.6))*EP.sq*(1+0.06*Math.max(0,-gl));
       u.uMZ.value*=EP.scale; u.uMSX.value*=EP.sx; u.uMR.value+=EP.rot*(i?1:-1); u.uMOff.value.x+=EP.x*(i?1:-1); u.uMOff.value.y+=EP.y; u.uMLo.value=clamp01(EP.lo); u.uBrPl.value=BP.pull;   // rot: + 바깥 끝이 올라감, x: + 바깥쪽
-      u.uBrP.value.set(0.07*(Math.min(ob,1.4)-1)-0.05*A.b[i]+BP.y, 0.35*clamp(A.k[i],-1.2,1.2)+BP.tilt, BP.bend, BP.x); } u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
+      u.uBrP.value.set(0.07*(Math.min(ob,1.4)-1)-0.05*A.b[i]+BP.y, 0.35*clamp(A.k[i],-1.2,1.2)+BP.tilt, BP.bend, BP.x); if (gzOn()||gzBlinkOn()) gzEyePost(i,u,blk); } u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
     if (pup) u.uGaze.value.set(pl[0]+A.gx*s0[0]*0.6+A.px[i]*s0[0], pl[1]+A.gy*s0[1]*0.55+A.py[i]*s0[1]);
     u.uLight.value.setRGB(lt[0],lt[1],lt[2]); }
   mouthG.visible=false; }   // 입 없는 캐릭터: 입은 그리지 않아요
