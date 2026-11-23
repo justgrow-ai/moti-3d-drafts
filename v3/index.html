@@ -3353,10 +3353,12 @@ function grabAddPin(rp,worldHit,id,sticky){ lumpApply(); // rp: 휴지 구 위�
   for (const [dd,i] of d){ if (dd>rg+fall && parts.length>=3) break; const t=clamp01((dd-rg)/fall); parts.push({i,w:1-t*t*(3-2*t)}); }
   // 손가락 평면: 카메라를 바라보는 면, 맞은 점을 지나요
   const cp=[cam.position.x,cam.position.y,-cam.position.z], nrm=norm(sub(worldHit,cp));
-  const pin={id,sticky:!!sticky,g0,parts,rg,fall,world:[...worldHit],plane:{p:[...worldHit],n:nrm},gP:[...g0],local:null,t0:time};
+  const gW=qRot(hRot,[g0[0]*hScl[0],g0[1]*hScl[1],g0[2]*hScl[2]]), off0=GR.pins.length?sub(basePos,add(hPos,gW)):sub(basePos,worldHit);   // 이 점 하나만 잡았을 때 몸이 있어야 할 자리 (손가락 기준)
+  const pin={id,sticky:!!sticky,g0,parts,rg,fall,world:[...worldHit],plane:{p:[...worldHit],n:nrm},gP:[...g0],local:null,t0:time,off0:off0.every(isFinite)?off0:sub(basePos,worldHit)};
   // 맞은 순간: 지금 손가락이 닿은 국소 위치(현재 입자 상태 기준)로 시작 → 튀지 않아요
   GR.pins.push(pin); GR.active=true; grabRebase(); return pin; }
-function grabRebase(){ if (!GR.pins.length) return; let c=[0,0,0]; for (const p of GR.pins) c=add(c,p.world); c=mul(c,1/GR.pins.length); GR.baseOff=sub(basePos,c); }
+function grabRebase(){ if (!GR.pins.length) return; if (GR.pins.length===1 && GR.pins[0].off0){ GR.baseOff=[...GR.pins[0].off0]; return; }   // 하나 남으면: 그 점을 잡은 자연스러운 자리로 (늘어난 채 남지 않게)
+  let c=[0,0,0]; for (const p of GR.pins) c=add(c,p.world); c=mul(c,1/GR.pins.length); GR.baseOff=sub(basePos,c); }
 function grabRelease(pin){ const i=GR.pins.indexOf(pin); if (i>=0) GR.pins.splice(i,1); grabRebase(); }
 // ---- 젤리: 입자 구름을 '매끈한 몇 개의 모드'(이동 + 1차 늘어남·비틀림 + 2차 휨·배불뚝)로 맞춰요 (2차 형상 맞춤)
 // 잡고 있을 땐 울퉁불퉁 잔물결을 이 매끈한 모양 쪽으로 걷어내고, 놓으면 입자 하나하나가 아니라 모드 몇 개가 감쇠 스프링(Hz·감쇠비)으로 촥 돌아와요
@@ -3414,7 +3416,8 @@ function jellyRelease(aL,inert,gL){ jqInit(); const n=GR.n, X=GR.X, V=GR.V, J=je
   let av=0, ad=0; for (let q=0;q<27;q++){ av=Math.max(av,Math.abs(Av[q])); ad=Math.max(ad,Math.abs(A[q]-A0[q])); }
   if (bad || (mx<0.01 && av<0.05 && ad<0.004 && me<0.004)){ for (let i=0;i<n*3;i++){ X[i]=GR.XR[i]; V[i]=0; } for (let i=0;i<n;i++){ const f=i*9; GR.F.fill(0,f,f+9); GR.F[f]=1; GR.F[f+4]=1; GR.F[f+8]=1; }
     GR.q=[0,0,0,1]; GR.active=false; GR.jr=null; } }
-window.__mt=()=>{ let fin=true,mx=0; for (const v of GR.X){ if(!isFinite(v)) fin=false; mx=Math.max(mx,Math.abs(v)); } return {errs:ERRS.map(e=>e.m+' x'+e.n), pins:GR.pins.map(p=>[p.id,p.sticky?1:0,+len(p.local||[0,0,0]).toFixed(2)]), ptr:[...PTR.entries()].map(([k,p])=>[k,p.st,!!p.pin,!!p.pinch,!!p.spin]), zm:!!ZM.pin, act:GR.active, fin, mx:+mx.toFixed(2), hp:hPos.map(v=>+v.toFixed(2)), bp:basePos.map(v=>+v.toFixed(2)), drag:dragging, jr:!!GR.jr, zt:+ZM.t.toFixed(3)}; };   // 테스트용 상태 읽기 (v3build/tests_multitouch.py)
+window.__vis=()=>{ body.updateMatrixWorld(true); const pa=bodyGeo.attributes.position, v=new THREE.Vector3(); let sx=0,sy=0,n=0,x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; for (let i=0;i<pa.count;i+=3){ v.fromBufferAttribute(pa,i).applyMatrix4(body.matrixWorld).project(cam); const x=(v.x+1)/2*W, y=(1-v.y)/2*H; sx+=x; sy+=y; n++; x0=Math.min(x0,x); x1=Math.max(x1,x); y0=Math.min(y0,y); y1=Math.max(y1,y); } return [sx/n,sy/n,x0,x1,y0,y1]; };   // 테스트: 화면에 보이는 몸의 중심·범위
+window.__mt=()=>{ let fin=true,mx=0; for (const v of GR.X){ if(!isFinite(v)) fin=false; mx=Math.max(mx,Math.abs(v)); } return {errs:ERRS.map(e=>e.m+' x'+e.n), pins:GR.pins.map(p=>[p.id,p.sticky?1:0,+len(p.local||[0,0,0]).toFixed(2)]), ptr:[...PTR.entries()].map(([k,p])=>[k,p.st,!!p.pin,!!p.pinch,!!p.spin,!!p.idle,!!p.stroke,p.pin?GR.pins.includes(p.pin):null,!!p.onBody]), zm:!!ZM.pin, act:GR.active, fin, mx:+mx.toFixed(2), hp:hPos.map(v=>+v.toFixed(2)), bp:basePos.map(v=>+v.toFixed(2)), drag:dragging, jr:!!GR.jr, zt:+ZM.t.toFixed(3), bc:window.__bc(), pw:GR.pins.map(p=>{ const v=new THREE.Vector3(p.world[0],p.world[1],-p.world[2]).project(cam); return [p.id,+((v.x+1)/2*W).toFixed(1),+((1-v.y)/2*H).toFixed(1)]; }), dbg:DBGT?DBGL.slice():null}; };   // 테스트용 상태 읽기 (v3build/tests_multitouch.py)
 window.__jx=()=>[GR.active,Array.from(GR.X)]; window.__jelly=i=>{ S['젤리']=i; jellyApply(); }; window.__jx0=()=>GR.X0; window.__bc=()=>{ const c=new THREE.Vector3(hPos[0],hPos[1],-hPos[2]).project(cam), e_=new THREE.Vector3(hPos[0]+R*hScl[0],hPos[1],-hPos[2]).project(cam); return [(c.x+1)/2*W,(1-c.y)/2*H,Math.abs(e_.x-c.x)/2*W]; };
 function grabSim(){
   const n=GR.n, X=GR.X, V=GR.V, P=GR.P, X0=GR.X0, held=GR.pins.length>0;
@@ -3508,10 +3511,11 @@ function grabSim(){
 // 입력 (여러 손가락 / 마우스: 왼쪽 끌기 = 집기, Shift 또는 오른쪽 끌기 = 놓아도 남는 두 번째 집기)
 const PTR=new Map();
 const ptrPos=e=>{ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:r.height-(e.clientY-r.top)}; };
-cvs.addEventListener('pointerdown',e=>{ if (!S['잡기모드']) return; PTR.set(e.pointerId,{...ptrPos(e),btn:e.button,shift:e.shiftKey||e.button===2,st:'new',t0:time,moved:false,d0:ptrPos(e)}); });
+cvs.addEventListener('pointerdown',e=>{ if (!S['잡기모드']) return; { const o=PTR.get(e.pointerId); if (o){ if (o.pin && !o.pin.sticky) grabRelease(o.pin); if (orbitPtr===e.pointerId) orbitPtr=null; } } PTR.set(e.pointerId,{...ptrPos(e),btn:e.button,shift:e.shiftKey||e.button===2,st:'new',t0:time,moved:false,d0:ptrPos(e)}); });
 window.addEventListener('pointermove',e=>{ const p=PTR.get(e.pointerId); if (!p) return; const q=ptrPos(e); p.x=q.x; p.y=q.y; if (Math.hypot(q.x-p.d0.x,q.y-p.d0.y)>6) p.moved=true; });
 const ptrUp=e=>{ const p=PTR.get(e.pointerId); if (p){ p.st='up'; if (e.type==='pointercancel') p.cancel=true; } };
 window.addEventListener('pointerup',ptrUp); window.addEventListener('pointercancel',ptrUp);
+const ptrDropAll=()=>{ for (const p of PTR.values()){ p.st='up'; p.cancel=true; } }; window.addEventListener('blur',ptrDropAll); document.addEventListener('visibilitychange',()=>{ if (document.hidden) ptrDropAll(); });
 cvs.addEventListener('contextmenu',e=>{ if (S['잡기모드']) e.preventDefault(); });
 window.addEventListener('keydown',e=>{ if (e.key==='Escape'){ for (const p of [...GR.pins]) if (p.sticky) grabRelease(p); } });
 function hitBody(m){ raycaster.setFromCamera(new THREE.Vector2(m.x/W*2-1, m.y/H*2-1), cam); hupi.updateMatrixWorld(true); bodyGeo.computeBoundingSphere();
@@ -3527,11 +3531,26 @@ function spinNear(x,y){ const c=new THREE.Vector3(hPos[0],hPos[1],-hPos[2]).proj
 function spinTrackOld(A_,tt,x,y){ A_.h.push([tt,x,y]); while (A_.h.length>2 && tt-A_.h[0][0]>0.1) A_.h.shift(); const h0=A_.h[0], ddt=Math.max(1/60,tt-h0[0]), vx=(x-h0[1])/ddt, vy=(y-h0[2])/ddt;
   if (Math.abs(vx)>520 && Math.abs(vx)>Math.abs(vy)*1.1){ const w_=SPINDIR*Math.sign(vx)*Math.min(30,Math.abs(vx)*0.016); if (!A_.fired || Math.abs(w_)>Math.abs(A_.pk||0)*1.15){ spinKick(w_); A_.fired=true; A_.pk=w_; } } }
 function spinUpOld(A_,tt,x,y){ if (A_.fired) return; const dx=x-A_.x0, ddt=Math.max(0.05,tt-A_.t0); if (Math.abs(dx)>45 && ddt<0.6 && Math.abs(dx)>Math.abs(y-A_.y0)) spinKick(SPINDIR*Math.sign(dx)*Math.min(30,Math.abs(dx)/ddt*0.016)); }
+const DBGT=/(^|[?&])debug=touch/.test(location.search); let DBGE=null, DBGN=0; const DBGL=[];
+function dbgTouch(tt){ if (!DBGE){ DBGE=document.createElement('div'); DBGE.id='dbgTouch'; DBGE.style.cssText='position:fixed;left:6px;top:6px;z-index:99999;pointer-events:none;font:11px/1.35 ui-monospace,Menlo,monospace;color:#fff;background:rgba(0,0,0,.62);padding:6px 8px;border-radius:8px;white-space:pre;max-width:94vw'; document.body.appendChild(DBGE); }
+  for (const [id,p] of PTR){ let d=document.getElementById('dbgT'+id); if (!d){ d=document.createElement('div'); d.id='dbgT'+id; d.className='dbgDot'; d.style.cssText='position:fixed;z-index:99998;pointer-events:none;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:2px solid #fff;font:bold 12px/40px sans-serif;text-align:center;color:#000'; document.body.appendChild(d); }
+    const r=cvs.getBoundingClientRect(); d.style.left=(r.left+p.x)+'px'; d.style.top=(r.top+r.height-p.y)+'px'; d.textContent=id%100; d.style.background=p.pin&&GR.pins.includes(p.pin)?'rgba(80,220,120,.7)':p.pinch?'rgba(255,80,80,.7)':p.spin?'rgba(90,160,255,.7)':'rgba(200,200,200,.6)'; }
+  for (const d of [...document.querySelectorAll('.dbgDot')]) if (!PTR.has(+d.id.slice(4))) d.remove();
+  if (++DBGN%3) return;
+  const st=p=>p.pin?(GR.pins.includes(p.pin)?'잡음':'유령잡기!'):p.pinch?'핀치':p.spin?'스핀':p.idle?'쉼':p.stroke?'쓰다듬':orbitPtr!==null&&PTR.get(orbitPtr)===p?'회전':'-';
+  let mx=0; if (GR.active) for (let i=0;i<GR.n*3;i++) mx=Math.max(mx,Math.abs(GR.X[i]-GR.XR[i]));
+  const ghost=GR.pins.filter(q=>!q.sticky && ![...PTR.values()].some(p=>p.pin===q)).length;
+  const lines=['터치 '+PTR.size+'  잡은 점 '+GR.pins.length+(ghost?'  ⚠유령 '+ghost:'')+'  확대 ×'+ZM.t.toFixed(2)+(ZM.pin?' (핀치중)':''),
+    ...[...PTR].map(([id,p])=>'#'+id+' '+st(p)+' '+(p.st)+' ('+Math.round(p.x)+','+Math.round(H-p.y)+')'),
+    '늘어남 '+mx.toFixed(2)+'  몸 '+basePos.map(v=>v.toFixed(1)).join(',')+'  기준 '+GR.baseOff.map(v=>v.toFixed(1)).join(','),
+    'fps '+(QL.fps||0).toFixed(0)+(ERRS.length?'\n⚠ '+ERRS.slice(-2).map(e=>e.m.slice(0,60)).join('\n⚠ '):'')];
+  DBGL.push((tt).toFixed(2)+' '+lines[0]); if (DBGL.length>6) DBGL.shift();
+  DBGE.textContent=lines.join('\n'); }
 function grabInput(tt){
   M.down=false; M.up=false; HOLDT=0;
   for (const [id,p] of [...PTR]){
     if (p.st==='new'){ p.st='move'; lastTouch=tt;
-      const hb=hitBody(p);
+      let hb=hitBody(p); if (!hb && GR.pins.some(q=>!q.sticky)){ for (const rr of [12,22,32]){ for (let a=0;a<8 && !hb;a++){ const an=a*PI/4; hb=hitBody({x:p.x+Math.cos(an)*rr,y:p.y+Math.sin(an)*rr}); } if (hb) break; } }
       if (hb){ spinCatch(); p.pin=grabAddPin(hb.rp,hb.world,id,p.shift); p.onBody=true; Sfx('pop',0.5,1.3+Math.random()*0.2); if (GR.pins.length===1 && MINI()) playExpr('놀람','once'); }
       else if (GR.pins.some(q=>!q.sticky) || [...PTR.values()].some(q=>q!==p && q.onBody && q.st!=='up')){ p.onBody=false; p.idle=true; }   // 다른 손가락이 몸을 잡고 있으면: 이 손가락은 아무것도 안 해요 (확대·회전이 끼어들지 않게)
       else if (spinNear(p.x,H-p.y)){ p.onBody=false; p.spin={h:[[tt,p.x,p.y]],fired:false,x0:p.x,y0:p.y,t0:tt}; }
@@ -3557,7 +3576,7 @@ function grabInput(tt){
         if (!p.moved && tt-p.t0<0.25 && !p.pin.sticky && !GR.pins.length && !tapReact(p)){ boingV-=S['클릭띠용']; clickJumpAt=tt+0.14; } } } }
   for (const q of [...GR.pins]) if (!q.sticky && !PTR.has(q.id)) grabRelease(q);   // 주인 없는 잡기(손가락을 잃어버림) 정리
   if (orbitPtr!==null && !PTR.has(orbitPtr)) orbitPtr=null;
-  pinchTick(tt);
+  pinchTick(tt); if (DBGT) dbgTouch(tt);
   // 몸 전체는 손가락을 늦게 따라와요 (용수철 + 감쇠)
   if (GR.pins.length){ let c=[0,0,0]; for (const p of GR.pins) c=add(c,p.world); c=mul(c,1/GR.pins.length); const tgt=add(c,GR.baseOff);
     const lag=S['뒤따라옴'], wt=S['무게감'], k=lerp(0.07,0.01,lag)/(0.6+wt*0.8)*(GR.fol??1), cd=lerp(0.4,0.2,lag);
