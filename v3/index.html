@@ -152,6 +152,16 @@ const MAT_PRESETS=[
   {n:'직접 고르기'}];
 const MAT_NAMES=MAT_PRESETS.map(p=>p.n);
 const SHP_MIG={eye:[0,0,0,1,2,2,3,3,4,5,5,6,6,7,8,9,10,11,12,13,14,15,16,3,2,2,8,17,18,19],brow:[0,1,2,1,1,1,8,1,2,4,5,6,1,10,6,7,2,3,9,7,7,3,3,8,11,7,3,12,13,2,14]};
+// 젤리 프리셋: f 탄성 진동수(Hz) · z 감쇠비 · sm 매끈함(잡고 있을 때 울퉁불퉁 잔물결 걷어냄) · rx 가운데로 모이는 빠르기(1/초) · lim 출렁임 한계 · st 늘어남 · lag 뒤따라옴
+const JELLY=[
+  {n:'1 단단한 고무', f:4.4, z:0.5,  sm:0.6,  rx:30, lim:0.3,   st:0.3,   lag:0.35},
+  {n:'2 탱탱한 젤리', f:3.7, z:0.38, sm:0.52, rx:24, lim:0.4,  st:0.38,  lag:0.48},
+  {n:'3 균형',       f:3.0, z:0.3,  sm:0.45, rx:19, lim:0.5,  st:0.448, lag:0.6},
+  {n:'4 말랑 젤리',  f:2.5, z:0.22, sm:0.38, rx:15, lim:0.6,  st:0.55,  lag:0.7},
+  {n:'5 말랑한 푸딩', f:2.0, z:0.16, sm:0.32, rx:11, lim:0.7,  st:0.65,  lag:0.8}];
+const JELLY_K={f:'젤리진동수',z:'젤리감쇠',sm:'젤리매끈함',rx:'젤리모임',lim:'젤리한계',st:'늘어남',lag:'뒤따라옴'};
+function jellyApply(){ const j=JELLY[Math.max(0,Math.min(4,S['젤리']|0))]; for (const k in JELLY_K) S[JELLY_K[k]]=j[k]; }
+function jellyP(){ return {f:S['젤리진동수']??3, z:S['젤리감쇠']??0.3, sm:S['젤리매끈함']??0.45, rx:S['젤리모임']??19, lim:S['젤리한계']??0.55}; }
 const SCHEMA = [
  {h:'성능', f:[
   {k:'화질',t:'enum',o:['자동','고','중','저'],d:0,onSet:()=>setTier(),tip:'자동 = 기기에 맞춰 고르고, 버벅이면 알아서 낮춰요. 고 = 가장 선명, 저 = 오래된 폰도 부드럽게'},
@@ -165,6 +175,7 @@ const SCHEMA = [
   {k:'귀안쪽색',hide:1,t:'color',d:C(1,0.68,0.55)},{k:'귀안쪽',hide:1,t:'bool',d:true},
   {k:'볼색',hide:1,t:'color',d:C(1,0.56,0.47)},{k:'입안색',hide:1,t:'color',d:C(0.77,0.33,0.29)}]},
  {h:'ver2 잡기', f:[
+  {k:'젤리',t:'enum',btn5:1,o:JELLY.map(j=>j.n),d:2,onSet:()=>jellyApply(),tip:'탄성·출렁임 느낌 5가지 (1 단단한 고무 → 3 균형 → 5 말랑한 푸딩). 고르면 아래 세부값이 함께 바뀌어요'},
   {k:'잡기모드',t:'bool',d:true,tip:'켜면 손가락(마우스)으로 몸을 집어 늘려요. 끄면 예전처럼 통째로 끌어요'},
   {k:'잡는힘',r:[0.3,1],d:1,tip:'집은 점이 손가락에 붙는 힘 (1 = 절대 안 미끄러짐)'},
   {k:'늘어남',r:[0,1],d:0.65,tip:'클수록 쭈욱 늘어나요'},
@@ -177,6 +188,11 @@ const SCHEMA = [
   {k:'끊김거리',r:[3,14],d:8},
   {k:'되돌아오는속도',r:[0,1],d:0.5,tip:'놓았을 때 원래 모양으로 돌아오는 빠르기 (높을수록 빨리 톡 돌아와요)'},
   {k:'놓을때출렁임',r:[0,1],d:0.5,tip:'놓았을 때 돌아오며 출렁이는 정도 (높을수록 더 많이·오래 출렁여요)'},
+  {k:'젤리진동수',r:[1.5,5.5],d:3,tip:'탄성: 놓았을 때 출렁이는 빠르기(Hz). 높을수록 탱탱하게 톡, 낮을수록 말랑하게 출렁'},
+  {k:'젤리감쇠',r:[0.1,0.8],d:0.3,tip:'출렁임이 잦아드는 빠르기. 낮을수록 여러 번 출렁여요'},
+  {k:'젤리한계',r:[0.2,1],d:0.5,tip:'놓은 뒤 반대로 넘쳐 찌그러지는 최대 정도 (지나친 출렁임 막기)'},
+  {k:'젤리모임',r:[6,32],d:19,tip:'늘였다 놓았을 때 잘록한 곳·울퉁불퉁한 곳이 가운데로 차오르는 빠르기'},
+  {k:'젤리매끈함',r:[0,0.8],d:0.45,tip:'잡고 끌거나 돌릴 때 표면 잔물결을 걷어내고 한 덩어리로 (높을수록 매끈)'},
   {k:'잡는범위',hide:1,r:[0.08,0.6],d:0.22,tip:'손가락이 잡는 면적 (몸 반지름 대비). 클수록 넓고 뭉툭하게 잡혀요'},
   {k:'끝둥글기',hide:1,r:[0,1],d:0.75,tip:'잡힌 끝이 얼마나 둥글고 통통하게 남는지 (0 = 뾰족, 1 = 반죽처럼 둥글게)'}]},
  {h:'화면·재질', hide:1, f:[
@@ -446,7 +462,7 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   const face=take('얼굴'), eye=take('눈모양'); face.o=face.o.map((n,i)=>i?'동물형 · '+n:'기본형'); face.tip='기본형 또는 동물 얼굴을 골라요'; eye.tip='눈 모양 (기본: 점 눈)';
   const snd=['소리켜기','소리크기'].map(take);
   for (const g of SCHEMA){ if (g.tab==='act') continue; const keep=SHOW[g.h]||[]; for (const f of g.f) if (!keep.includes(f.k)) f.hide=1; }
-  for (const h of ['ver2 잡기','젤리 늘어남']){ const g=G(h); g.tab='hid'; g.hide=0; for (const f of g.f) f.hide=['치즈지수','잡는범위','끝둥글기'].includes(f.k)?1:0; }
+  for (const h of ['ver2 잡기','젤리 늘어남']){ const g=G(h); g.tab='hid'; g.hide=0; for (const f of g.f) f.hide=['치즈지수','잡는범위','끝둥글기','되돌아오는속도','놓을때출렁임'].includes(f.k)?1:0; }
   G('ver2 잡기').h='잡기 · 늘이기'; G('젤리 늘어남').h='통째로 끌 때 늘어남';
   G('성능').f.push(...snd); G('성능').h='앱 설정'; G('몸 일렁임').h='일렁임 · 숨쉬기'; G('타격 임팩트 설정').hide=1;
   for (const [h,n] of [['염동력 설정','염동력'],['각성모드 설정','각성모드'],['명상 설정','명상'],['맥동 설정','맥동'],['소환 설정','소환']]) G(h).lbl=n+' 강도'; G('소환 설정').lbl='소환';
@@ -781,7 +797,7 @@ function wallPress(){ const L=WL.L, h=WL.h; let x=DX,y=DY,z=DZ, hit=false;
     let cr=0; if (WL.cr>0){ const a_=Math.sin(x*1.5+y*2.0+z*1.7+WL.tt*1.1), b_=Math.sin(y*3.6-z*2.9+x*2.4-WL.tt*0.7); cr=WL.cr*Math.min(ex,0.9)*(0.32*Math.abs(a_)+0.16*Math.abs(b_)); }
     const e=ex+cr; x+=q[4]*e+kb*(x-q[4]*rn); y+=q[5]*e+kb*(y-q[5]*rn); z+=q[6]*e+kb*(z-q[6]*rn); }
   if (hit){ DX=x; DY=y; DZ=z; } }
-let SPCF=0;   // 스핀 원심력 (세로축에서 바깥으로 부풀어요)
+let SPCF=0, SPCFv=0, SPNF=1;   // 스핀 원심력 (세로축에서 바깥으로 부풀어요)
 let SPL={on:0,d:0,pull:0,pinch:0,rad:1};   // 복제: 한쪽(+x)으로 치즈처럼 늘어남
 function deform(px,py,pz,tt){
   const ox=px,oy=py,oz=pz; shape(px,py,pz); px=SX; py=SY; pz=SZ;
@@ -792,7 +808,7 @@ function deform(px,py,pz,tt){
       const s1=q(BC[0]), s2=q(-BC[0]); if (Math.max(s1,s2)>rb-5*BK){ const m=Math.max(rb,s1,s2), r=m+BK*Math.log(Math.exp((rb-m)/BK)+Math.exp((s1-m)/BK)+Math.exp((s2-m)/BK))-BK*Math.log(1+Math.exp(-1/BK)*0);
       const rr=rb+(Math.max(rb,r-BK*Math.log(3)*0)-rb)*BUTT; const f=rr/rb; if (f>1.0005){ px*=f; py*=f; pz*=f; } } } } }
   tt*=S['일렁임속도']; const nz=Math.sin(px*2.1+tt*1.7)*Math.sin(py*2.3+tt*1.3)*Math.sin(pz*1.9+tt*1.1);
-  const l=Math.hypot(px,py,pz); let k=l>1e-5?nz*S['일렁임크기']/l:0;
+  const l=Math.hypot(px,py,pz); let k=l>1e-5?nz*S['일렁임크기']*SPNF/l:0;
   if (FX.wob>0 && l>1e-5) k+=Math.sin(px*3.7+wobPh*9)*Math.sin(py*4.1+wobPh*7.3)*Math.sin(pz*3.3+wobPh*8.1)*FX.wob/l*R*0.5;
   const sx0=px, sy0=py, sz0=pz; px+=px*k; py+=py*k; pz+=pz*k; PW=0; PG=0; PF=0;
   if (PODON){ const ol=Math.hypot(ox,oy,oz)||1, ux=ox/ol, uy=oy/ol, uz=oz/ol; PX=px; PY=py; PZ=pz; for (const p of PODS) if (p.on) podVert(p,ux,uy,uz,px,py,pz,px-sx0,py-sy0,pz-sz0); px=PX; py=PY; pz=PZ; }
@@ -2099,7 +2115,7 @@ function UpdateSpinOld(dt){ const S_=SPIN; if (!S_.on && Math.abs(S_.T[0])+Math.
     if (Math.abs(S_.w)<0.05 && Math.abs(Math.atan2(Math.sin(S_.a),Math.cos(S_.a)))<0.02){ S_.on=false; S_.a=0; S_.w=0; if (S_.tot>4*Math.PI){ S_.dizzyAt=time; S_.sway=1; playExpr('어지러움','once'); } else Sfx('bump',0.25,1.4); } }
   // 팽이 세차: 느릴수록 기울기가 커지고, 기울기 축은 돌아가요 → 끝나면 감쇠 진동
   const aw=Math.abs(S_.w), A=S_.on?14*Math.pow(clamp01(1-aw/9),1.4)*sstep(0,0.6,S_.tot/6):0, ph=S_.a*0.55;
-  const tg=[A*Math.cos(ph),A*Math.sin(ph)]; for (let i=0;i<2;i++){ S_.Tv[i]+=((tg[i]-S_.T[i])*60-S_.Tv[i]*7)*dt; S_.T[i]+=S_.Tv[i]*dt; }
+  const tg=[A*Math.cos(ph),A*Math.sin(ph)]; for (let i=0;i<2;i++){ { const J_=jellyP(), w_=2*PI*J_.f*0.41, z_=J_.z+0.15; S_.Tv[i]+=((tg[i]-S_.T[i])*w_*w_-S_.Tv[i]*2*z_*w_)*dt; } S_.T[i]+=S_.Tv[i]*dt; }
   S_.sway*=Math.exp(-dt*0.9);
   SPCF=Math.min(0.2,0.00034*S_.w*S_.w);
   return qMul(qMul(qAxis(S_.T[0],RIGHT),qAxis(S_.T[1],FWD)),qAxis(S_.a*R2D,UP)); }
@@ -3342,6 +3358,63 @@ function grabAddPin(rp,worldHit,id,sticky){ lumpApply(); // rp: 휴지 구 위�
   GR.pins.push(pin); GR.active=true; grabRebase(); return pin; }
 function grabRebase(){ if (!GR.pins.length) return; let c=[0,0,0]; for (const p of GR.pins) c=add(c,p.world); c=mul(c,1/GR.pins.length); GR.baseOff=sub(basePos,c); }
 function grabRelease(pin){ const i=GR.pins.indexOf(pin); if (i>=0) GR.pins.splice(i,1); grabRebase(); }
+// ---- 젤리: 입자 구름을 '매끈한 몇 개의 모드'(이동 + 1차 늘어남·비틀림 + 2차 휨·배불뚝)로 맞춰요 (2차 형상 맞춤)
+// 잡고 있을 땐 울퉁불퉁 잔물결을 이 매끈한 모양 쪽으로 걷어내고, 놓으면 입자 하나하나가 아니라 모드 몇 개가 감쇠 스프링(Hz·감쇠비)으로 촥 돌아와요
+function jqInit(){ if (GR.QI) return; const n=GR.n, X0=GR.X0, s=1/R, B=new Float64Array(n*9), M=new Float64Array(81), bm=new Float64Array(9);
+  for (let i=0;i<n;i++){ const x=X0[i][0]*s, y=X0[i][1]*s, z=X0[i][2]*s, b=[x,y,z,x*x,y*y,z*z,x*y,y*z,z*x]; for (let a=0;a<9;a++){ B[i*9+a]=b[a]; bm[a]+=b[a]/n; } }
+  for (let i=0;i<n;i++) for (let a=0;a<9;a++) B[i*9+a]-=bm[a];
+  for (let i=0;i<n;i++) for (let a=0;a<9;a++) for (let c=0;c<9;c++) M[a*9+c]+=B[i*9+a]*B[i*9+c];
+  const N=9, A=Array.from({length:N},(_,r)=>{ const row=new Float64Array(2*N); for (let c=0;c<N;c++) row[c]=M[r*N+c]; row[N+r]=1; return row; });
+  for (let c=0;c<N;c++){ let p=c; for (let r=c+1;r<N;r++) if (Math.abs(A[r][c])>Math.abs(A[p][c])) p=r; [A[c],A[p]]=[A[p],A[c]]; const d=A[c][c]||1e-12; for (let k=0;k<2*N;k++) A[c][k]/=d;
+    for (let r=0;r<N;r++) if (r!==c){ const f=A[r][c]; if (f) for (let k=0;k<2*N;k++) A[r][k]-=f*A[c][k]; } }
+  const QI=new Float64Array(81); for (let r=0;r<N;r++) for (let c=0;c<N;c++) QI[r*N+c]=A[r][N+c];
+  GR.QB=B; GR.QI=QI; GR.QF=new Float64Array(n*3); GR.QE=new Float64Array(n*3); GR.QW=new Float64Array(n);
+  const f0=jqFit(GR.XR); GR.QA0=f0.A; GR.QC0=f0.c;
+  GR.QJ0=new Float64Array(n*9); for (let i=0;i<n;i++){ const J=jqJac(f0.A,i), iv=m3inv(J); for (let k=0;k<9;k++) GR.QJ0[i*9+k]=iv[k]; } }
+function jqFit(P){ const n=GR.n, B=GR.QB, QI=GR.QI; let cx=0,cy=0,cz=0; for (let i=0;i<n;i++){ cx+=P[i*3]; cy+=P[i*3+1]; cz+=P[i*3+2]; } cx/=n; cy/=n; cz/=n;
+  const Apq=new Float64Array(27); for (let i=0;i<n;i++){ const px=P[i*3]-cx, py=P[i*3+1]-cy, pz=P[i*3+2]-cz; for (let a=0;a<9;a++){ const b=B[i*9+a]; Apq[a]+=px*b; Apq[9+a]+=py*b; Apq[18+a]+=pz*b; } }
+  const A=new Float64Array(27); for (let r=0;r<3;r++) for (let c=0;c<9;c++){ let v=0; for (let k=0;k<9;k++) v+=Apq[r*9+k]*QI[k*9+c]; A[r*9+c]=v; }
+  return {A,c:[cx,cy,cz]}; }
+function jqEval(A,c,out){ const n=GR.n, B=GR.QB; for (let i=0;i<n;i++) for (let r=0;r<3;r++){ let v=c[r]; for (let k=0;k<9;k++) v+=A[r*9+k]*B[i*9+k]; out[i*3+r]=v; } }
+function jqJac(A,i){ const s=1/R, r=GR.X0[i], x=r[0]*s, y=r[1]*s, z=r[2]*s;   // d(A·b)/dr  (b = x,y,z,x²,y²,z²,xy,yz,zx)
+  const D=[[1,0,0],[0,1,0],[0,0,1],[2*x,0,0],[0,2*y,0],[0,0,2*z],[y,x,0],[0,z,y],[z,0,x]], J=[0,0,0,0,0,0,0,0,0];
+  for (let a=0;a<3;a++) for (let b=0;b<3;b++){ let v=0; for (let k=0;k<9;k++) v+=A[a*9+k]*D[k][b]; J[a*3+b]=v*s; } return J; }
+function jqF(A,i,out,o,w){ const J=jqJac(A,i), J0=GR.QJ0.subarray(i*9,i*9+9); for (let a=0;a<3;a++) for (let b=0;b<3;b++){ const v=J[a*3]*J0[b]+J[a*3+1]*J0[3+b]+J[a*3+2]*J0[6+b]; out[o+a*3+b]=w>=1?v:out[o+a*3+b]+(v-out[o+a*3+b])*w; } }
+const det3=m=>m[0]*(m[4]*m[8]-m[5]*m[7])-m[1]*(m[3]*m[8]-m[5]*m[6])+m[2]*(m[3]*m[7]-m[4]*m[6]);
+// 잡고 있을 때: 손가락에 붙은 곳은 그대로, 나머지 입자를 매끈한 2차 모양 쪽으로 (울퉁불퉁·우글거림 제거)
+function jellyHoldSmooth(P,multi){ jqInit(); const n=GR.n, J=jellyP(), W=GR.QW; W.fill(0); for (const p of GR.pins) for (const q of p.parts) if (q.w>W[q.i]) W[q.i]=q.w;
+  const fit=jqFit(P), G=GR.QF; jqEval(fit.A,fit.c,G); const k=J.sm*(multi?0.35:1);
+  for (let i=0;i<n;i++){ const w=k*(1-W[i]); if (w<=0) continue; for (let a=0;a<3;a++) P[i*3+a]+=(G[i*3+a]-P[i*3+a])*w; } }
+// 잡고 있을 때의 모드 속도를 기억 (놓는 순간 이어지게)
+function jellyHoldTrack(multi){ jqInit(); const fit=jqFit(GR.X), J=jellyP(), n=GR.n, W=GR.QW, k=J.sm*(multi?0.3:0.8);
+  if (GR.jAp){ if (!GR.jAv) GR.jAv=new Float64Array(27); for (let q=0;q<27;q++) GR.jAv[q]=GR.jAv[q]*0.5+(fit.A[q]-GR.jAp[q])*60*0.5; GR.jcv=(GR.jcv||[0,0,0]).map((v,a)=>v*0.5+(fit.c[a]-GR.jcp[a])*60*0.5); }
+  GR.jAp=fit.A; GR.jcp=fit.c; GR.jr=null;
+  if (k>0) for (let i=0;i<n;i++){ const w=k*(1-W[i]); if (w>0) jqF(fit.A,i,GR.F,i*9,w); } }
+// 놓았을 때: 모드(이동 3 + 1차 9 + 2차 18)를 감쇠 스프링으로 쉼 모양으로. 남은 잔모양(잘록함·울퉁불퉁)은 지수적으로 빠르게 가운데로 차올라요
+function jellyRelease(aL,inert,gL){ jqInit(); const n=GR.n, X=GR.X, V=GR.V, J=jellyP(), dt=1/60, A0=GR.QA0, C0=GR.QC0;
+  GR.cor.length=0; GR.mid=null; GR.q=[0,0,0,1];
+  if (!GR.jr){ const f=jqFit(X), E=GR.QE; jqEval(f.A,f.c,GR.QF); for (let i=0;i<n*3;i++) E[i]=X[i]-GR.QF[i];
+    const D=new Float64Array(27); let dd=0; for (let q=0;q<27;q++){ D[q]=f.A[q]-A0[q]; dd+=D[q]*D[q]; }
+    const Av=GR.jAv?Float64Array.from(GR.jAv):new Float64Array(27); for (let q=0;q<27;q++) Av[q]=clamp(Av[q],-40*R,40*R);
+    GR.jr={A:Float64Array.from(f.A), c:[...f.c], Av, cv:(GR.jcv||[0,0,0]).map(v=>clamp(v,-30,30)), D, dd:Math.max(dd,1e-9)}; GR.jAp=null; GR.jAv=null; GR.jcv=null; }
+  const S_=GR.jr, w=2*PI*J.f, z=J.z, A=S_.A, Av=S_.Av, c=S_.c, cv=S_.cv;
+  for (let a=0;a<3;a++) cv[a]+=(-aL[a]*inert+gL[a]*0.5)*60;
+  for (let h=0;h<2;h++){ const hd=dt/2;
+    for (let q=0;q<27;q++){ Av[q]+=(-w*w*(A[q]-A0[q])-2*z*w*Av[q])*hd; A[q]+=Av[q]*hd; }
+    for (let a=0;a<3;a++){ cv[a]+=(-w*w*(c[a]-C0[a])-2*z*w*cv[a])*hd; c[a]+=cv[a]*hd; } }
+  // 출렁임 한계: 놓은 모양의 반대쪽으로 넘치는 정도를 제한
+  { let pr=0; for (let q=0;q<27;q++) pr+=(A[q]-A0[q])*S_.D[q]; const os=-pr/S_.dd, lim=J.lim*0.5; if (os>lim){ const k=os-lim; let pv=0; for (let q=0;q<27;q++){ A[q]+=S_.D[q]*k; pv+=Av[q]*S_.D[q]; } if (pv<0){ const kv=pv/S_.dd; for (let q=0;q<27;q++) Av[q]-=S_.D[q]*kv; } } }
+  // 부피 지키기: 1차(선형) 부분의 행렬식을 쉼 상태와 같게
+  const Ao=Float64Array.from(A), L=[A[0],A[1],A[2],A[9],A[10],A[11],A[18],A[19],A[20]], L0=[A0[0],A0[1],A0[2],A0[9],A0[10],A0[11],A0[18],A0[19],A0[20]], dl=det3(L), d0=det3(L0);
+  if (dl>1e-6 && d0>1e-6){ const f=clamp(Math.cbrt(d0/dl),0.7,1.4); for (const r of [0,9,18]) for (const k of [0,1,2]) Ao[r+k]=A[r+k]*f; }
+  const E=GR.QE, de=Math.exp(-J.rx*dt); for (let i=0;i<n*3;i++) E[i]*=de;
+  const G=GR.QF; jqEval(Ao,c,G); let bad=false, mx=0, me=0;
+  for (let i=0;i<n*3;i++){ const x=G[i]+E[i]; if (!isFinite(x)){ bad=true; break; } V[i]=x-X[i]; X[i]=x; mx=Math.max(mx,Math.abs(x-GR.XR[i])); me=Math.max(me,Math.abs(E[i])); }
+  if (!bad) for (let i=0;i<n;i++) jqF(Ao,i,GR.F,i*9,1);
+  let av=0, ad=0; for (let q=0;q<27;q++){ av=Math.max(av,Math.abs(Av[q])); ad=Math.max(ad,Math.abs(A[q]-A0[q])); }
+  if (bad || (mx<0.01 && av<0.05 && ad<0.004 && me<0.004)){ for (let i=0;i<n*3;i++){ X[i]=GR.XR[i]; V[i]=0; } for (let i=0;i<n;i++){ const f=i*9; GR.F.fill(0,f,f+9); GR.F[f]=1; GR.F[f+4]=1; GR.F[f+8]=1; }
+    GR.q=[0,0,0,1]; GR.active=false; GR.jr=null; } }
+window.__jx=()=>[GR.active,Array.from(GR.X)]; window.__jelly=i=>{ S['젤리']=i; jellyApply(); }; window.__jx0=()=>GR.X0; window.__bc=()=>{ const c=new THREE.Vector3(hPos[0],hPos[1],-hPos[2]).project(cam), e_=new THREE.Vector3(hPos[0]+R*hScl[0],hPos[1],-hPos[2]).project(cam); return [(c.x+1)/2*W,(1-c.y)/2*H,Math.abs(e_.x-c.x)/2*W]; };
 function grabSim(){
   const n=GR.n, X=GR.X, V=GR.V, P=GR.P, X0=GR.X0, held=GR.pins.length>0;
   GR.held=held?Math.min(1,GR.held+0.1):Math.max(0,GR.held-0.05);
@@ -3352,6 +3425,7 @@ function grabSim(){
   const wt=S['무게감'], st=S['늘어남'], lag=S['뒤따라옴'], ch=S['치즈지수'], rs=S['복원력'], gs=S['잡는힘'];
   let aL=ITV(aW); { const l=len(aL); if (l>0.12) aL=mul(aL,0.12/l); } const inert=0.35+0.9*wt, multi=GR.pins.length>=2;
   const gL=mul(gDown, (0.0025+0.006*wt)*GR.held);
+  if (!held){ jellyRelease(aL,inert,gL); return; }
   let kd0=0, damp=held?lerp(0.975,0.93,lag*0.6):clamp(lerp(0.93,0.88,rs)+((S['놓을때출렁임']??0.5)-0.5)*0.16,0.8,0.985), kd=lerp(0.55,0.035,st), ksm=held?lerp(0.03,0.12,rs):lerp(0.02,0.16,rs), kc0=0, kc=held?lerp(0.006,0.03,1-lag):0.06;
   if (multi){ kd*=0.2; kc=0; }
   GR.relT=held?0:(GR.relT||0)+1; if (!held){ const sp=Math.pow(4,((S['되돌아오는속도']??0.5)-0.5)*2), ramp=clamp01((GR.relT-6)/(45/sp)); ksm=Math.min(0.9,lerp(ksm,0.6,ramp)*sp); kd=Math.min(0.9,kd*(1-0.8*ramp)*sp); }
@@ -3380,12 +3454,13 @@ function grabSim(){
     const u0=mul(sub(b0,a0),1/L0), u=mul(sub(B,A),1/L), Q=qFromTo(u0,u), wb=clamp((pa.rg+pa.fall)*(0.8+0.5*S['끝둥글기']),0.5,L0*0.3), m0=Math.max(0.05,L0-2*wb), m1=Math.max(0.05,L-2*wb);
     const thin=clamp(Math.pow(L0*1.05/Math.max(L0*1.05,L),1.6+2.2*ch),Math.min(0.07,GR.smin||0.07),1), kg=lerp(0.3,0.1,lag)*(0.6+0.8*rs);
     for (let i=0;i<n;i++){ const r=X0[i], ra=sub(r,a0), d0=dot(ra,u0), l=sub(ra,mul(u0,d0));
-      let d, ls=1; if (d0<=wb) d=d0; else if (d0>=L0-wb) d=L-(L0-d0); else { const t=(d0-wb)/m0; d=wb+t*m1; ls=1-(1-thin)*Math.pow(Math.sin(PI*t),0.35); }
+      let d, ls=1; if (d0<=wb) d=d0; else if (d0>=L0-wb) d=L-(L0-d0); else { const t=(d0-wb)/m0; d=wb+t*m1; ls=1-(1-thin)*Math.pow(Math.sin(PI*t),2); }
       if (d0<=wb||d0>=L0-wb) ls=1+0.1*S['끝둥글기']*(1-thin)*Math.max(0,1-Math.abs(d0<=wb?d0:L0-d0)/wb);
       const lr=qRot(Q,mul(l,ls)), g=[A[0]+u[0]*d+lr[0],A[1]+u[1]*d+lr[1],A[2]+u[2]*d+lr[2]];
       P[i*3]+=(g[0]-P[i*3])*kg; P[i*3+1]+=(g[1]-P[i*3+1])*kg; P[i*3+2]+=(g[2]-P[i*3+2])*kg; } }
   else for (let i=0;i<n;i++){ const r=X0[i], gx=Rg[0]*r[0]+Rg[1]*r[1]+Rg[2]*r[2]+cT[0], gy=Rg[3]*r[0]+Rg[4]*r[1]+Rg[5]*r[2]+cT[1], gz=Rg[6]*r[0]+Rg[7]*r[1]+Rg[8]*r[2]+cT[2];
     P[i*3]+=(gx-P[i*3])*ksm; P[i*3+1]+=(gy-P[i*3+1])*ksm; P[i*3+2]+=(gz-P[i*3+2])*ksm; P[i*3]-=c[0]*kc; P[i*3+1]-=c[1]*kc; P[i*3+2]-=c[2]*kc; }
+  jellyHoldSmooth(P,multi);
   pinIt();
   // 속도·위치 갱신 + 안전장치
   let bad=false, mx=0; const vmax=held?0.9:0.22; for (let i=0;i<n*3;i++){ let v=P[i]-X[i]; if (!isFinite(v)){ bad=true; break; } if (v>vmax) v=vmax; else if (v<-vmax) v=-vmax; V[i]=v; X[i]=X[i]+v; const dd=X[i]-GR.XR[i]; if (Math.abs(dd)>mx) mx=Math.abs(dd); if (dd>14) X[i]=GR.XR[i]+14; else if (dd<-14) X[i]=GR.XR[i]-14; }
@@ -3407,6 +3482,7 @@ function grabSim(){
     const f=F.subarray(i*9,i*9+9), det=f[0]*(f[4]*f[8]-f[5]*f[7])-f[1]*(f[3]*f[8]-f[5]*f[6])+f[2]*(f[3]*f[7]-f[4]*f[6]);
     if (!ok) { for (let k=0;k<9;k++) F[i*9+k]=k%4===0?1:0; }
     else if (det<0.15){ const b=clamp01((0.15-det)/0.3); for (let k=0;k<9;k++) F[i*9+k]=F[i*9+k]*(1-b)+(k%4===0?0.6:0)*b; } }
+  jellyHoldTrack(multi);
   // 집은 점 보정: 그리는 표면의 그 점이 손가락에 정확히
   GR.cor.length=0;
   for (const p of GR.pins){ GR.skip=true; deform(p.g0[0],p.g0[1],p.g0[2],time); GR.skip=false; const base=[DX,DY,DZ]; p.gP=[CHX,CHY,CHZ];
@@ -3422,7 +3498,7 @@ function grabSim(){
   for (const p of GR.pins) if (p.tip && p.tip.rb>1e-4) p.tip.dir=mul(sub(p.local,p.tip.C),1/p.tip.rb);
   GR.mid=null; if (GR.pins.length>=2 && GR.pins[0].tip && GR.pins[1].tip && GR.pins[0].tip.su){ const pa=GR.pins[0], pb=GR.pins[1], Lc=len(sub(pa.local,pb.local)), sL=pa.tip.sL;
     const rS=clamp(R*0.55*Math.pow(sL*1.25/Math.max(sL*1.25,Lc),0.9+1.0*ch),0.1,R*0.55);
-    GR.mid={A:pa.tip.C,B:pb.tip.C,su:pa.tip.su,sL,a0:pa.g0,rS,amt:Math.min(1,ch)*clamp01((Lc/sL-1.2)/0.7)}; }
+    GR.mid={A:pa.tip.C,B:pb.tip.C,su:pa.tip.su,sL,a0:pa.g0,rS,amt:Math.min(1,ch)*sstep(1.15,2.3,Lc/sL)}; }
   // 끊김
   const BD=GR.brk?(S['끊김']?Math.min(GR.brk,S['끊김거리']):GR.brk):S['끊김거리']; if (S['끊김']||GR.brk) for (const p of [...GR.pins]){ if (len(sub(p.local,c))>BD){ grabRelease(p); Sfx('pop',0.9,0.8); Sfx('boing',0.8,1.4); boingV-=0.08; } }
   // 잠잠해지면 끄기
@@ -3636,7 +3712,7 @@ function step(){ const skip=slowTick(); pfxTick(); tkTick(); awTick(); mdTick();
   if (camAbs){ cam.position.set(...camAbs[0]); cam.lookAt(...camAbs[1]); }
   cam.updateMatrixWorld();
 
-  boingV+=-boing*0.18; boingV*=0.86; boing+=boingV;
+  { const J_=jellyP(), w_=2*PI*J_.f*1.35/60, z_=Math.min(0.9,J_.z*0.55+0.02); boingV+=-boing*w_*w_; boingV*=1-2*z_*w_; boing+=boingV; }   // 몸 통통(찌르기·착지): 젤리 진동수·감쇠비를 따라요 (3 균형 = 예전 값)
   jumpV+=-jump*0.08-0.004; jumpV*=0.9; jump=Math.max(0,jump+jumpV);
   sqV+=-sq*0.2; sqV*=0.8; sq+=sqV;
 
@@ -3845,6 +3921,10 @@ for (const g of SCHEMA){ if (g.hide) continue; if (!g.btns && !g.f.some(f=>!f.hi
   if (g.btns) btnGrid(det,g.btns);
   for (const f of g.f){ if (f.hide||f.inSw) continue;
     if (f.t==='enum' && f.sw){ swRow(det,f); }
+    else if (f.t==='enum' && f.btn5){ const r=rowEl(f.k,f.tip); r.style.flexWrap='wrap'; const gd=document.createElement('div'); gd.style.cssText='display:flex;gap:4px;width:100%;margin-top:4px'; const bs=f.o.map((o,i)=>{ const b=document.createElement('button'); b.textContent=o.split(' ')[0]; b.title=o; b.style.cssText='flex:1;padding:8px 0;border-radius:10px;border:1px solid rgba(0,0,0,.14);background:rgba(127,127,127,.08);color:inherit;font:inherit;font-weight:700;cursor:pointer';
+        b.onclick=()=>{ S[f.k]=i; if (f.onSet) f.onSet(); save(); refreshAll(); exToast&&exToast('젤리 '+o); }; gd.appendChild(b); return b; });
+      const nm=document.createElement('div'); nm.style.cssText='width:100%;font-size:12px;opacity:.75;margin-top:3px'; r.appendChild(gd); r.appendChild(nm); det.appendChild(r);
+      refreshers.push(()=>{ bs.forEach((b,i)=>{ const on=i===(S[f.k]|0); b.style.background=on?'rgba(255,190,110,.9)':'rgba(127,127,127,.08)'; b.style.color=on?'#222':''; }); nm.textContent=f.o[S[f.k]|0]||''; }); }
     else if (f.t==='enum' && f.pick){ pickRow(det,f); }
     else if (f.t==='enum'){ const r=rowEl(f.k,f.tip); const s=document.createElement('select'); f.o.forEach((o,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=o; s.appendChild(op); });
       s.addEventListener('change',()=>{ S[f.k]=+s.value; if (f.onSet){ f.onSet(); refreshAll(); } if (f.k==='모양'){ if (S['모양']===7) applyFace(S,1); else if (S['얼굴']) { const m_=S['모양']; applyFace(S,0); S['모양']=m_; } refreshAll(); } if (f.k==='표정'){ unlockAudio(); playExpr(EXPRS[S['표정']]); } save(); }); r.appendChild(s); det.appendChild(r); refreshers.push(()=>s.value=S[f.k]); }
@@ -4462,9 +4542,9 @@ function UpdateSpin(dt){ const S_=SPIN;
     const hv=Math.floor(S_.a/Math.PI); if (hv!==S_.lastH){ S_.lastH=hv; if (wl>5) Sfx('whoosh',Math.min(0.45,wl*0.016),0.9+wl*0.02); }
     if (wl<0.05 && th<0.02){ S_.on=false; S_.q=[0,0,0,1]; S_.wv=[0,0,0]; S_.a=0; if (S_.tot>4*Math.PI){ S_.dizzyAt=time; S_.sway=1; playExpr('어지러움','once'); } else Sfx('bump',0.25,1.4); } }
   const aw=len(S_.wv), A=S_.on?14*S_.ay*Math.pow(clamp01(1-aw/9),1.4)*sstep(0,0.6,S_.tot/6):0, ph=S_.a*0.55;
-  const tg=[A*Math.cos(ph),A*Math.sin(ph)]; for (let i=0;i<2;i++){ S_.Tv[i]+=((tg[i]-S_.T[i])*60-S_.Tv[i]*7)*dt; S_.T[i]+=S_.Tv[i]*dt; }
+  const tg=[A*Math.cos(ph),A*Math.sin(ph)]; for (let i=0;i<2;i++){ { const J_=jellyP(), w_=2*PI*J_.f*0.41, z_=J_.z+0.15; S_.Tv[i]+=((tg[i]-S_.T[i])*w_*w_-S_.Tv[i]*2*z_*w_)*dt; } S_.T[i]+=S_.Tv[i]*dt; }
   S_.sway*=Math.exp(-dt*0.9);
-  SPCF=Math.min(0.2,0.00034*aw*aw)*S_.ay;
+  { const J_=jellyP(), tg_=Math.min(0.2,0.00034*aw*aw)*S_.ay, w_=2*PI*J_.f*0.9; SPCFv+=(-w_*w_*(SPCF-tg_)-2*J_.z*w_*SPCFv)*dt; SPCF=Math.max(0,SPCF+SPCFv*dt); if (SPCF<1e-5&&tg_===0){ SPCF=0; SPCFv=0; } SPNF=1/(1+Math.pow(aw/3,2)); }   // 원심 부풂 = 젤리 스프링, 빨리 돌수록 잔 일렁임 줄임
   return qMul(qMul(qAxis(S_.T[0],RIGHT),qAxis(S_.T[1],FWD)),S_.q); }
 // 쓸기 → 스핀 (가로·세로·대각선 모두): 쓸어 넘긴 방향과 수직인 축
 function spinSwipe(vx,vy,v){ const l=Math.hypot(vx,vy)||1; spinKick(SPINDIR*Math.min(30,v*0.016),[vy/l,vx/l,0]); }
