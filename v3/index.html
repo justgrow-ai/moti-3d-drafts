@@ -478,11 +478,12 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
     at('눈썹 높이',{k:'눈썹 길이',r:[0.6,1.5],d:1,tip:'눈썹 가로 길이 (모든 눈썹 모양). 가운데를 기준으로 양쪽으로 늘어나요'}); at('눈썹 길이',{k:'눈썹 두께',r:[0.5,2],d:1,tip:'눈썹 두께 (모든 눈썹 모양). 아치·물결·S곡선 모양은 그대로'});
     SCHEMA.push({h:'색',lbl:'🎨 색',f:[{k:'캐릭터 색상',t:'enum',sw:'char',ck:'캐릭터 직접색',o:CHAR_SW.map(x=>x[0]),d:0,tip:'몸 색. 어두운 색이면 눈·눈썹·테두리가 밝게 바뀌어 잘 보여요'},{k:'캐릭터 직접색',t:'color',inSw:1,d:hx('#e9a15a')},
       {k:'배경 색상',t:'enum',sw:'bg',ck:'배경 직접색',o:BG_SW.map(x=>x[0]),d:0,tip:'색 하나를 고르면 그 색으로 자연스러운 그라데이션 배경을 만들어요 (캐릭터 쪽이 살짝 밝게)'},{k:'배경 직접색',t:'color',inSw:1,d:hx('#cfe3f3')}]});
+    SCHEMA.push({h:'다이나믹 표정',lbl:'✨ 다이나믹 표정',btns:'dyn',f:[{k:'표정 강도',r:[0,2],d:1,tip:'눈·눈썹 표정이 얼마나 크게 움직일지 (0 = 다이나믹 층 끔, 1 = 기본, 2 = 과장)'},{k:'반응 표정',t:'bool',d:true,tip:'잡기 · 늘이기 · 던지기 · 벽 충돌 · 스핀 · 소환 · 꾹 누르기에 눈이 반응해요'},{k:'가만히 있을 때 표정',t:'bool',d:true,tip:'가만히 두면 가끔 두리번거리고, 십몇 초마다 큰 표정을 지어요'}]});
     const tg=G('염동력 설정'); for (const f of tg.f) if (f.k==='파동반복속도'){ f.hide=0; f.tip='파동 속도: 바깥으로 흘러가는 동심원 물결이 1초에 몇 번'; }
     for (const f of tg.f) if (f.k==='굴절강도') f.tip='왜곡 정도: 공간이 휘는 세기 (물결 + 아지랑이 전체)';
     tg.f.push({k:'파동 세기',r:[0,4],d:1,tip:'동심원 물결만 더 세게 휘게 (아지랑이는 그대로)'},{k:'파동 개수',r:[0.4,3],d:1,tip:'반경 안 동심원 물결 수 (1 = 지금)'},{k:'파동 두께',r:[0.3,3],d:1,tip:'물결 고리 두께 (작을수록 가는 선, 클수록 굵은 띠)'},
       {k:'파동 빛',r:[0,1.5],d:0,tip:'물결 고리에 은은한 빛을 얹어요 — 단색 배경에서도 파동이 또렷이 보여요 (0 = 지금처럼 굴절만)'},{k:'파동 색',t:'enum',o:['캐릭터 색','배경 색','흰빛'],d:0,tip:'파동 빛 색. 어두운 배경에선 밝게, 밝은 배경에선 진하게 보여요'}); }
-  const ORD=['얼굴 · 눈','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
+  const ORD=['얼굴 · 눈','다이나믹 표정','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
 const FIELDS = {}; for (const g of SCHEMA) for (const f of g.f) FIELDS[f.k] = f;
 // Unity 프로젝트의 moti-tuning.json (기본값)
 const TUNING = {"버전":2,"귀":1,"귀크기":1.0,"귀간격":1.0,"귀출렁임":1.0,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1.0},"벼슬색":{"r":1.0,"g":0.42,"b":0.48,"a":1.0},"하트정도":0.7,"위홈깊이":0.5,"아래뾰족":0.5,"앞뒤두께":0.88,"따라오는속도":0.49000000953674316,"출렁임잡기":0.4000000059604645,"늘어남시작":0.5099999904632568,"최대늘어남":1.840000033378601,"가운데잘록":1.0,"일렁임크기":0.06800000369548798,"일렁임속도":0.4099999964237213,"숨쉬기위아래":0.12,"숨쉬기부풀기":0.015,"몸광택":1.0,"테두리빛두께":0.5,"테두리빛세기":2.2799999713897705,"테두리색1":{"r":0.35,"g":0.65,"b":1.0,"a":1.0},"테두리색2":{"r":1.0,"g":0.45,"b":0.6,"a":1.0},"중력":0.01730000041425228,"바닥탄력":0.6959999799728394,"던지기최대속도":1.2000000476837158,"클릭띠용":0.2029999941587448,"클릭점프":0.289000004529953,"파티클개수":0.0,"눈크기":1.0800000429153442,"눈동자크기":1.0,"눈동자이동":0.3490000069141388,"왼눈위치":{"x":-0.2,"y":0.6},"오른눈위치":{"x":0.7,"y":0.2},"깜빡임간격":4.0,"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1.0},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1.0}};
@@ -1374,7 +1375,7 @@ function fx2Target(dt,F){ const N=neutralP(); for (const k of PK) PT[k]=N[k];
   const d=FX2.def; if (!d && !FX2.out){ if (FX2.dirty){ FX2.cur.set(FX2_ZERO); fx2Write(); FX2.dirty=false; } if (typeof GZ!=='undefined'){ GZ.rate=1; GZ.bdur=1; } return 0; }   // 표정이 없을 땐 __face 를 건드리지 않아요(직접 조절 가능)
   FX2.dirty=true;
   FX2.t+=dt; const t=FX2.t, out=FX2.out, ant=out?0.12:(d.ant??0.25), ta=out?0.07:0.09, tin=out?0.38:(d.tin??0.32), os=out?1.2:(d.os??1.6), tr=FX2.tr, L=FX2.lag;
-  const P=FX2.cur, A=FX2.from, B=FX2.to, I=S['표정세기'];
+  const P=FX2.cur, A=FX2.from, B=FX2.to, I=S['표정세기']*(isFinite(+S['표정 강도'])?clamp(+S['표정 강도'],0,2):1);
   const bd=typeof gzBD==='function'?gzBD():0.26, tsw=bd*0.38;                 // 깜빡이며 바뀌기: 다 감긴 순간 모양을 바꿔요
   for (let i=0;i<FX2L;i++){ const side=i<26?(i/FX2N|0):0, k=i<26?FX2K[i%FX2N]:'', eye=FX2_EYE.has(k), body=i>=26; let v;
     if (tr==='legacy'){ const u=t-(eye?0.06:0)-(side?0.025:0)-(body?0.03:0), an=A[i]+(A[i]-B[i])*ant;
@@ -1410,6 +1411,80 @@ window.__fx2=()=>({name:FX2.name,t:+FX2.t.toFixed(2),out:FX2.out,on:!!FX2.def,tr
 let EX=null; // 지금 재생 중인 표정 {name,t,mode}
 const Pc=neutralP(); const PT={};
 function playExpr(name,mode){ return fx2Play(name,mode); }
+// ---- step46: 다이나믹 눈·눈썹 층
+const DYK=['s','sx','sy','cl','lo','rot','x','y','by','bt','bb','bp'];   // 한쪽: 크기·가로·세로(배율-1), 감김·아래꺼풀(더함), 각도(+바깥 끝 위), 위치, 눈썹 높이·기울기·굽힘·안쪽 당김
+const DYF={s:5.2,sx:5.2,sy:5.2,cl:7,lo:6,rot:5,x:6,y:6,by:5.5,bt:5.5,bb:5.5,bp:5.5}, DYZ={s:0.3,sx:0.28,sy:0.28,cl:0.6,lo:0.5,rot:0.4,x:0.45,y:0.45,by:0.38,bt:0.42,bb:0.42,bp:0.45};
+const DYE={v:[{},{}],w:[{},{}],tg:[{},{}],g:[0,0],gv:[0,0],gt:[0,0],cur:null,t:0,ff:1,idleNext:6,lookNext:2,hitN:0,hitT:-9,suF:false,bb0:null,stretch:0,blk:[0,0],last:'',grab:0};
+for (let i=0;i<2;i++) for (const k of DYK){ DYE.v[i][k]=0; DYE.w[i][k]=0; DYE.tg[i][k]=0; }
+const DYI=()=>{ const v=+S['표정 강도']; return isFinite(v)?clamp(v,0,2):1; };
+// 표정 시간표: [시각, {a:양쪽, L:왼쪽, R:오른쪽, g:[시선x,y], f:빠르기 배율}] — 각 구간의 목표로 용수철이 달려가요. fn(t,T)는 매 순간 더하는 움직임
+const DYX={
+ '깜짝':{d:1.45,k:[[0,{a:{s:-0.12,sy:-0.15,by:-0.03}}],[0.09,{a:{s:0.62,sy:0.12,by:0.2,bb:0.35},f:1.3}],[0.85,{a:{s:0.18,by:0.08,bb:0.15}}],[1.25,{}]],tip:'움찔 작아졌다가 눈이 확 커지고 눈썹이 높이 튀어요'},
+ '반짝 기대':{d:1.6,k:[[0,{a:{s:-0.1,sy:-0.08}}],[0.08,{a:{s:0.5,by:0.13,bb:0.3}}],[0.42,{a:{s:0.25,by:0.1}}],[0.58,{a:{s:0.55,by:0.15,bb:0.35}}],[1.0,{a:{s:0.3,by:0.08}}],[1.4,{}]],tip:'눈이 두 번 부풀었다 줄었다 — 신나서 두근두근'},
+ '찡긋 웃음':{d:1.8,k:[[0,{a:{sy:0.1,by:-0.02}}],[0.08,{a:{lo:0.95,sx:0.2,sy:-0.18,y:0.03,by:0.13,bb:0.5}}],[1.25,{a:{lo:0.85,sx:0.12,by:0.1,bb:0.4}}],[1.6,{}]],tip:'아래 눈꺼풀이 올라와 ^^ 반달 눈, 눈썹은 둥글게 위로'},
+ '질끈':{d:1.25,k:[[0,{a:{s:0.15,by:0.04}}],[0.07,{a:{cl:0.9,sx:0.3,sy:-0.35,s:-0.08,bp:0.65,by:-0.07},f:1.4}],[0.8,{a:{cl:0.75,sx:0.15,bp:0.4}}],[1.05,{}]],tip:'>< 처럼 꽉 감고 옆으로 찌그러짐, 눈썹이 가운데로 모여요'},
+ '쫙 찢어짐':{d:1.3,k:[[0,{a:{sy:0.12,sx:-0.05}}],[0.1,{a:{sx:0.62,sy:-0.62,s:0.02,by:0.05,bt:0.1},f:1.2}],[0.75,{a:{sx:0.55,sy:-0.55}}],[0.82,{f:1.1}]],tip:'눈이 가로로 쫙 늘어나 가는 실눈이 됐다가 용수철처럼 튕겨 돌아와요'},
+ '뿅 작아짐':{d:1.25,k:[[0,{a:{s:-0.58,sy:-0.1,by:-0.05}}],[0.55,{a:{s:0.45,by:0.16,bb:0.3},f:1.4}],[0.92,{}]],tip:'콩알처럼 작아졌다가 뿅 크게 돌아와요'},
+ '의심':{d:2.0,k:[[0,{L:{cl:0.12},R:{s:0.05}}],[0.1,{L:{cl:0.5,lo:0.3,s:-0.08,by:-0.07,bt:-0.12,bp:0.35},R:{s:0.2,sy:0.08,by:0.17,bb:0.3},g:[0.35,0]}],[1.6,{g:[0.1,0]}],[1.8,{}]],tip:'한쪽은 가늘게 째려보고 다른 쪽은 크게 뜨고 눈썹을 치켜올려요 (좌우 비대칭)'},
+ '시무룩':{d:2.0,k:[[0,{a:{s:0.05}}],[0.12,{a:{s:-0.25,rot:-0.25,y:-0.03,sy:-0.05,bp:-0.55,by:0.02},g:[0,-0.35],f:0.7}],[1.7,{}]],tip:'눈이 작아지고 바깥이 처지며 눈썹 안쪽이 올라가요'},
+ '화남':{d:1.8,k:[[0,{a:{s:0.08,by:0.03}}],[0.08,{a:{bp:0.85,bt:-0.3,by:-0.08,sy:-0.25,lo:0.35,s:-0.04},f:1.3}],[1.5,{}]],fn(t,T){ const w=Math.exp(-t*1.5)*0.03*Math.sin(t*55); for (const e of T){ e.by+=w; e.x+=w*0.3; } },tip:'눈썹이 안쪽으로 확 내려오고 눈이 가늘어지며 부들부들'},
+ '두리번':{d:1.6,k:[[0,{g:[-0.7,0.05],a:{by:0.04}}],[0.42,{g:[0.7,0.05],a:{by:0.06}}],[0.86,{g:[0,0.45],a:{by:0.12,s:0.08}}],[1.25,{g:[0,0]}]],gf:1,tip:'시선이 왼쪽·오른쪽·위로 휙휙, 볼 때마다 눈썹이 살짝 들려요'},
+ '졸림 번쩍':{d:2.0,k:[[0,{a:{cl:0.55,sy:-0.1,by:-0.04},f:0.45}],[0.9,{a:{cl:0.82,by:-0.05},f:0.45}],[1.15,{a:{s:0.55,cl:0,sy:0.15,by:0.22,bb:0.35},f:1.5}],[1.7,{}]],tip:'스르르 감기다가 번쩍! 눈이 크게 떠져요'},
+ '어지러움':{d:2.0,k:[[0,{a:{s:0.05}}],[1.85,{}]],fn(t,T,G){ const e=Math.min(1,t*4)*Math.max(0,1-(t-1.4)/0.45), c=Math.sin(t*9), s_=Math.cos(t*9); T[0].s+=0.32*c*e; T[1].s-=0.32*c*e; T[0].rot+=0.35*s_*e; T[1].rot-=0.35*s_*e; T[0].by+=0.06*s_*e; T[1].by-=0.06*s_*e; G[0]+=0.4*c*e; G[1]+=0.3*s_*e; },tip:'두 눈 크기가 번갈아 커졌다 작아지고 빙글빙글'},
+ '윙크':{d:1.3,k:[[0,{L:{sy:0.08},R:{s:0.04}}],[0.07,{L:{cl:1,sy:-0.25,sx:0.18,by:-0.06,bp:0.2},R:{s:0.12,by:0.13,bb:0.3},f:1.4}],[0.75,{}]],tip:'한쪽 눈을 꾹 감으며 눌리고, 다른 쪽 눈썹은 올라가요'}};
+const DYN=Object.keys(DYX);
+function dynPlay(nm,amp){ if (!DYX[nm]) return; DYE.cur={nm,t:0,amp:amp??1}; DYE.last=nm; }
+function dynKick(i,k,v){ const I=DYI(); for (const s of (i<0?[0,1]:[i])) DYE.w[s][k]+=v*I; }   // 순간 충격: 용수철 속도에 더해요
+// 상호작용 반응 (켜져 있을 때만)
+function dynReact(kind,a){ if (S['반응 표정']===false || !MINI()) return; a=a??1;
+  if (kind==='grab'){ dynKick(-1,'s',2.6); dynKick(-1,'by',1.2); DYE.grab=time; }
+  else if (kind==='throw'){ dynPlay(a>0.6?'깜짝':'반짝 기대',Math.min(1.2,0.6+a)); }
+  else if (kind==='release'){ dynKick(-1,'sy',-1.5); dynKick(-1,'sx',1.2); }
+  else if (kind==='hit'){ if (time-DYE.hitT<1.6) DYE.hitN++; else DYE.hitN=1; DYE.hitT=time;
+    if (DYE.hitN>=3 && a>0.3){ dynPlay('어지러움'); DYE.hitN=0; } else if (a>0.45) dynPlay('질끈',Math.min(1.2,0.5+a)); else { dynKick(-1,'sy',-2.5*a-0.6); dynKick(-1,'sx',2*a+0.4); } }
+  else if (kind==='spin') dynPlay('깜짝',0.8);
+  else if (kind==='dizzy') dynPlay('어지러움');
+  else if (kind==='summon') dynPlay('반짝 기대',1.1);
+  else if (kind==='press') dynPlay('찡긋 웃음'); }
+function dynTick(dt){ const I=DYI(), T=[{},{}], G=[0,0]; for (let i=0;i<2;i++) for (const k of DYK) T[i][k]=0;
+  let ff=1;
+  if (DYE.cur){ const c=DYE.cur, X=DYX[c.nm]; c.t+=dt; let key=X.k[0]; for (const kk of X.k) if (c.t>=kk[0]) key=kk; const o=key[1]; ff=o.f||1;
+    for (let i=0;i<2;i++){ const src=Object.assign({},o.a||{},(i?o.R:o.L)||{}); for (const k in src) T[i][k]+=src[k]; }
+    if (o.g){ G[0]+=o.g[0]; G[1]+=o.g[1]; } if (X.fn) X.fn(c.t,T,G);
+    const am=c.amp; for (let i=0;i<2;i++) for (const k of DYK) T[i][k]*=am; G[0]*=am; G[1]*=am;
+    if (c.t>X.d) DYE.cur=null; }
+  // 잡고 늘이면: 늘어난 방향으로 눈도 쫙 (가로로 늘면 실눈, 세로로 늘면 길쭉) → 놓으면 용수철로 튕겨 돌아와요
+  if (DYE.bb0===null || !dragging){ const w_=BB[3]-BB[0], h_=BB[4]-BB[1]; if (isFinite(w_)&&isFinite(h_)&&w_>0&&h_>0){ if (DYE.bb0===null) DYE.bb0=[w_,h_]; else { DYE.bb0[0]+=(w_-DYE.bb0[0])*0.02; DYE.bb0[1]+=(h_-DYE.bb0[1])*0.02; } } }
+  let sxS=0, syS=0; if (dragging && DYE.bb0 && S['반응 표정']!==false){ const ax=(BB[3]-BB[0])/DYE.bb0[0]-1, ay=(BB[4]-BB[1])/DYE.bb0[1]-1;
+    if (isFinite(ax)&&isFinite(ay)){ const kx=clamp(ax,-0.5,1.5), ky=clamp(ay,-0.5,1.5); sxS=0.55*kx-0.3*ky; syS=0.55*ky-0.45*kx; DYE.stretch=Math.max(kx,ky); } }
+  else DYE.stretch=0;
+  for (let i=0;i<2;i++){ T[i].sx+=clamp(sxS,-0.4,0.8); T[i].sy+=clamp(syS,-0.6,0.8); if (DYE.stretch>0.25){ T[i].by+=0.1*Math.min(1,DYE.stretch); T[i].bb+=0.2*Math.min(1,DYE.stretch); } }
+  if (dragging && time-DYE.grab<1.5 && DYE.stretch<0.2){ for (let i=0;i<2;i++) T[i].s+=0.15; }   // 잡혀 있는 동안 눈 동그랗게
+  // 가만히 있을 때: 휙 둘러보기(작은 시선 이동) + 가끔 큰 표정
+  if (S['가만히 있을 때 표정']!==false && MINI() && !dragging && time-lastTouch>3 && !MOT && !GONE){
+    if (time>DYE.lookNext){ DYE.lookNext=time+rnd(1.3,3.8); const a=Math.random()*Math.PI*2, r=rnd(0.15,0.55); DYE.gt=[Math.cos(a)*r,Math.sin(a)*r*0.7]; if (Math.random()<0.35) DYE.gt=[0,0]; dynKick(-1,'by',0.5*r); }
+    if (time>DYE.idleNext && !DYE.cur && !(FX2.def&&!FX2.out)){ DYE.idleNext=time+rnd(13,26); const pool=['반짝 기대','두리번','찡긋 웃음','의심','졸림 번쩍','윙크','뿅 작아짐']; let nm; do { nm=pool[(Math.random()*pool.length)|0]; } while (nm===DYE.last && pool.length>1); dynPlay(nm,0.85); } }
+  else { DYE.gt=[0,0]; if (time-lastTouch<=3) DYE.idleNext=Math.max(DYE.idleNext,time+8); }
+  if (typeof SPIN!=='undefined' && SPIN.dizzyAt>0 && SPIN.dizzyAt!==DYE.dzT){ DYE.dzT=SPIN.dizzyAt; dynReact('dizzy'); }   // 스핀 끝 → 어지러움
+  // 소환: 눈이 처음 드러나는 순간 반짝
+  if (typeof SU!=='undefined' && SU){ if (SU.on && SU.Tr && SU.t>=SU.Tr+0.05 && !DYE.suF){ DYE.suF=true; dynReact('summon'); } if (!SU.on) DYE.suF=false; }
+  // 용수철 적분
+  for (let i=0;i<2;i++) for (const k of DYK){ const w=2*Math.PI*DYF[k]*ff, z=DYZ[k], tg=T[i][k]*I;
+    DYE.w[i][k]+=((tg-DYE.v[i][k])*w*w-DYE.w[i][k]*2*z*w)*dt; DYE.v[i][k]+=DYE.w[i][k]*dt; if (!isFinite(DYE.v[i][k])||!isFinite(DYE.w[i][k])){ DYE.v[i][k]=0; DYE.w[i][k]=0; } }
+  const gt=[(G[0]+DYE.gt[0])*I,(G[1]+DYE.gt[1])*I], gw=2*Math.PI*9, gz=0.75;
+  for (let j=0;j<2;j++){ DYE.gv[j]+=((clamp(gt[j],-1,1)-DYE.g[j])*gw*gw-DYE.gv[j]*2*gz*gw)*dt; DYE.g[j]+=DYE.gv[j]*dt; if (!isFinite(DYE.g[j])){ DYE.g[j]=0; DYE.gv[j]=0; } } }
+// 눈 셰이더 값에 얹기 (기존 표정·시선·깜빡임 다 계산한 뒤)
+function dynPost(i,u,blk){ const V=DYE.v[i];
+  if (blk>0.55 && DYE.blk[i]<=0.55){ DYE.w[i].sx+=1.6; DYE.w[i].sy-=1.2; DYE.w[i].by-=0.5; }   // 깜빡일 때 찌그러졌다 튕겨요
+  DYE.blk[i]=blk;
+  const sc=clamp(1+V.s,0.35,1.9), sx=clamp(1+V.sx,0.45,2.0), sy=clamp(1+V.sy,0.3,1.8);
+  u.uMZ.value=Math.min(2.4,u.uMZ.value*sc); u.uMSX.value*=sx/Math.sqrt(sy); u.uSq.value=clamp(u.uSq.value*Math.sqrt(sy),0.3,2.2);
+  u.uCl.value=clamp01(1-(1-u.uCl.value)*(1-clamp01(V.cl))); u.uMLo.value=clamp01(u.uMLo.value+clamp01(V.lo)*(1-u.uMLo.value));
+  u.uMR.value+=clamp(V.rot,-0.8,0.8)*(i?1:-1);
+  u.uMOff.value.x+=clamp(V.x,-0.2,0.2)*(i?1:-1)+DYE.g[0]*0.16; u.uMOff.value.y+=clamp(V.y,-0.2,0.2)+DYE.g[1]*0.13;
+  const b=u.uBrP.value; b.x+=clamp(V.by,-0.2,0.35)+0.03*V.s; b.y+=clamp(V.bt,-0.6,0.6); b.z+=clamp(V.bb,-0.8,0.8); u.uBrPl.value+=clamp(V.bp,-0.9,1.0); }
+function dynBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='다이나믹 표정'); for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } if (nm==='🎲 아무거나'){ let n; do { n=DYN[(Math.random()*DYN.length)|0]; } while (n===DYE.last); dynPlay(n); return; } dynPlay(nm.replace(/^[^\s]+ /,'')); }
+window.__dyn={play:dynPlay,react:dynReact,DYE,names:DYN};
 function playExprOld(name,mode){ if (!PRESET[name]) return; if (name==='기본'){ if (EX) EX.out=true; return; } EX={name,t:0,mode:mode||['once','loop','hold'][S['표정재생']],pt:-1,out:false,ot:0}; }
 function exprTarget(dt,F){ return fx2Target(dt,F); }
 function exprTargetOld(dt,F){ const N=neutralP(); for (const k of PK) PT[k]=N[k];
@@ -2126,8 +2201,9 @@ function UpdateActions(tt){ const dt=1/60;
   const F=FX; F.off=[0,0,0]; F.rx=F.ry=F.rz=0; F.sy=1; F.sx=1; F.press=0; F.wob=0; F.walk=0; F.big=1; F.crumple=0; F.jaw=0;
   UpdateMotion(dt,F); BPH+=dt/0.55*BRK;
   HOLDP+=(HOLDT-HOLDP)*(HOLDT>HOLDP?0.12:0.25); if (HOLDP>0.01){ F.press+=HOLDP*0.34; F.sx*=1+HOLDP*0.1; }
-  if (HOLDREL>0 && time-HOLDREL<1/30){ HOLDREL=0; jumpV+=S['클릭점프']*1.1; boingV+=0.12; Sfx('boing',0.9,S['튀는소리높이']*1.1); if (MINI()) playExpr('웃음','once'); }
+  if (HOLDREL>0 && time-HOLDREL<1/30){ HOLDREL=0; jumpV+=S['클릭점프']*1.1; boingV+=0.12; Sfx('boing',0.9,S['튀는소리높이']*1.1); if (MINI()) playExpr('웃음','once'); dynReact('press'); }
   exprTarget(dt,F); if (MINI()){ gzBody(dt,F); esBody(dt,F); }
+  SAFE(()=>dynTick(dt),'dyn');
   for (const k of PK) Pc[k]+=(PT[k]-Pc[k])*(k[0]==='m'?0.22:0.28);
   if (S['손항상'] && !POD.act) podReach();
   UpdatePod(dt,F);
@@ -2391,7 +2467,7 @@ function UpdateEyes(tt){
     { const EP=FACEP.eye[i], BP=FACEP.brow[i], ob=Math.max(0,o), blk=clamp01(mblI);   // 표정 뜸(o) → 감김/눌림, 깜빡임 → 감김
       const gl=gzOn()?GZ.lid*GZ_LS:0; u.uCl.value=clamp01(1-(1-clamp01(1-ob))*(1-blk)*(1-clamp01(EP.cl))*(1-Math.max(0,gl)*0.3)); u.uSq.value=Math.max(1,Math.min(ob,1.6))*EP.sq*(1+0.06*Math.max(0,-gl));
       u.uMZ.value*=EP.scale; u.uMSX.value*=EP.sx; u.uMR.value+=EP.rot*(i?1:-1); u.uMOff.value.x+=EP.x*(i?1:-1); u.uMOff.value.y+=EP.y; u.uMLo.value=clamp01(EP.lo); u.uBrPl.value=BP.pull;   // rot: + 바깥 끝이 올라감, x: + 바깥쪽
-      u.uBrP.value.set(0.07*(Math.min(ob,1.4)-1)-0.05*A.b[i]+BP.y+(S['눈썹 높이']??0), 0.35*clamp(A.k[i],-1.2,1.2)+BP.tilt, BP.bend+(S['아치']??0), BP.x); if (gzOn()||gzBlinkOn()) gzEyePost(i,u,blk); edPost(i,u,blk,tt); esPost(i,u,mbi); u.uBrP.value.x=clamp(u.uBrP.value.x,-0.13,0.42); } u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
+      u.uBrP.value.set(0.07*(Math.min(ob,1.4)-1)-0.05*A.b[i]+BP.y+(S['눈썹 높이']??0), 0.35*clamp(A.k[i],-1.2,1.2)+BP.tilt, BP.bend+(S['아치']??0), BP.x); if (gzOn()||gzBlinkOn()) gzEyePost(i,u,blk); edPost(i,u,blk,tt); esPost(i,u,mbi); dynPost(i,u,blk); u.uBrP.value.x=clamp(u.uBrP.value.x,-0.13,0.42); } u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
     if (pup) u.uGaze.value.set(pl[0]+A.gx*s0[0]*0.6+A.px[i]*s0[0], pl[1]+A.gy*s0[1]*0.55+A.py[i]*s0[1]);
     u.uLight.value.setRGB(lt[0],lt[1],lt[2]); }
   mouthG.visible=false; }   // 입 없는 캐릭터: 입은 그리지 않아요
@@ -3553,7 +3629,7 @@ function grabInput(tt){
   for (const [id,p] of [...PTR]){
     if (p.st==='new'){ p.st='move'; lastTouch=tt;
       let hb=hitBody(p); if (!hb && GR.pins.some(q=>!q.sticky)){ for (const rr of [12,22,32]){ for (let a=0;a<8 && !hb;a++){ const an=a*PI/4; hb=hitBody({x:p.x+Math.cos(an)*rr,y:p.y+Math.sin(an)*rr}); } if (hb) break; } }
-      if (hb){ spinCatch(); p.pin=grabAddPin(hb.rp,hb.world,id,p.shift); p.onBody=true; Sfx('pop',0.5,1.3+Math.random()*0.2); if (GR.pins.length===1 && MINI()) playExpr('놀람','once'); }
+      if (hb){ spinCatch(); p.pin=grabAddPin(hb.rp,hb.world,id,p.shift); p.onBody=true; Sfx('pop',0.5,1.3+Math.random()*0.2); if (GR.pins.length===1 && MINI()) playExpr('놀람','once'); if (GR.pins.length===1) dynReact('grab'); }
       else if (GR.pins.some(q=>!q.sticky) || [...PTR.values()].some(q=>q!==p && q.onBody && q.st!=='up')){ p.onBody=false; p.idle=true; }   // 다른 손가락이 몸을 잡고 있으면: 이 손가락은 아무것도 안 해요 (확대·회전이 끼어들지 않게)
       else if (spinNear(p.x,H-p.y)){ p.onBody=false; p.spin={h:[[tt,p.x,p.y]],fired:false,x0:p.x,y0:p.y,t0:tt}; }
       else { if (!orbitPtr) orbitPtr=id; p.onBody=false; p.last={x:p.x,y:p.y}; if (!p.shift) for (const q of [...GR.pins]) if (q.sticky && !q.dragging) grabRelease(q); } }
@@ -3586,7 +3662,7 @@ function grabInput(tt){
     // 빙글빙글 감지 → 어지러운 눈
     const v=sub(c,hPos), an=Math.atan2(v[1],v[0]); if (GR.spinA!==null){ let da=an-GR.spinA; if (da>PI) da-=2*PI; if (da<-PI) da+=2*PI; GR.spinW=GR.spinW*0.9+da*0.1; } GR.spinA=an;
     if (Math.abs(GR.spinW)>0.12){ GR.spinT+=1/60; if (GR.spinT>0.5 && tt-lastSpinT>3 && MINI()){ playExpr('어지러움','once'); lastSpinT=tt; } } else GR.spinT=Math.max(0,GR.spinT-1/60); }
-  else { if (dragging){ dragging=false; mouseDown=false; GR.bv=[0,0,0]; const l=len(vel); if (l>S['던지기최대속도']) vel=mul(vel,S['던지기최대속도']/l); } GR.spinA=null; GR.spinW=0; }
+  else { if (dragging){ dragging=false; mouseDown=false; GR.bv=[0,0,0]; const l=len(vel); if (l>S['던지기최대속도']) vel=mul(vel,S['던지기최대속도']/l); const tv=len(vel); dynReact(tv>0.12?'throw':'release',Math.min(1,tv/0.5)); } GR.spinA=null; GR.spinW=0; }
 }
 
 
@@ -3936,9 +4012,9 @@ function impactBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g
   if (!S['타격임팩트']){ S['타격임팩트']=true; save(); refreshAll(); }
   if (nm.includes('다시')) land(1); else vel=[Math.random()<0.5?-0.7:0.7,0.18,0]; }
 function btnGrid(det,kind){ const gd=document.createElement('div'); gd.className='grid';
-  const items=kind==='su'?['🪐 소환 재생','이 섹션 초기화']:kind==='pu'?['☀️ 맥동 켜기/끄기','이 섹션 초기화']:kind==='md'?['🧘 명상 시작/끝','이 섹션 초기화']:kind==='aw'?['✨ 각성 재생','이 섹션 초기화']:kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='es'?[...ES_NAMES,'기본']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
+  const items=kind==='dyn'?['😲 깜짝','🤩 반짝 기대','😊 찡긋 웃음','😣 질끈','↔️ 쫙 찢어짐','🫘 뿅 작아짐','🤨 의심','😞 시무룩','😠 화남','👀 두리번','😪 졸림 번쩍','😵 어지러움','😉 윙크','🎲 아무거나','이 섹션 초기화']:kind==='su'?['🪐 소환 재생','이 섹션 초기화']:kind==='pu'?['☀️ 맥동 켜기/끄기','이 섹션 초기화']:kind==='md'?['🧘 명상 시작/끝','이 섹션 초기화']:kind==='aw'?['✨ 각성 재생','이 섹션 초기화']:kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='es'?[...ES_NAMES,'기본']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
   for (const nm of items){ const b=document.createElement('button'); b.textContent=nm; b.title=nm;
-    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='es'){ esBtn(nm); return; } if (kind==='su'){ suBtn(nm); return; } if (kind==='pu'){ puBtn(nm); return; } if (kind==='md'){ mdBtn(nm); return; } if (kind==='aw'){ awBtn(nm); return; } if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
+    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='es'){ esBtn(nm); return; } if (kind==='dyn'){ dynBtn(nm); return; } if (kind==='su'){ suBtn(nm); return; } if (kind==='pu'){ puBtn(nm); return; } if (kind==='md'){ mdBtn(nm); return; } if (kind==='aw'){ awBtn(nm); return; } if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
     gd.appendChild(b); actBtns.push({b,kind,nm}); }
   det.appendChild(gd);
   if (kind==='hand'){ const h=document.createElement('div'); h.className='hint'; h.textContent='몸 젤리가 가늘게 늘어나 팔이 되고, 더 뻗으면 엄지 → 손가락 순서로 갈라져 나와요. 손동작 버튼을 누르면 그 자세로 손을 뻗어요. 팔다리가 있으면 팔 위쪽에서 나와요.'; det.appendChild(h); } }
@@ -4022,7 +4098,7 @@ function buttTick(){ BUTT+=((S['엉덩이']?1:0)-BUTT)*0.12; if (Math.abs(BUTT-(
   BJV+=-BJ*0.32+clamp(kick,-0.6,0.6); BJV*=0.82; BJ=clamp(BJ+BJV,-1,1); }
 // 충돌 이펙트: 세기 s·시작 시각·방향(화면). 모드가 '끔'이거나 끝나면 평소처럼 바로 그려요(추가 비용 0)
 const IM={s:0,t0:-9,ix:1,iy:0,dur:0.6,rt:null,mk:null, active(){ return ((S['충돌이펙트']|0)>0 && this.s>0.01 && time-this.t0<this.dur) || PFX.swOn; }};
-function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03) return; window.__hits=(window.__hits||0)+1; try{ if (ix||iy) pfxHit(s,ix,iy); }catch(e){ reportErr(e,'pfx'); } if (!(S['충돌이펙트']|0)) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
+function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03) return; SAFE(()=>dynReact('hit',s),'dynhit'); window.__hits=(window.__hits||0)+1; try{ if (ix||iy) pfxHit(s,ix,iy); }catch(e){ reportErr(e,'pfx'); } if (!(S['충돌이펙트']|0)) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
   IM.s=s; IM.t0=time; const l=Math.hypot(ix,iy); if (l>1e-3){ IM.ix=ix/l; IM.iy=iy/l; } else { IM.ix=Math.random()<0.5?1:-1; IM.iy=0.25; } }
 window.__impact=(s,ix,iy)=>Impact(s,ix||0,iy||0); window.__im=IM; window.__vel=(x,y)=>{ vel=[x,y,0]; }; window.__bp=()=>[basePos[0],basePos[1],vel[0],vel[1],dragging?1:0];
 function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,stencilBuffer:true,samples:fxMS()}); IM.b1=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false}); IM.b2=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false});
@@ -4562,7 +4638,7 @@ function pinchTick(tt){ const big=JM.s>=JM.zj*0.85, held=!big && GR.pins.some(q=
 function spinKick(w,ax){ const S_=SPIN; ax=ax?norm(ax):UP; const heavy=1+3*(JM.P||0), kv=mul(ax,w/heavy);
   if (!S_.on || dot(S_.wv,kv)<=0) S_.wv=kv; else S_.wv=add(S_.wv,mul(kv,0.6));
   const l=len(S_.wv), cap=30/heavy; if (l>cap) S_.wv=mul(S_.wv,cap/l);
-  S_.on=true; S_.cat=null; S_.tot=0; S_.dizzyAt=-1; Sfx('whoosh',0.6,1.2/Math.sqrt(heavy)); lastTouch=time; if (MINI()) playExpr('놀람','once'); }
+  S_.on=true; S_.cat=null; S_.tot=0; S_.dizzyAt=-1; Sfx('whoosh',0.6,1.2/Math.sqrt(heavy)); lastTouch=time; if (MINI()) playExpr('놀람','once'); dynReact('spin'); }
 function UpdateSpin(dt){ const S_=SPIN;
   const held_=S_.on && S_.cat!=null && GR.pins.length>0; if (held_){ const wl0=len(S_.wv); if (wl0>1e-4){ const nl=wl0*Math.exp(-dt*12)-dt*0.8; S_.wv=nl>0?mul(S_.wv,nl/wl0):[0,0,0]; } }   // 잡으면 손가락 마찰로 0.2~0.3초에 걸쳐 멈춰요 if (!S_.on && Math.abs(S_.T[0])+Math.abs(S_.T[1])+Math.abs(S_.Tv[0])+Math.abs(S_.Tv[1])<1e-3 && S_.sway<1e-3){ SPCF=0; return null; }
   if (S_.on){ let wl=len(S_.wv); if (wl>1e-6) S_.ay=Math.abs(S_.wv[1])/wl;
