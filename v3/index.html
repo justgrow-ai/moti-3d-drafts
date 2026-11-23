@@ -457,7 +457,7 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   const hiF=take('하이라이트'); hiF.tip='눈 도형 안에 들어가는 하얀 반짝 점 (모든 눈 도형 공통)'; hiF.d=!!FINAL['하이라이트'];
   SCHEMA.unshift({h:'얼굴 · 눈', f:[face,{k:'눈 도형',t:'enum',pick:'eye4',ids:[0,8,20,21],o:EYE_SHP,d:0,tip:'검은 눈 도형 4가지: 동그라미 · 네모 · 세로 알약 · 사람 눈 (예전 도형은 가장 가까운 것으로 바뀌어요)'},hiF,{k:'꺼풀 모서리 둥글기',r:[0,2],d:1,tip:'눈꺼풀이 눈 윤곽과 만나는 곳을 둥글게 (0 = 예전처럼 칼로 자른 듯, 1 = 기본)'},{k:'눈썹 모양',t:'enum',pick:'brow6',ids:[0,1,8,11,15,16],o:BROW_SHP,d:0,tip:'눈썹 5가지 + 없음: 일자 · 마로 · 세 가닥 · 관우 · 두꺼운 일자 (예전 눈썹은 가장 가까운 것으로)'},{k:'아치',r:[-1,1.5],d:0,tip:'눈썹 모양 변형: 가운데가 올라간 아치 (- 는 가운데가 내려감). 표정의 굽힘에 더해져요'},{k:'물결',r:[-1,1],d:0,tip:'눈썹 모양 변형: 물결'},{k:'S곡선',r:[-1,1],d:0,tip:'눈썹 모양 변형: 안쪽이 내려가고 바깥이 올라가는 S (- 는 반대)'},{k:'머리 기관',t:'enum',pick:'org',o:ORG_SHP,d:0,tip:'이마 위에 달린 특별한 기관 30가지 + 없음 — 몸과 같이 출렁여요'},{k:'도형버전',r:[0,9],d:2,hide:1}]}); eye.hide=1; SCHEMA[0].f.push(eye);
   { const F0=SCHEMA[0].f, at=(k,o)=>F0.splice(F0.findIndex(f=>f.k===k)+1,0,o);
-    at('하이라이트',{k:'하이라이트 크기',r:[0.4,2],d:1,tip:'하얀 반짝 점 크기 (두 눈 똑같이, 4가지 눈 도형 모두). 눈을 감으면 같이 사라져요'});
+    at('하이라이트',{k:'하이라이트 크기',r:[0.4,4],d:1,tip:'반짝 점 크기 (두 눈 똑같이, 4가지 눈 도형 모두). 크게 하면 눈 밖으로 넘쳐도 그려요. 눈을 감거나 각성모드에선 사라져요'});
     at('S곡선',{k:'눈썹 높이',r:[-0.1,0.25],d:0,tip:'눈썹 기본 높이 (양쪽 같이). 표정 움직임은 그 위에 더해지고, 눈과 겹치거나 얼굴 밖으로 나가지 않게 막아요'});
     SCHEMA.push({h:'색',lbl:'🎨 색',f:[{k:'캐릭터 색상',t:'enum',sw:'char',ck:'캐릭터 직접색',o:CHAR_SW.map(x=>x[0]),d:0,tip:'몸 색. 어두운 색이면 눈·눈썹·테두리가 밝게 바뀌어 잘 보여요'},{k:'캐릭터 직접색',t:'color',inSw:1,d:hx('#e9a15a')},
       {k:'배경 색상',t:'enum',sw:'bg',ck:'배경 직접색',o:BG_SW.map(x=>x[0]),d:0,tip:'색 하나를 고르면 그 색으로 자연스러운 그라데이션 배경을 만들어요 (캐릭터 쪽이 살짝 밝게)'},{k:'배경 직접색',t:'color',inSw:1,d:hx('#cfe3f3')}]});
@@ -844,7 +844,7 @@ const EYE_VS=`attribute vec2 aE; varying vec2 vP; void main(){ vP=aE; gl_Positio
 function glueGeo(w,h,nx,ny,ty){ const g=new THREE.PlaneGeometry(w,h,nx,ny); if (ty) g.translate(0,ty,0); const p=g.attributes.position; const a=new Float32Array(p.count*2); for (let i=0;i<p.count;i++){ a[i*2]=p.getX(i); a[i*2+1]=p.getY(i); } g.setAttribute('aE',new THREE.BufferAttribute(a,2)); p.setUsage(THREE.DynamicDrawUsage); return g; }
 const EYE_FS=`precision highp float; varying vec2 vP;
 uniform float uTime,uSide,uStyle,uHasWhite,uGlint; uniform vec2 uWR,uPR,uGaze;
-uniform float uMin,uMO,uMB,uMC,uMK,uMZ,uMR,uMSX,uMPup,uMHi,uHiS,uRing; uniform vec2 uMOff;
+uniform float uMin,uMO,uMB,uMC,uMK,uMZ,uMR,uMSX,uMPup,uMHi,uHiS,uRing; uniform vec4 uHiC; uniform vec2 uMOff;
 uniform float uUp,uLo,uTilt,uCurve,uDil,uHeart,uSpiral,uXX,uSpark,uTear,uBrow,uBrowY,uBrowA,uBrowC,uBlush,uSweat,uVein,uWide,uFade;
 uniform vec3 uWhite,uPupilC,uLight,uBlushC;
 vec4 acc;
@@ -1003,21 +1003,21 @@ vec4 minEye(vec2 p){
     vec2 lim=max(vec2(rx,ry)-pr*0.85,vec2(0.)); vec2 pc=clamp(uGaze*Z,-lim,lim);
     vec2 pq=vec2(c.x,yb)-pc; float dp=sdEll(pq,pr); float ap=fwidth(dp)*0.75+1e-4; float inP=(1.-smoothstep(-ap,ap,dp))*pv;
     col=mix(col,uPupilC,inP);
-    if (uMHi>0.5){ float hr=0.26*min(pr.x,pr.y)*uHiS; float dh=length(pq-vec2(0.36,0.4)*pr)-hr; float ah=fwidth(dh)*0.75+1e-4; col=mix(col,vec3(1.),(1.-smoothstep(-ah,ah,dh))*inP); } }
-  else if (uShp>-0.5){ if (uMHi>0.5 && d<0.02){ float best=-1e3; vec2 bc=vec2(0.);   // 도형 안 가장 넉넉한 자리(오른쪽 위 우선)에 하이라이트, 도형 밖으로는 안 나가요
+    if (uMHi>0.5){ float hr=0.26*min(pr.x,pr.y)*uHiS; float dh=length(pq-vec2(0.36,0.4)*pr)-hr; float ah=fwidth(dh)*0.75+1e-4; col=mix(col,uHiC.rgb,(1.-smoothstep(-ah,ah,dh))*inP*uHiC.a); } }
+  else if (uShp>-0.5){ if (uMHi>0.5 && d<0.02+max(0.,uHiS-1.)*0.45*scS){ float best=-1e3; vec2 bc=vec2(0.);   // 도형 안 가장 넉넉한 자리(오른쪽 위 우선)에 하이라이트, 도형 밖으로는 안 나가요
       vec4 HS=uShp<0.5?vec4(0.22,0.24,0.,0.):(uShp>7.5&&uShp<8.5)?vec4(0.34,0.38,0.,0.):(uShp>19.5&&uShp<20.5)?vec4(0.16,0.36,0.,0.):uShp>20.5?vec4(0.2,0.17,0.,0.08):vec4(-9.);
       if (HS.x>-5.){ bc=vec2(HS.x*uSide,HS.w+HS.y);   // 4가지 도형: 눈의 시각 중심(사람 눈은 0.08 위)에서 화면 기준 같은 방향·같은 거리 → 두 눈이 같은 곳(정면)을 봐요
         best=min(-eyeSD(uShp,bc),-eyeSD(uShp,vec2(-bc.x,bc.y))); }               // 크기도 양쪽 중 좁은 쪽에 맞춰 같게 (사람 눈은 바깥 꼬리가 올라가 좌우가 달라요)
       else for (int k=0;k<7;k++){ vec2 cd=k==0?vec2(0.36,0.4):k==1?vec2(0.22,0.24):k==2?vec2(0.,0.):k==3?vec2(0.42,0.):k==4?vec2(-0.3,0.36):k==5?vec2(0.,0.5):vec2(0.,-0.45);
         cd.x*=uSide; float dd=-eyeSD(uShp,cd); if (best<0.3 && dd>best){ best=dd; bc=cd; } }
-      float hr0=clamp(best*0.6,0.,0.3), hr=min(hr0*uHiS,best*0.85)*smoothstep(0.45,0.25,eC)*(1.-smoothstep(0.3,0.55,uMLo))*smoothstep(0.62,0.45,eC+uMLo*0.8)*(1.-0.5*uLF.x); float dh=(length(qS-bc)-hr)*scS; float ah=fwidth(dh)*0.75+1e-4;
-      float hv=step(0.1,hr0)*smoothstep(0.035,0.07,hr/clamp(uHiS,0.4,2.))*(1.-smoothstep(-a,a,d));   // 반쯤 감기면 양쪽 다 부드럽게 사라져요 (한쪽에만 작은 점이 남아 사시처럼 보이지 않게)
-      col=mix(col,vec3(1.),(1.-smoothstep(-ah,ah,dh))*hv); } }
+      float hr0=clamp(best*0.6,0.,0.3), hr=hr0*uHiS*smoothstep(0.45,0.25,eC)*(1.-smoothstep(0.3,0.55,uMLo))*smoothstep(0.62,0.45,eC+uMLo*0.8)*(1.-0.5*uLF.x); float dh=(length(qS-bc)-hr)*scS; float ah=fwidth(dh)*0.75+1e-4;
+      float hv=step(0.1,hr0)*smoothstep(0.035,0.07,hr/clamp(uHiS,0.4,4.))*max(1.-smoothstep(-a,a,d),smoothstep(0.8,1.,hr0*uHiS/max(best,1e-3)));   // 눈 안에 들어가는 크기까진 눈 모양으로 잘리고, 그보다 크면 눈 밖으로 넘쳐 그려요   // 반쯤 감기면 양쪽 다 부드럽게 사라져요 (한쪽에만 작은 점이 남아 사시처럼 보이지 않게)
+      float hA=(1.-smoothstep(-ah,ah,dh))*hv*uHiC.a; col=mix(col,uHiC.rgb,hA/max(1e-4,max(al,hA))); al=max(al,hA); } }
   else if (uMHi>0.5){ // ver3: 잉크 눈 위 단색 점 하나
     float rr=min(rx,ryF); float hr=0.24*rr*uHiS; vec2 hc=vec2(0.34*rx,0.4*ryF*clamp(uMO,0.,1.));
     float dh=length(vec2(c.x,yb)-hc)-hr; float ah=fwidth(dh)*0.75+1e-4;
     float hv=step(0.6,uMO)*step(abs(uMB),0.45)*step(uMC,0.3);
-    col=mix(col,vec3(1.),(1.-smoothstep(-ah,ah,dh))*hv); }
+    col=mix(col,uHiC.rgb,(1.-smoothstep(-ah,ah,dh))*hv*uHiC.a); }
   if (uRing>0.5){ float rw=0.05*Z; col=mix(col,uPupilC,smoothstep(-rw-a,-rw+a,d)); }
   return vec4(col,al); }
 void main(){
@@ -1132,7 +1132,7 @@ const EYE_STYLE=[ // 흰자 반지름, 눈동자 반지름, 흰자 있음, 반�
   {wr:[0.42,0.42],pr:[0.19,0.19],w:1,g:0},{wr:[0.56,0.56],pr:[0.3,0.3],w:1,g:1},{wr:[0.286,0.546],pr:[0.136,0.23],w:1,g:0},
   {wr:[0.36,0.2],pr:[0.1,0.1],w:0,g:0},{wr:[0.15,0.15],pr:[0.15,0.15],w:0,g:0},{wr:[0.42,0.42],pr:[0.19,0.19],w:1,g:0},{wr:[0.48,0.48],pr:[0.29,0.29],w:1,g:2}];
 function eyeUniforms(side){ const u={uSide:{value:side},uTime:timeU}; for (const k of ['uMPup','uMHi','uHiS','uMin','uMO','uMB','uMC','uMK','uMR','uStyle','uHasWhite','uGlint','uUp','uLo','uTilt','uCurve','uDil','uHeart','uSpiral','uXX','uSpark','uTear','uBrow','uBrowY','uBrowA','uBrowC','uBlush','uSweat','uVein','uWide','uFade']) u[k]={value:0};
-  u.uMZ={value:1}; u.uMSX={value:1}; u.uMOff={value:new THREE.Vector2()}; u.uWR={value:new THREE.Vector2()}; u.uPR={value:new THREE.Vector2()}; u.uGaze={value:new THREE.Vector2()}; u.uWhite={value:new THREE.Color()}; u.uPupilC={value:new THREE.Color()}; u.uLight={value:new THREE.Color()}; u.uBlushC={value:new THREE.Color(1,0.56,0.47)}; u.uRing={value:0}; u.uShp={value:0}; u.uES={value:0.22}; u.uBrw={value:0}; u.uCl={value:0}; u.uSq={value:1}; u.uBrP={value:new THREE.Vector4()}; u.uMLo={value:0}; u.uBrPl={value:0}; u.uCY={value:new THREE.Vector3(0.7,0,1)}; u.uLF={value:new THREE.Vector2()}; u.uLR={value:1}; u.uBrD={value:new THREE.Vector2()}; return u; }
+  u.uMZ={value:1}; u.uMSX={value:1}; u.uMOff={value:new THREE.Vector2()}; u.uHiC={value:new THREE.Vector4(1,1,1,1)}; u.uWR={value:new THREE.Vector2()}; u.uPR={value:new THREE.Vector2()}; u.uGaze={value:new THREE.Vector2()}; u.uWhite={value:new THREE.Color()}; u.uPupilC={value:new THREE.Color()}; u.uLight={value:new THREE.Color()}; u.uBlushC={value:new THREE.Color(1,0.56,0.47)}; u.uRing={value:0}; u.uShp={value:0}; u.uES={value:0.22}; u.uBrw={value:0}; u.uCl={value:0}; u.uSq={value:1}; u.uBrP={value:new THREE.Vector4()}; u.uMLo={value:0}; u.uBrPl={value:0}; u.uCY={value:new THREE.Vector3(0.7,0,1)}; u.uLF={value:new THREE.Vector2()}; u.uLR={value:1}; u.uBrD={value:new THREE.Vector2()}; return u; }
 
 const EYE=[-1,1].map((side,i)=>{ const m=new THREE.ShaderMaterial({uniforms:eyeUniforms(side),vertexShader:EYE_VS,fragmentShader:EYE_FS,transparent:true,depthTest:false,depthWrite:false,side:THREE.DoubleSide});
   const me=new THREE.Mesh(glueGeo(2.2,3.1,8,12,-0.2),m); me.renderOrder=4000+i; me.frustumCulled=false; const g=new THREE.Group(); g.add(me); hupi.add(g);
@@ -2369,7 +2369,7 @@ function UpdateEyes(tt){
     u.uMZ.value=Math.max(0.2,A.z[i]); u.uMSX.value=A.sx[i]*(mbi?mbi.sx:(1+0.1*Math.max(0,mbl))); u.uMR.value=A.r[i];
     const s0=EYE_STYLE[st].wr, pl=EYE[i].pl, pup=S['눈스타일']===1&&EYE_STYLE[st].w?1:0, sh=pup?0.35:1;   // 검은자가 있으면 시선은 주로 검은자가 움직여요
     u.uMOff.value.set(pl[0]*0.35*sh+A.gx*0.15*sh*Math.max(0.6,s0[0]/0.42)+A.x[i], pl[1]*0.3*sh+A.gy*0.12*sh*Math.max(0.6,s0[1]/0.42)+A.y[i]);
-    u.uMPup.value=0; u.uShp.value=builtShp; u.uBrw.value=S['눈썹 모양']|0; u.uMHi.value=S['하이라이트']?1:0; u.uHiS.value=S['하이라이트 크기']??1;
+    u.uMPup.value=0; u.uShp.value=builtShp; u.uBrw.value=S['눈썹 모양']|0; u.uMHi.value=S['하이라이트']?1:0; u.uHiS.value=S['하이라이트 크기']??1; hiColor(u.uHiC.value);
     { const EP=FACEP.eye[i], BP=FACEP.brow[i], ob=Math.max(0,o), blk=clamp01(mblI);   // 표정 뜸(o) → 감김/눌림, 깜빡임 → 감김
       const gl=gzOn()?GZ.lid*GZ_LS:0; u.uCl.value=clamp01(1-(1-clamp01(1-ob))*(1-blk)*(1-clamp01(EP.cl))*(1-Math.max(0,gl)*0.3)); u.uSq.value=Math.max(1,Math.min(ob,1.6))*EP.sq*(1+0.06*Math.max(0,-gl));
       u.uMZ.value*=EP.scale; u.uMSX.value*=EP.sx; u.uMR.value+=EP.rot*(i?1:-1); u.uMOff.value.x+=EP.x*(i?1:-1); u.uMOff.value.y+=EP.y; u.uMLo.value=clamp01(EP.lo); u.uBrPl.value=BP.pull;   // rot: + 바깥 끝이 올라감, x: + 바깥쪽
@@ -3540,6 +3540,12 @@ function darkBgTex(){ const W=256, H=512, c=document.createElement('canvas'); c.
   const im=g.getImageData(0,0,W,H), d=im.data; for (let i=0;i<d.length;i+=4){ const n=(Math.random()-0.5)*2.2; d[i]+=n; d[i+1]+=n; d[i+2]+=n; } g.putImageData(im,0,0);
   const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.NoColorSpace; return t; }
 const _rimDir=new THREE.Vector3();
+// 하이라이트 색: 눈이 어두우면 흰 점, 눈이 밝으면(어두운 몸 위 크림 눈) 몸 색이 살짝 도는 짙은 점 — 눈 밝기(OKLab L) 기준으로 늘 또렷하게
+let _hiK='', _hiRGB=[1,1,1];
+function hiColor(v){ const e=S['눈색'], b=S['몸색'], k=e.r.toFixed(3)+e.g.toFixed(3)+e.b.toFixed(3)+b.r.toFixed(3)+b.g.toFixed(3)+b.b.toFixed(3);
+  if (k!==_hiK){ _hiK=k; const L=toOk(e)[0]; if (L<0.6) _hiRGB=[1,1,1]; else { const ob=toOk(b), Lh=Math.min(0.3,Math.max(0.16,L-0.6)), q=fromOk(Lh,ob[1]*0.45,ob[2]*0.45); _hiRGB=q.map(clamp01); } }
+  let f=1; try{ if (AW && AW.on){ const a=Math.min(1,Math.max(AW.eye||0,(AW.d||0)/Math.max(0.05,S['어두워지는정도']??0.92))); f=1-a*a*(3-2*a); } }catch(_){}   // 각성 중: 어두워지기 시작하면 부드럽게 사라지고, 복구 때 다시 나타나요
+  v.set(_hiRGB[0],_hiRGB[1],_hiRGB[2],f); }
 let COL0=null;
 function charPick(){ const i=S['캐릭터 색상']|0; if (!i) return null; return i>=CHAR_SW.length-1?(S['캐릭터 직접색']||hx('#e9a15a')):hx(CHAR_SW[i][1]); }
 const _cc=o=>({r:o.r,g:o.g,b:o.b,a:1});
