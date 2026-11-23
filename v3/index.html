@@ -409,7 +409,15 @@ const SCHEMA = [
   {k:'표정 전환 방식',t:'enum',o:['표정별 자동','깜빡이며 바뀌기','바로 바뀌기'],d:0,tip:'깜빡이며: 감은 사이에 바꾸고 뜰 때 살짝 더 열림 / 바로: 0.28초, 튕김 없이'},
   {k:'불규칙 유지 움직임',t:'bool',d:true,tip:'표정 유지 중 움직임을 일정 박자 대신 불규칙하게'},
   {k:'유지 중 움직임',r:[0,2],d:1,tip:'표정 유지 중 작은 움직임의 크기'},
-  {k:'대화 시선 규칙',t:'bool',d:true,tip:'경청: 7초 안팎마다 1초쯤 살짝 피함 / 생각중: 위나 옆으로 휙 보고 머묾'}]},
+  {k:'대화 시선 규칙',t:'bool',d:true,tip:'경청: 7초 안팎마다 1초쯤 살짝 피함 / 생각중: 위나 옆으로 휙 보고 머묾'},
+  {k:'눈 디테일',t:'bool',d:true,tip:'눈(+눈썹)이 얼굴 위를 실제로 옮겨 다니고, 가장자리로 갈수록 둥근 얼굴처럼 납작해져요'},
+  {k:'시선 이동 크기',r:[0,2.5],d:1,tip:'눈이 얼굴 위에서 움직이는 거리 (도형이 클수록 자동으로 덜 움직여요)'},
+  {k:'가장자리 눌림',r:[0,2],d:1,tip:'보는 쪽 눈이 좁고 작아지는 정도 (원근)'},
+  {k:'휙 늘어남',r:[0,2],d:1,tip:'빠르게 볼 때 움직이는 방향으로 아주 잠깐 늘어나요'},
+  {k:'눈썹 연동',t:'bool',d:true,tip:'눈썹이 시선·깜빡임을 따라 움직이고, 좌우가 따로 살아 움직여요'},
+  {k:'눈썹 시선 따라가기',r:[0,2],d:1,tip:'위를 보면 눈썹이 올라가고, 보는 쪽 눈썹이 조금 더 들려요'},
+  {k:'눈썹 생동감',r:[0,2],d:1,tip:'좌우 눈썹이 따로 아주 작게 움직임 + 눈을 맞출 때 톡 올라감'},
+  {k:'표정 또렷하게',t:'bool',d:true,tip:'애틋·편안·공감·시원·하품을 눈썹 중심으로 더 또렷하게 구분'}]},
 ];
 // ver3 최종값 (2026-11-22 대표님 확정) — 코드 기본값. 각성 유지시간은 손 옵션과 키를 분리했어요
 const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레트":3,"무늬색":{"r":0.298,"g":0.3725,"b":0.2157,"a":1},"눈스타일":0,"귀안쪽색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"귀안쪽":true,"볼색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"입안색":{"r":0.7098,"g":0.2824,"b":0.2471,"a":1},"잡기모드":true,"잡는힘":0.7382,"늘어남":0.448,"뒤따라옴":0.6,"무게감":0.5,"덩어리감":0.842,"치즈지수":0.916,"복원력":0.753,"끊김":false,"끊김거리":14,"잡는범위":0.2621,"끝둥글기":0.7997,"배경":0,"배경색":{"r":0.9647,"g":0.9255,"b":0.8745,"a":1},"배경그라데이션":false,"배경위색":{"r":0.84,"g":0.93,"b":1,"a":1},"배경아래색":{"r":1,"g":0.97,"b":0.91,"a":1},"스튜디오배경":false,"바닥그림자":false,"그림자부드러움":0,"조명":0,"키라이트각도":30,"키라이트높이":35,"키라이트세기":1.1,"키라이트색":{"r":1,"g":1,"b":1,"a":1},"채움빛":1,"채움색1":{"r":0.431,"g":0.659,"b":1,"a":1},"채움색2":{"r":1,"g":0.478,"b":0.612,"a":1},"주변광":1,"주변광색":{"r":0.22,"g":0.22,"b":0.3,"a":1},"림라이트":0,"림라이트색":{"r":1,"g":1,"b":1,"a":1},"환경반사":0,"재질":0,"몸광택":1,"반사":0,"빛통과":0,"클리어코트":0,"테두리빛세기":0,"안쪽빛남":0,"안쪽빛색":{"r":1,"g":0.75,"b":0.65,"a":1},"질감":0,"벨벳":0,"몸색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"몸색섞기":1,"팔다리도같이":true,"모양":0,"모양정도":1,"위홈깊이":0.5,"아래뾰족":1,"앞뒤두께":0.88,"얼굴무늬":1,"얼굴무늬색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"눈썹점":true,"외곽선":false,"외곽선두께":0.0857,"외곽선색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"충돌이펙트":4,"엉덩이":false,"기본반짝이":false,"말랑방울":false,"만화충격선":false,"먼지구름":false,"물결링":false,"타격임팩트":true,"나선파편":false,"쇼크웨이브":false,"초현실충격파":false,"만화충격파":false,"파티클크기":1,"충돌민감도":0.481,"슬로우모션":0,"슬로우지속":0.1988,"히트스톱":1.904,"화면흔들림":2.616,"흔들림시간":0.28,"섬광크기":0.8075,"섬광밝기":0.303,"파편양":42,"파편크기":1.2423,"파편크기편차":0.618,"터지는속도":1.1296,"파편중력":0.696,"부서짐":0.288,"사라지는시간":0.3,"파편밝기":0.847,"파편불투명도":0.3736,"테스트소품":false,"염동력반경":2.2,"굴절강도":1,"진동속도":1,"파동반복속도":1.6,"RGB분리강도":1,"방사형블러":0.5,"염동력시작":0.4,"염동력종료":0.6,"어두워지는정도":0.92,"테두리두께":1.2099,"광채강도":0.608,"어두워짐시간":2.258,"빛새어남시간":1.2752,"절정맥동시간":2,"유지시간":2,"복구시간":2.3091,"남는발광":0,"오로라색상":{"r":1,"g":0.55,"b":0.2,"a":1},"오로라투명도":0.484,"흐름속도":1.179,"흡수범위":3.165,"몸발광강도":0.8805,"차오름시간":3.7775,"기본발광강도":1.5,"맥동강도":2,"맥동주기":1.8954,"파동속도":2.5089,"파동폭":0.794,"확산반경":1.805,"주변밝힘강도":0.918,"눈모양":4,"눈크기":1,"눈동자크기":0.9885,"눈동자이동":0.349,"눈간격":1,"눈높이":0,"왼눈위치":{"x":-0.46,"y":0.32},"오른눈위치":{"x":0.46,"y":0.32},"깜빡임간격":4,"눈색":{"r":0.1804,"g":0.1255,"b":0.0941,"a":1},"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1},"귀":0,"귀크기":1,"귀간격":1,"귀출렁임":1,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1},"벼슬색":{"r":1,"g":0.42,"b":0.48,"a":1},"팔다리":0,"팔크기":1,"다리크기":1,"팔다리출렁임":1,"착지찌그러짐":1,"팔다리몸색":false,"팔다리색":{"r":0.9137,"g":0.6314,"b":0.3529,"a":1},"발톱색":{"r":1,"g":0.9529,"b":0.8824,"a":1},"발바닥색":{"r":1,"g":0.6039,"b":0.5255,"a":1},"꼬리":true,"팔손가락수":3,"팔손가락길이":1,"팔손가락굵기":1,"표정모드":0,"눈곡선":0,"눈윗기울기":0,"검은자":true,"검은자 크기":1,"하이라이트":false,"시선X":0,"시선Y":0,"표정":0,"표정재생":0,"표정세기":1,"자동표정":0,"자동간격":6,"표정소리":true,"눈썹표시":1,"눈뜸왼":1,"눈뜸오른":1,"눈꺼풀기울기":0,"입모양":1,"눈썹각도":0,"볼터치":1,"모션크기":1,"모션속도":1,"모션표정":true,"탭반응":1,"쓰다듬기감지":true,"시작때등장":true,"손쪽":1,"손방향":0,"뿌리굵기":0.3,"뿌리높이":0.1,"뿌리각도":15,"이음매부드러움":0.1,"팔길이":1.9,"팔굵기":0.2,"팔가늘어짐":0.12,"팔꿈치굽힘":20,"팔출렁임":1,"근육량":0,"근질":0,"손크기":1.25,"손모양":0,"손가락수":4,"손가락길이":1,"손가락굵기":1,"손가락벌림":0.6,"손가락굽힘":0.08,"마디굽힘":0.25,"손끝둥글기":0.8,"엄지":true,"엄지각도":55,"손가락나오는지점":0.6,"손동작":1,"손속도":1,"오버슈트":1,"넣는방식":0,"손항상":false,"손색":0,"손색상":{"r":1,"g":0.6039,"b":0.5255,"a":1},"손색세기":0.7,"따라오는속도":0.4911,"출렁임잡기":0.4,"늘어남시작":2.388,"최대늘어남":3.1325,"가운데잘록":0.7921,"일렁임크기":0.0597,"일렁임속도":0.996,"숨쉬기위아래":0.0876,"숨쉬기부풀기":0.0268,"테두리빛두께":0.5,"테두리색1":{"r":0.35,"g":0.65,"b":1,"a":1},"테두리색2":{"r":1,"g":0.45,"b":0.6,"a":1},"중력":0,"바닥탄력":0.5254,"던지기최대속도":0.8168,"클릭띠용":0.004,"클릭점프":0.0236,"파티클개수":0,"소리켜기":true,"소리크기":0.6,"튀는소리높이":1,"부딪힘소리높이":1,"각성유지시간":3.59,"놓을때출렁임":0.39,"되돌아오는속도":0.5};
@@ -1254,6 +1262,23 @@ const FX2_META={'기본':{tr:'blink'},'웃음':{tr:'blink'},'행복':{tr:'blink'
   '하품':{tr:'direct',bd:1.4},'혼자 생각중':{tr:'direct',gz:'think'},'경청1 말하는걸 눈치챔':{tr:'direct',gz:'notice'},'경청2 아하':{tr:'direct',gz:'listen'},'경청3 끄덕끄덕':{tr:'direct',gz:'nod'},
   '경청4 흥미로움':{tr:'direct',gz:'listen',br:2.5},'경청5 공감':{tr:'blink',gz:'listen'},'궁금':{tr:'direct',br:0.7},'놀람':{tr:'direct',br:2.5}};
 for (const k in FX2_DEF){ const d=FX2_DEF[k]; d.idleS=d.idle; if (FX2_IDLE[k]) d.idle=FX2_IDLE[k]; else if (d.idle) d.idle=null; d.addS=d.add; if (k in FX2_ADD) d.addN=FX2_ADD[k]; else d.addN=d.add; Object.assign(d,FX2_META[k]||{}); }
+// ---- 눈 디테일: 표정 또렷하게 (눈썹이 감정을 끌고 가도록). 끄면 위의 원래 모양 그대로
+// 애틋 = 안쪽이 올라간 눈썹 + 웃는 듯 부드러운 눈 / 편안 = 낮고 평평한 눈썹 + 반쯤 감긴 졸린 눈 / 공감 = 좌우 다른 걱정 눈썹 + 열린 눈
+// 시원 = 편히 감은 눈(아래가 밀려 올라간 만족) + 바깥이 살짝 들린 둥근 눈썹 / 하품 = 안쪽이 크게 올라간 눈썹 + 꽉 감겨 옆으로 퍼진 눈
+const FX2_CLR={
+ '애틋':{e:[{cl:0.3,lo:0.5,scale:1.03},{cl:0.33,lo:0.53,scale:1.03}], b:[{y:0.09,tilt:-0.17,pull:-0.9,bend:0.14},{y:0.1,tilt:-0.19,pull:-0.95,bend:0.14}], body:{rz:-6,rx:3}},
+ '편안':{e:{cl:0.55,lo:0.04,sx:1.04}, b:[{y:-0.025,bend:0.04,tilt:0.05},{y:-0.02,bend:0.05,tilt:0.06}], body:{sy:0.98}},
+ '경청5 공감':{e:[{cl:0.16,lo:0.12,scale:1.02},{cl:0.19,lo:0.14,scale:1.02}], b:[{y:0.07,tilt:-0.15,pull:-0.62,bend:0.05},{y:0.11,tilt:-0.07,pull:-0.38,bend:0.14}], body:{rx:3,rz:3}},
+ '시원':{e:{cl:0.95,lo:0.4,sq:0.97,sx:1.02}, b:[{y:0.1,bend:0.32,tilt:0.07},{y:0.11,bend:0.34,tilt:0.08}], body:{sy:0.95,hop:-0.04,rx:2}},
+ '하품':{add(t,P){
+   const kb=fx2S(0,0.5,t)*(1-fx2S(1.9,2.6,t)), ke=fx2S(0.15,0.7,t)*(1-fx2S(2.0,2.5,t));
+   const tear=0.75*fx2Pulse(t,2.75,0.07)+0.6*fx2Pulse(t,3.15,0.07), rest=0.35*fx2S(2.3,2.6,t)*(1-fx2S(2.8,4.0,t));
+   for (let s=0;s<2;s++){ const o=s*FX2N; P[o+4]+=Math.min(1,0.98*ke+tear+rest); P[o+1]+=0.18*ke; P[o+2]-=0.24*ke; P[o+5]+=0.3*tear+0.3*ke;
+     P[o+8]+=(0.2+0.02*s)*kb; P[o+10]+=0.2*kb; P[o+11]-=0.75*kb; P[o+9]-=0.13*kb; }
+   P[26]+=0.09*kb; P[29]-=7*kb; P[27]+=0.03*kb; }},
+};
+const fx2Clr=()=>S['표정 또렷하게']!==false;
+const fx2PoseN=(name,def)=>{ const c=fx2Clr()&&FX2_CLR[name]; return fx2Pose(c&&c.e?Object.assign({},def,c):def); };
 const FX2={cur:FX2_ZERO.slice(), from:FX2_ZERO.slice(), to:FX2_ZERO.slice(), def:null, name:'', t:0, out:false, ot:0, ia:0, pend:null, R:fx2R(), lag:{e:0.06,s:0.025,b:0.03}, tr:'direct', hold:2};
 const fx2Nat=()=>S['표정 전환 자연스럽게']!==false;
 function fx2Tr(def){ const m=S['표정 전환 방식']|0; if (!fx2Nat()) return 'legacy'; if (m===1) return 'blink'; if (m===2) return 'direct'; return (def&&def.tr)||'direct'; }
@@ -1262,7 +1287,7 @@ function fx2Start(tr){ FX2.tr=tr; FX2.lag={e:0.06*rnd(0.7,1.3), s:0.025*rnd(0.4,
 function fx2Play(name,mode,fromPend){ name=FX2_ALIAS[name]||name; const def=FX2_DEF[name]; if (!def) return;
   if (!fromPend && fx2Nat() && typeof gzBusy==='function' && gzBusy(time)){ FX2.pend=[name,mode]; return; }   // 깜빡이는 중이면 끝날 때까지 기다렸다가
   if (name==='기본'){ if (FX2.def){ FX2.from=FX2.cur.slice(); FX2.to=FX2_ZERO.slice(); FX2.out=true; FX2.t=0; fx2Start(fx2Tr(FX2_DEF['기본'])); } if (EX) EX.out=true; if (typeof gzSetRule==='function') gzSetRule(null,time); return; }
-  FX2.from=FX2.cur.slice(); FX2.to=fx2Pose(def); FX2.def=def; FX2.name=name; FX2.t=0; FX2.out=false; FX2.mode=mode||['once','loop','hold'][S['표정재생']]||'once';
+  FX2.from=FX2.cur.slice(); FX2.to=fx2PoseN(name,def); FX2.def=def; FX2.name=name; FX2.t=0; FX2.out=false; FX2.mode=mode||['once','loop','hold'][S['표정재생']]||'once';
   FX2.hold=(def.hold||2)*(fx2Nat()?rnd(0.85,1.2):1); fx2Start(fx2Tr(def));
   if (typeof GZ!=='undefined'){ GZ.rate=fx2Nat()?(def.br||1):1; GZ.bdur=fx2Nat()?(def.bd||1):1; gzSetRule(gzOn()&&gzRuleOn()?(def.gz||null):null,time); }
   EX={name,t:0,mode:FX2.mode,out:false,ot:0};
@@ -1290,7 +1315,7 @@ function fx2Target(dt,F){ const N=neutralP(); for (const k of PK) PT[k]=N[k];
     P[i]=FX2_ZERO[i]+(v-FX2_ZERO[i])*I; }
   if (tr==='blink'){ const ro=tsw+bd*0.35, x=(t-ro)/0.22; if (x>0 && x<1){ const oo=0.06*Math.sin(Math.PI*x)*I; P[0]*=1+oo; P[FX2N]*=1+oo; } }   // 뜰 때만 6% 살짝 더 열렸다 돌아와요
   const nat=fx2Nat(), R=FX2.R, gzR=nat&&typeof gzOn==='function'&&gzOn()&&gzRuleOn();
-  const addF=out?null:(gzR?d.addN:d.addS);
+  let addF=out?null:(gzR?d.addN:d.addS); const cA=fx2Clr()&&FX2_CLR[FX2.name]; if (addF && cA && cA.add) addF=cA.add;
   if (addF){ const Q=FX2_ZERO.slice(); addF(t,Q,R); for (let i=0;i<FX2L;i++) P[i]+=(Q[i]-FX2_ZERO[i])*I; }
   const irr=S['불규칙 유지 움직임']!==false, idF=out?null:(irr?d.idle:d.idleS), am=irr?(S['유지 중 움직임']??1):1;
   if (idF){ FX2.ia=Math.min(1,Math.max(0,(t-0.35)/0.5)); const Q=FX2_ZERO.slice(); idF(t,Q,R); for (let i=0;i<FX2L;i++) P[i]+=(Q[i]-FX2_ZERO[i])*FX2.ia*I*am; }
@@ -2128,6 +2153,52 @@ function gzEyePost(i,u,blk){ const k=S['깜빡일 때 내려가기']??1;
   const hw=ex[0]*U*Math.max(1,u.uMSX.value), hh=ex[1]*U*Math.max(1,u.uSq.value);
   const lx=Math.max(0.05,0.36-hw*0.55), ly=Math.max(0.04,0.3-hh*0.55);       // 눈 그림 영역 안 + 얼굴 위 적당한 범위
   const o=u.uMOff.value, hx=EYE[i].hx||0, hy=EYE[i].hy||0; o.x=hx+clamp(o.x-hx,-lx,lx); o.y=hy+clamp(o.y-hy,-ly,ly); }
+// ============================================================ ver3 눈 디테일 (시선 이동 크게 · 가장자리 원근 · 눈썹 연동)
+// 참고 연구: moti-eye-research/detail-study.md (공개 저장소에 올리지 않음)
+// 1) 시선은 눈 그림 안에서만 3px 움직이던 것을, 눈(+눈썹) 자체를 몸 표면 위로 옮겨요. 표면이 둥그니 가장자리로 갈수록 저절로 납작해져요.
+// 2) 보는 쪽 눈은 조금 좁고 작게, 반대쪽은 아주 조금 크게 (둥근 얼굴의 원근). 보는 쪽 눈이 덜 움직여서 두 눈 사이도 살짝 좁아져요.
+// 3) 휙 움직일 때 움직이는 방향으로 아주 잠깐 늘어나요. 4) 눈썹: 위를 보면 올라가고 아래를 보면 내려와요(살짝 늦게), 보는 쪽 눈썹이 조금 더 올라가요.
+// 5) 깜빡일 때 눈썹이 한 박자 늦게 살짝 눌리며 평평해져요. 6) 눈썹이 가만있지 않고 좌우 따로 아주 작게 살아 움직여요 + 눈을 맞출 때 눈썹이 톡 올라가요.
+const ED={v:[0,0], pe:null, bl:0, flash:-9, lg:[0,0], R:null, sx:[0,0]};
+const edOn=()=>S['눈 디테일']!==false, edBrowOn=()=>S['눈썹 연동']!==false;
+const ED_HS=1, ED_VS=-1, ED_RS=1;   // 시선(화면: x 오른쪽 +, y 아래 +) → 눈 위치(몸 좌표) 부호 (화면에서 확인해 맞춤)
+function edShapeK(){ const ex=GZ_EXT[(S['눈 도형']|0)]||GZ_EXT[0], m=Math.max(ex[0],ex[1])*(S['눈크기']||1);
+  return clamp(1.3-0.4*m,0.45,1); }                   // 큰 도형·큰 눈일수록 덜 움직여요
+function edHome(tt,dt){ if (!(gzOn()&&edOn())) return;
+  const k=(S['시선 이동 크기']??1)*edShapeK(), g=GZ.eye;
+  // 시선 → 표면 위 이동량 (R=2.2 기준, 1이면 좌우 약 0.36 · 위아래 약 0.24)
+  for (let i=0;i<2;i++){ const h=EYE[i].home, side=Math.sign(h[0])||(i?1:-1), lead=Math.sign(g[0]*ED_HS)===side?1:0;
+    const dx=g[0]*0.36*k*ED_HS*(1-0.22*lead*Math.min(1,Math.abs(g[0]))), dy=g[1]*0.24*k*ED_VS;
+    const ex=clamp(h[0]+dx,-R*0.62,R*0.62), ey=clamp(h[1]+dy,-R*0.45,R*0.7);
+    h[0]=ex; h[1]=ey; h[2]=-Math.sqrt(Math.max(0.01,R*R-ex*ex-ey*ey)); }
+  // 시선 속도(휙 늘어남용) · 눈썹용 늦게 따라오는 시선
+  if (ED.pe){ const vx=(g[0]-ED.pe[0])/dt, vy=(g[1]-ED.pe[1])/dt; ED.v[0]+=(vx-ED.v[0])*0.6; ED.v[1]+=(vy-ED.v[1])*0.6; } ED.pe=[...g];
+  const kb=1-Math.exp(-dt/0.07); ED.lg[0]+=(g[0]-ED.lg[0])*kb; ED.lg[1]+=(g[1]-ED.lg[1])*kb;
+  // 눈 맞춤(멀리 보다가 가운데로 돌아올 때) → 눈썹 톡
+  if (Math.hypot(GZ.from[0],GZ.from[1])>0.3 && Math.hypot(GZ.to[0],GZ.to[1])<0.15 && tt-GZ.st<1/60+1e-4 && Math.random()<0.6) ED.flash=tt; }
+function edPost(i,u,blk,tt){ if (!(gzOn()&&edOn())){ return; }
+  const g=GZ.eye, side=i?1:-1, ax=Math.min(1,Math.abs(g[0])), ay=Math.min(1,Math.abs(g[1]));
+  const lead=Math.sign(g[0]*ED_HS)===Math.sign(EYE[i].home[0]||side)?1:0, P=S['가장자리 눌림']??1;
+  // 원근: 보는 쪽 눈은 좁고 조금 작게, 반대쪽은 아주 조금 크게 / 위아래로 보면 세로로 살짝 눌림
+  u.uMSX.value*=1-P*ax*(lead?0.16:-0.03); u.uMZ.value*=1-P*ax*(lead?0.05:-0.025); u.uSq.value*=1-P*ay*0.07;
+  // 둥근 면을 따라 대각선으로 보면 눈이 그 방향으로 살짝 기울어요 (최대 약 11°)
+  u.uMR.value+=ED_RS*0.2*P*Math.max(-1,Math.min(1,g[0]))*Math.max(-1,Math.min(1,g[1]));
+  // 휙: 움직이는 방향으로 아주 잠깐 늘어남 (최대 약 12%)
+  const H=S['휙 늘어남']??1, sp=Math.min(1,Math.hypot(ED.v[0],ED.v[1])/18);
+  if (sp>0.02){ const fx=Math.abs(ED.v[0])/(Math.hypot(ED.v[0],ED.v[1])||1); u.uMSX.value*=1+0.12*H*sp*fx; u.uSq.value*=1+0.12*H*sp*(1-fx); u.uMZ.value*=1-0.03*H*sp; }
+  if (!edBrowOn()) return;
+  const B=S['눈썹 시선 따라가기']??1, br=u.uBrP.value, lg=ED.lg;
+  // 눈썹: 위를 보면 올라가고(아래 보면 내려옴), 보는 쪽 눈썹이 조금 더 올라가며 바깥이 살짝 들려요
+  br.x+=(-lg[1]*0.07+0.03*Math.min(1,Math.abs(lg[0]))*(lead?1:0.2))*B; br.y+=0.08*Math.min(1,Math.abs(lg[0]))*(lead?1:-0.3)*B;
+  // 깜빡임: 눈썹이 한 박자 늦게 살짝 눌리며 평평해짐
+  const kq=S['깜빡일 때 내려가기']??1; if (i===0) ED.bl+=(blk-ED.bl)*(1-Math.exp(-(1/60)/0.035));
+  br.x-=0.02*ED.bl*kq; br.z*=1-0.35*ED.bl*Math.min(1,kq);
+  // 살아있는 눈썹: 좌우 따로 아주 작게 (불규칙) + 눈 맞출 때 톡
+  const L=S['눈썹 생동감']??1; if (!ED.R) ED.R=Math.random()*100;
+  br.x+=L*(0.010*N2(tt*0.55,ED.R+i*7.1)+0.006*N2(tt*1.7,ED.R+i*3.3)); br.y+=L*0.035*N2(tt*0.45,ED.R+20+i*5.7);
+  const f=tt-ED.flash; if (f>=0 && f<0.5) br.x+=0.045*L*Math.sin(Math.PI*Math.min(1,f/0.42))*(f<0.12?f/0.12:1); }
+window.__ed=()=>({v:ED.v.map(v=>+v.toFixed(2)),lg:ED.lg.map(v=>+v.toFixed(3)),bl:+ED.bl.toFixed(3),home:[EYE[0].home.map(v=>+v.toFixed(3)),EYE[1].home.map(v=>+v.toFixed(3))]});
+
 window.__gz=()=>({g:GZ.g.map(v=>+v.toFixed(3)),eye:GZ.eye.map(v=>+v.toFixed(3)),bn:GZ.bn.map(v=>+v.toFixed(3)),bw:+GZ.bw.toFixed(3),lid:+GZ.lid.toFixed(3),rule:GZ.rule,ph:GZ.ph,track:GZ.track,blinks:blinkQ.length,nb:+GZ.nb.toFixed(2),last:+GZ.lastBlink.toFixed(2)});
 window.__gzBlink=()=>gzBlink(time,"swap");
 window.__gzSac=(x,y,h)=>{ gzSac(x,y,time); GZ.holdEnd=time+(h??2); GZ.microAt=time+(h??2); };
@@ -2137,6 +2208,7 @@ function UpdateEyes(tt){
   const ep=[S['왼눈위치'],S['오른눈위치']], mid=(ep[0].x+ep[1].x)/2;
   for (let i=0;i<2;i++){ const ex=clamp(mid+(ep[i].x-mid)*S['눈간격'],-2,2), ey=clamp(ep[i].y+S['눈높이'],-2,2); EYE[i].home=[ex,ey,-Math.sqrt(Math.max(0.01,R*R-ex*ex-ey*ey))]; }
   if (gzOn()) gzTick(tt,1/60);
+  edHome(tt,1/60);
   if (gzBlinkOn()) gzBlinkTick(tt); else if (tt>nextBlink){ blinkStart=tt; nextBlink=tt+rnd(S['깜빡임간격']*0.6,S['깜빡임간격']*1.4); blinkQ=[tt]; if (Math.random()<0.22) blinkQ.push(tt+0.46); }
   let bl=0; for (const b of blinkQ) bl=Math.max(bl,blinkCl(tt-b));
   let nd=[M.x/W*2-1, M.y/H*2-1]; const ndl=Math.hypot(nd[0],nd[1]); if (ndl>1) nd=[nd[0]/ndl,nd[1]/ndl];
@@ -2165,7 +2237,7 @@ function UpdateEyes(tt){
     { const EP=FACEP.eye[i], BP=FACEP.brow[i], ob=Math.max(0,o), blk=clamp01(mbl);   // 표정 뜸(o) → 감김/눌림, 깜빡임 → 감김
       const gl=gzOn()?GZ.lid*GZ_LS:0; u.uCl.value=clamp01(1-(1-clamp01(1-ob))*(1-blk)*(1-clamp01(EP.cl))*(1-Math.max(0,gl)*0.3)); u.uSq.value=Math.max(1,Math.min(ob,1.6))*EP.sq*(1+0.06*Math.max(0,-gl));
       u.uMZ.value*=EP.scale; u.uMSX.value*=EP.sx; u.uMR.value+=EP.rot*(i?1:-1); u.uMOff.value.x+=EP.x*(i?1:-1); u.uMOff.value.y+=EP.y; u.uMLo.value=clamp01(EP.lo); u.uBrPl.value=BP.pull;   // rot: + 바깥 끝이 올라감, x: + 바깥쪽
-      u.uBrP.value.set(0.07*(Math.min(ob,1.4)-1)-0.05*A.b[i]+BP.y, 0.35*clamp(A.k[i],-1.2,1.2)+BP.tilt, BP.bend, BP.x); if (gzOn()||gzBlinkOn()) gzEyePost(i,u,blk); } u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
+      u.uBrP.value.set(0.07*(Math.min(ob,1.4)-1)-0.05*A.b[i]+BP.y, 0.35*clamp(A.k[i],-1.2,1.2)+BP.tilt, BP.bend, BP.x); if (gzOn()||gzBlinkOn()) gzEyePost(i,u,blk); edPost(i,u,blk,tt); } u.uDil.value=Math.max(0.2,A.pd[i])*S['검은자 크기']*S['눈동자크기'];
     if (pup) u.uGaze.value.set(pl[0]+A.gx*s0[0]*0.6+A.px[i]*s0[0], pl[1]+A.gy*s0[1]*0.55+A.py[i]*s0[1]);
     u.uLight.value.setRGB(lt[0],lt[1],lt[2]); }
   mouthG.visible=false; }   // 입 없는 캐릭터: 입은 그리지 않아요
