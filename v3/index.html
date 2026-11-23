@@ -457,7 +457,7 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   const hiF=take('하이라이트'); hiF.tip='눈 도형 안에 들어가는 하얀 반짝 점 (모든 눈 도형 공통)'; hiF.d=!!FINAL['하이라이트'];
   SCHEMA.unshift({h:'얼굴 · 눈', f:[face,{k:'눈 도형',t:'enum',pick:'eye4',ids:[0,8,20,21],o:EYE_SHP,d:0,tip:'검은 눈 도형 4가지: 동그라미 · 네모 · 세로 알약 · 사람 눈 (예전 도형은 가장 가까운 것으로 바뀌어요)'},hiF,{k:'꺼풀 모서리 둥글기',r:[0,2],d:1,tip:'눈꺼풀이 눈 윤곽과 만나는 곳을 둥글게 (0 = 예전처럼 칼로 자른 듯, 1 = 기본)'},{k:'눈썹 모양',t:'enum',pick:'brow6',ids:[0,1,8,11,15,16],o:BROW_SHP,d:0,tip:'눈썹 5가지 + 없음: 일자 · 마로 · 세 가닥 · 관우 · 두꺼운 일자 (예전 눈썹은 가장 가까운 것으로)'},{k:'아치',r:[-1,1.5],d:0,tip:'눈썹 모양 변형: 가운데가 올라간 아치 (- 는 가운데가 내려감). 표정의 굽힘에 더해져요'},{k:'물결',r:[-1,1],d:0,tip:'눈썹 모양 변형: 물결'},{k:'S곡선',r:[-1,1],d:0,tip:'눈썹 모양 변형: 안쪽이 내려가고 바깥이 올라가는 S (- 는 반대)'},{k:'머리 기관',t:'enum',pick:'org',o:ORG_SHP,d:0,tip:'이마 위에 달린 특별한 기관 30가지 + 없음 — 몸과 같이 출렁여요'},{k:'도형버전',r:[0,9],d:2,hide:1}]}); eye.hide=1; SCHEMA[0].f.push(eye);
   { const F0=SCHEMA[0].f, at=(k,o)=>F0.splice(F0.findIndex(f=>f.k===k)+1,0,o);
-    at('하이라이트',{k:'하이라이트 크기',r:[0.4,4],d:1,tip:'반짝 점 크기 (두 눈 똑같이, 4가지 눈 도형 모두). 크게 하면 눈 밖으로 넘쳐도 그려요. 눈을 감거나 각성모드에선 사라져요'});
+    at('하이라이트',{k:'하이라이트 크기',r:[0.4,4],d:1,tip:'반짝 점 크기 (두 눈 똑같이, 4가지 눈 도형 모두). 크게 해도 눈 안에만 그려져요. 눈을 감거나 각성모드에선 사라져요'});
     at('S곡선',{k:'눈썹 높이',r:[-0.1,0.25],d:0,tip:'눈썹 기본 높이 (양쪽 같이). 표정 움직임은 그 위에 더해지고, 눈과 겹치거나 얼굴 밖으로 나가지 않게 막아요'});
     SCHEMA.push({h:'색',lbl:'🎨 색',f:[{k:'캐릭터 색상',t:'enum',sw:'char',ck:'캐릭터 직접색',o:CHAR_SW.map(x=>x[0]),d:0,tip:'몸 색. 어두운 색이면 눈·눈썹·테두리가 밝게 바뀌어 잘 보여요'},{k:'캐릭터 직접색',t:'color',inSw:1,d:hx('#e9a15a')},
       {k:'배경 색상',t:'enum',sw:'bg',ck:'배경 직접색',o:BG_SW.map(x=>x[0]),d:0,tip:'색 하나를 고르면 그 색으로 자연스러운 그라데이션 배경을 만들어요 (캐릭터 쪽이 살짝 밝게)'},{k:'배경 직접색',t:'color',inSw:1,d:hx('#cfe3f3')}]});
@@ -1004,15 +1004,15 @@ vec4 minEye(vec2 p){
     vec2 pq=vec2(c.x,yb)-pc; float dp=sdEll(pq,pr); float ap=fwidth(dp)*0.75+1e-4; float inP=(1.-smoothstep(-ap,ap,dp))*pv;
     col=mix(col,uPupilC,inP);
     if (uMHi>0.5){ float hr=0.26*min(pr.x,pr.y)*uHiS; float dh=length(pq-vec2(0.36,0.4)*pr)-hr; float ah=fwidth(dh)*0.75+1e-4; col=mix(col,uHiC.rgb,(1.-smoothstep(-ah,ah,dh))*inP*uHiC.a); } }
-  else if (uShp>-0.5){ if (uMHi>0.5 && d<0.02+max(0.,uHiS-1.)*0.45*scS){ float best=-1e3; vec2 bc=vec2(0.);   // 도형 안 가장 넉넉한 자리(오른쪽 위 우선)에 하이라이트, 도형 밖으로는 안 나가요
+  else if (uShp>-0.5){ if (uMHi>0.5 && d<0.02){ float best=-1e3; vec2 bc=vec2(0.);   // 도형 안 가장 넉넉한 자리(오른쪽 위 우선)에 하이라이트, 도형 밖으로는 안 나가요
       vec4 HS=uShp<0.5?vec4(0.22,0.24,0.,0.):(uShp>7.5&&uShp<8.5)?vec4(0.34,0.38,0.,0.):(uShp>19.5&&uShp<20.5)?vec4(0.16,0.36,0.,0.):uShp>20.5?vec4(0.2,0.17,0.,0.08):vec4(-9.);
       if (HS.x>-5.){ bc=vec2(HS.x*uSide,HS.w+HS.y);   // 4가지 도형: 눈의 시각 중심(사람 눈은 0.08 위)에서 화면 기준 같은 방향·같은 거리 → 두 눈이 같은 곳(정면)을 봐요
         best=min(-eyeSD(uShp,bc),-eyeSD(uShp,vec2(-bc.x,bc.y))); }               // 크기도 양쪽 중 좁은 쪽에 맞춰 같게 (사람 눈은 바깥 꼬리가 올라가 좌우가 달라요)
       else for (int k=0;k<7;k++){ vec2 cd=k==0?vec2(0.36,0.4):k==1?vec2(0.22,0.24):k==2?vec2(0.,0.):k==3?vec2(0.42,0.):k==4?vec2(-0.3,0.36):k==5?vec2(0.,0.5):vec2(0.,-0.45);
         cd.x*=uSide; float dd=-eyeSD(uShp,cd); if (best<0.3 && dd>best){ best=dd; bc=cd; } }
       float hr0=clamp(best*0.6,0.,0.3), hr=hr0*uHiS*smoothstep(0.45,0.25,eC)*(1.-smoothstep(0.3,0.55,uMLo))*smoothstep(0.62,0.45,eC+uMLo*0.8)*(1.-0.5*uLF.x); float dh=(length(qS-bc)-hr)*scS; float ah=fwidth(dh)*0.75+1e-4;
-      float hv=step(0.1,hr0)*smoothstep(0.035,0.07,hr/clamp(uHiS,0.4,4.))*max(1.-smoothstep(-a,a,d),smoothstep(0.8,1.,hr0*uHiS/max(best,1e-3)));   // 눈 안에 들어가는 크기까진 눈 모양으로 잘리고, 그보다 크면 눈 밖으로 넘쳐 그려요   // 반쯤 감기면 양쪽 다 부드럽게 사라져요 (한쪽에만 작은 점이 남아 사시처럼 보이지 않게)
-      float hA=(1.-smoothstep(-ah,ah,dh))*hv*uHiC.a; col=mix(col,uHiC.rgb,hA/max(1e-4,max(al,hA))); al=max(al,hA); } }
+      float hv=step(0.1,hr0)*smoothstep(0.035,0.07,hr/clamp(uHiS,0.4,4.))*(1.-smoothstep(-a,a,d));   // 크기를 키워도 항상 눈 윤곽(꺼풀·감김 포함) 안에만, 부드러운 가장자리로 잘려요   // 반쯤 감기면 양쪽 다 부드럽게 사라져요 (한쪽에만 작은 점이 남아 사시처럼 보이지 않게)
+      col=mix(col,uHiC.rgb,(1.-smoothstep(-ah,ah,dh))*hv*uHiC.a); } }
   else if (uMHi>0.5){ // ver3: 잉크 눈 위 단색 점 하나
     float rr=min(rx,ryF); float hr=0.24*rr*uHiS; vec2 hc=vec2(0.34*rx,0.4*ryF*clamp(uMO,0.,1.));
     float dh=length(vec2(c.x,yb)-hc)-hr; float ah=fwidth(dh)*0.75+1e-4;
