@@ -487,6 +487,7 @@ Object.assign(FINAL,{"충돌이펙트": 4, "윤곽 효과 지속": 0.2, "윤곽 
     SCHEMA.push({h:'색',lbl:'🎨 색',f:[{k:'캐릭터 색상',t:'enum',sw:'char',ck:'캐릭터 직접색',o:CHAR_SW.map(x=>x[0]),d:0,tip:'몸 색. 어두운 색이면 눈·눈썹·테두리가 밝게 바뀌어 잘 보여요'},{k:'캐릭터 직접색',t:'color',inSw:1,d:hx('#e9a15a')},
       {k:'배경 색상',t:'enum',sw:'bg',ck:'배경 직접색',o:BG_SW.map(x=>x[0]),d:0,tip:'색 하나를 고르면 그 색으로 자연스러운 그라데이션 배경을 만들어요 (캐릭터 쪽이 살짝 밝게)'},{k:'배경 직접색',t:'color',inSw:1,d:hx('#cfe3f3')}]});
     SCHEMA.push({h:'다이나믹 표정',lbl:'✨ 다이나믹 표정',btns:'dyn',f:[{k:'표정 강도',r:[0,2],d:2,tip:'눈·눈썹 표정이 얼마나 크게 움직일지 (0 = 다이나믹 층 끔, 1 = 기본, 2 = 과장)'},{k:'반응 표정',t:'bool',d:true,tip:'잡기 · 늘이기 · 던지기 · 벽 충돌 · 스핀 · 소환 · 꾹 누르기에 눈이 반응해요'},{k:'가만히 있을 때 표정',t:'bool',d:true,tip:'가만히 두면 가끔 두리번거리고, 십몇 초마다 큰 표정을 지어요'}]});
+    SCHEMA.push({h:'마스터 모드',lbl:'🌌 마스터 모드',f:[{k:'마스터 모드',t:'bool',d:false,tip:'켜면 몸이 형체 없는 유체처럼 크게 일렁이거나 4차원 도형이 돼요 (끄면 원래대로, 추가 비용 0)'},{k:'마스터 형태',t:'enum',o:['오로라 물결','수은 방울','플라스마','회오리 젤리','해파리 숨결','테서랙트 (4D)','초구 (4D)'],d:0,tip:'1~5 = 흐르는 유체 (색이 은은하게 계속 바뀌어요) · 6 = 4차원 정육면체(테서랙트) · 7 = 4차원 구(초구)'},{k:'마스터 세기',r:[0.3,1.5],d:1,tip:'일렁임·빛의 세기 (1 = 기본)'}]});
     SCHEMA.push({h:'기호 변신',lbl:'🔣 기호 변신',btns:'sym',f:[{k:'기호 유지 시간',r:[0.8,8],d:2.6,tip:'기호 모양으로 있는 시간(초). 같은 버튼을 다시 누르면 바로 돌아와요'},{k:'기호 탄력',r:[0,2],d:1,tip:'변신할 때 젤리처럼 지나쳤다 돌아오는 정도 (0 = 매끈, 2 = 출렁출렁)'}]});
     SCHEMA.push({h:'스핀 · 기울이기',lbl:'👆 스핀 · 기울이기',f:[{k:'스핀 최소 속도',r:[600,2400],d:1100,tip:'몸 주변을 이 속도(px/초)보다 빠르게, 터치하자마자 휙 쓸어야 스핀해요'},{k:'스윕 기울이기',t:'bool',d:true,tip:'몸 주변을 천천히 쓸면 몸이 그쪽으로 고개를 돌려요 (손 떼면 천천히 제자리)'},{k:'기울이기 세기',r:[0,2],d:1,tip:'천천히 쓸 때 몸이 돌아가는 정도'}]});
     SCHEMA.push({h:'커비크래클',lbl:'⚡ 커비크래클',btns:'kr',f:[{k:'크래클 강도',r:[0.3,2],d:1,tip:'점 개수·크기·도는 속도 (0.3 = 은은, 2 = 폭주)'},{k:'크래클 색',t:'enum',o:['전기 시안','라임','번개 노랑','흰 빛'],d:0,tip:'검은 점 사이에서 빛나는 에너지 색'},{k:'크래클 유지 시간',r:[1,10],d:3.5,tip:'발동하면 이만큼(초) 휘감다가 펑 흩어져요'},{k:'크래클 계속 켜두기',t:'bool',d:false,tip:'켜면 끌 때까지 계속 휘감아요'}]});
@@ -495,7 +496,7 @@ Object.assign(FINAL,{"충돌이펙트": 4, "윤곽 효과 지속": 0.2, "윤곽 
     tg.f.push({k:'파동 세기',r:[0,4],d:1,tip:'동심원 물결만 더 세게 휘게 (아지랑이는 그대로)'},{k:'파동 개수',r:[0.4,3],d:1,tip:'반경 안 동심원 물결 수 (1 = 지금)'},{k:'파동 두께',r:[0.3,3],d:1,tip:'물결 고리 두께 (작을수록 가는 선, 클수록 굵은 띠)'},
       {k:'파동 빛',r:[0,1.5],d:0,tip:'물결 고리에 은은한 빛을 얹어요 — 단색 배경에서도 파동이 또렷이 보여요 (0 = 지금처럼 굴절만)'},{k:'파동 색',t:'enum',o:['캐릭터 색','배경 색','흰빛'],d:0,tip:'파동 빛 색. 어두운 배경에선 밝게, 밝은 배경에선 진하게 보여요'}); }
   { const m=SCHEMA.find(g=>g.h==='모션'); if (m){ delete m.tab; m.lbl='🎬 모션'; } const e=SCHEMA.find(g=>g.h==='표정'); if (e){ e.btns=null; for (const f of e.f) if (f.k==='표정'||f.k==='표정재생') f.hide=1; } }
-  const ORD=['얼굴 · 눈','몸 도형','다이나믹 표정','기호 변신','모션','스핀 · 기울이기','커비크래클','충돌 효과','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
+  const ORD=['얼굴 · 눈','몸 도형','다이나믹 표정','기호 변신','모션','마스터 모드','스핀 · 기울이기','커비크래클','충돌 효과','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
 const FIELDS = {}; for (const g of SCHEMA) for (const f of g.f) FIELDS[f.k] = f;
 // Unity 프로젝트의 moti-tuning.json (기본값)
 const TUNING = {"버전":2,"귀":1,"귀크기":1.0,"귀간격":1.0,"귀출렁임":1.0,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1.0},"벼슬색":{"r":1.0,"g":0.42,"b":0.48,"a":1.0},"하트정도":0.7,"위홈깊이":0.5,"아래뾰족":0.5,"앞뒤두께":0.88,"따라오는속도":0.49000000953674316,"출렁임잡기":0.4000000059604645,"늘어남시작":0.5099999904632568,"최대늘어남":1.840000033378601,"가운데잘록":1.0,"일렁임크기":0.06800000369548798,"일렁임속도":0.4099999964237213,"숨쉬기위아래":0.12,"숨쉬기부풀기":0.015,"몸광택":1.0,"테두리빛두께":0.5,"테두리빛세기":2.2799999713897705,"테두리색1":{"r":0.35,"g":0.65,"b":1.0,"a":1.0},"테두리색2":{"r":1.0,"g":0.45,"b":0.6,"a":1.0},"중력":0.01730000041425228,"바닥탄력":0.6959999799728394,"던지기최대속도":1.2000000476837158,"클릭띠용":0.2029999941587448,"클릭점프":0.289000004529953,"파티클개수":0.0,"눈크기":1.0800000429153442,"눈동자크기":1.0,"눈동자이동":0.3490000069141388,"왼눈위치":{"x":-0.2,"y":0.6},"오른눈위치":{"x":0.7,"y":0.2},"깜빡임간격":4.0,"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1.0},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1.0}};
@@ -645,8 +646,9 @@ const maskU={amt:{value:0},brow:{value:0},ura:{value:new THREE.Color(1,0.9,0.76)
 // 몸 그라데이션(HupiBody) + 시바 무늬 마스크
 function gradPatch(sh){
   sh.uniforms.uTintAmt=tintU.amt; sh.uniforms.uTintC=tintU.c; sh.uniforms.uBodyC=bodyColU.c; sh.uniforms.uBodyMix=bodyColU.mix; sh.uniforms.uMaskAmt=maskU.amt; sh.uniforms.uBrowAmt=maskU.brow; sh.uniforms.uUra=maskU.ura; sh.uniforms.uBrowC=maskU.browC; sh.uniforms.uMzP=maskU.mzP||{value:new THREE.Vector4(0,0,0,2)}; sh.uniforms.uMzQ=maskU.mzQ||{value:new THREE.Vector4(0,0,0,-2)}; sh.uniforms.uMzOn=maskU.mzOn||{value:0};
-  sh.uniforms.uHideW=SYMHW; sh.vertexShader = 'attribute float aHide;\nvarying float vHide;\nuniform float uHideW;\nvarying float vOpY;\nuniform float uYOff;\nattribute vec2 aMask;\nvarying vec2 vMask;\nattribute vec3 aRd;\nvarying vec3 vRd;\nattribute float aTint;\nvarying float vTint;\nattribute float aGroove;\nvarying float vGroove;\nattribute float aSg;\nvarying float vSg;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvHide = aHide*uHideW; vOpY = position.y + uYOff; vMask = aMask; vRd = aRd; vTint = aTint; vGroove = aGroove; vSg = aSg;');
-  sh.fragmentShader = 'varying float vHide;\nvarying float vOpY;\nuniform float uTime;\nvarying vec2 vMask;\nvarying vec3 vRd;\nuniform vec4 uMzP; uniform vec4 uMzQ; uniform float uMzOn;\nuniform vec3 uBodyC; uniform float uBodyMix; uniform float uMaskAmt; uniform float uBrowAmt; uniform vec3 uUra; uniform vec3 uBrowC; uniform float uTintAmt; uniform vec3 uTintC; varying float vTint; varying float vGroove; varying float vSg;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+  sh.uniforms.uMstA=MSTU.a; sh.uniforms.uMstT=MSTU.t; sh.uniforms.uMstP=MSTU.p; sh.uniforms.uMstD=MSTU.d;
+  sh.uniforms.uHideW=SYMHW; sh.vertexShader = 'varying vec3 vMstN;\nvarying vec3 vMstV;\nvarying vec3 vMstP;\nattribute float aHide;\nvarying float vHide;\nuniform float uHideW;\nvarying float vOpY;\nuniform float uYOff;\nattribute vec2 aMask;\nvarying vec2 vMask;\nattribute vec3 aRd;\nvarying vec3 vRd;\nattribute float aTint;\nvarying float vTint;\nattribute float aGroove;\nvarying float vGroove;\nattribute float aSg;\nvarying float vSg;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvHide = aHide*uHideW; vOpY = position.y + uYOff; vMask = aMask; vRd = aRd; vTint = aTint; vGroove = aGroove; vSg = aSg; vMstP = position;').replace('#include <project_vertex>','#include <project_vertex>\nvMstN = normalize(normalMatrix*normal); vMstV = -mvPosition.xyz;');
+  sh.fragmentShader = 'varying vec3 vMstN;\nvarying vec3 vMstV;\nvarying vec3 vMstP;\nuniform float uMstA; uniform float uMstT; uniform vec4 uMstP; uniform float uMstD;\nvec3 mstPal(float h){ h=fract(h)*5.0; float i=floor(h); float f=smoothstep(0.0,1.0,h-i); vec3 P0=vec3(0.40,0.78,0.76), P1=vec3(0.52,0.75,0.95), P2=vec3(0.60,0.90,0.74), P3=vec3(0.98,0.85,0.56), P4=vec3(1.0,0.71,0.58); vec3 a=i<0.5?P0:i<1.5?P1:i<2.5?P2:i<3.5?P3:P4; vec3 b=i<0.5?P1:i<1.5?P2:i<2.5?P3:i<3.5?P4:P0; return mix(a,b,f); }\nvarying float vHide;\nvarying float vOpY;\nuniform float uTime;\nvarying vec2 vMask;\nvarying vec3 vRd;\nuniform vec4 uMzP; uniform vec4 uMzQ; uniform float uMzOn;\nuniform vec3 uBodyC; uniform float uBodyMix; uniform float uMaskAmt; uniform float uBrowAmt; uniform vec3 uUra; uniform vec3 uBrowC; uniform float uTintAmt; uniform vec3 uTintC; varying float vTint; varying float vGroove; varying float vSg;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
         if (vHide>0.015) discard;   // step54: 실 자르는 경계를 날카롭게 → 머리카락 같은 잔선 없음
         diffuseColor.rgb = uBodyC;                                                     // ver3: 몸은 단색 한 면
         float mzA=0.0; if (uMzOn>0.5 && dot(vRd,vRd)>0.25){ vec3 nr=normalize(vRd); float d1=dot(nr,uMzP.xyz)-uMzP.w, d2=dot(nr,uMzQ.xyz)-uMzQ.w; float e1=fwidth(d1)*0.75+1e-5, e2=fwidth(d2)*0.75+1e-5; mzA=smoothstep(-e1,e1,d1)*smoothstep(-e2,e2,d2)*uMaskAmt; }
@@ -654,7 +656,13 @@ function gradPatch(sh){
         diffuseColor.rgb = mix(diffuseColor.rgb, uBrowC, smoothstep(0.42,0.5,clamp(vMask.y*uBrowAmt,0.0,1.0)));
         diffuseColor.rgb = mix(diffuseColor.rgb, uTintC, smoothstep(0.4,0.6,clamp(vTint*uTintAmt,0.0,1.0)));
         diffuseColor.rgb *= 1.0-0.3*smoothstep(0.45,0.55,clamp(vGroove,0.0,1.0));
-        if (vSg>0.001) diffuseColor.rgb = 1.0-(1.0-diffuseColor.rgb)*(1.0-vec3(1.0,0.86,0.62)*clamp(vSg,0.0,0.8));   // 소환: 파편이 붙는 자리에 번지는 짧은 빛`); }
+        if (vSg>0.001) diffuseColor.rgb = 1.0-(1.0-diffuseColor.rgb)*(1.0-vec3(1.0,0.86,0.62)*clamp(vSg,0.0,0.8));   // 소환: 파편이 붙는 자리에 번지는 짧은 빛
+        if (uMstA>0.001){ vec3 n_=normalize(vMstN), v_=normalize(vMstV); float fr=1.0-abs(dot(n_,v_)); vec3 q_=vMstP*0.45;   // step55 마스터 모드: 은은한 오로라 · 무지개빛 흐름
+          float h_=uMstP.x + uMstP.y*(0.5*sin(q_.x*1.7+uMstT*0.23)+0.35*sin(q_.y*2.1-uMstT*0.17+q_.z)+0.25*sin(q_.z*1.3+q_.x*0.9+uMstT*0.29)) + 0.22*fr;
+          vec3 c_=mstPal(h_), c2_=mstPal(h_+0.27);
+          diffuseColor.rgb = mix(diffuseColor.rgb, c_, uMstA*uMstP.z*(0.55+0.45*fr));
+          diffuseColor.rgb += c2_*pow(fr,2.4)*uMstA*uMstP.w*0.55;
+          if (uMstD>0.001){ vec3 vd_=vec3(0.055,0.075,0.09)+c_*0.07*(0.6+0.4*sin(q_.y*3.0+uMstT*0.7)); diffuseColor.rgb = mix(diffuseColor.rgb, vd_, uMstD); diffuseColor.rgb += c2_*pow(fr,2.6)*uMstD*0.75; } }`); }
 // Unity Standard(감마 공간): 비금속 반사율 0.22
 function stdMat(color, smooth, gradient, yOff, extra){   // ver3: 조명·반사 없는 단색 (MeshBasic)
   const m = new THREE.MeshBasicMaterial({color, fog:false});
@@ -664,7 +672,8 @@ function stdMat(color, smooth, gradient, yOff, extra){   // ver3: 조명·반사
   m.customProgramCacheKey = () => (gradient ? 'flatBody' : 'flatStd') + (extra ? 'X' : '');
   return m; }
 const bodyMat = stdMat(0xffffff, 0.5, true);
-const SYMHW={value:0};   // step47: 기호 조각 사이 실 가리기 (0~1)
+const SYMHW={value:0};
+const MSTU={a:{value:0},t:{value:0},p:{value:new THREE.Vector4(0,0.4,0.5,0.4)},d:{value:0}};   // step55: 마스터 모드 색   // step47: 기호 조각 사이 실 가리기 (0~1)
 var MPH={nm:null,D:null,m:0,mv:0,tg:0,t:0,pop:0,popv:0,ps:1,w:0,ev:0,hide:0,c:1,s:0,sc:1,tx:0,ty:0,pv:[0,0],po:new Float32Array(16),keep:false,next:null,back:false,eyeBack:false,n:0,fs:1};
 const OUTLINE={w:{value:0.05},c:{value:new THREE.Color(0.17,0.14,0.13)},px:{value:3},res:{value:new THREE.Vector2(1,1)}};
 const rimMat = new THREE.ShaderMaterial({   // ver3: 림 글로우 대신 뒤집은 껍질 외곽선 (단색)
@@ -821,6 +830,97 @@ function wallPress(){ const L=WL.L, h=WL.h; let x=DX,y=DY,z=DZ, hit=false;
   if (hit){ DX=x; DY=y; DZ=z; } }
 let SPCF=0, SPCFv=0, SPNF=1;   // 스핀 원심력 (세로축에서 바깥으로 부풀어요)
 let SPL={on:0,d:0,pull:0,pinch:0,rad:1};   // 복제: 한쪽(+x)으로 치즈처럼 늘어남
+
+// ============================================================ step55: 🌌 마스터 모드
+var MST_NAMES=['오로라 물결','수은 방울','플라스마','회오리 젤리','해파리 숨결','테서랙트 (4D)','초구 (4D)'];
+// 형태별 내부 값: amp 일렁임 크기, f/s/l = 세 겹 물결의 촘촘함·속도·비중, warp 흐름 비틀림, twist 몸 꼬임, pulse/pf 맥동, drip 아래쪽 치맛자락 물결,
+// fp 얼굴 주변 보호, hue/hs/spread 색 위치·흐름 속도·퍼짐, tint 색 입히기, rim 가장자리 빛, dark 어두운 유리 몸(6·7), tess/hopf 4D 선, slice 3D 단면 숨쉬기
+const MSTP=[
+ {amp:0.34,f1:2.2,s1:0.9,l1:0.7,f2:1.4,s2:0.6,l2:0.5,f3:3.0,s3:1.4,l3:0.15,warp:0.35,twist:0.15,pulse:0.03,pf:1.2,drip:0,fp:0.55,hue:0.02,hs:0.035,spread:0.35,tint:0.5,rim:0.4,dark:0,tess:0,hopf:0,slice:0},
+ {amp:0.40,f1:3.2,s1:1.6,l1:0.8,f2:2.4,s2:1.1,l2:0.45,f3:5.0,s3:2.5,l3:0.12,warp:0.5,twist:0,pulse:0.04,pf:2.1,drip:0,fp:0.6,hue:0.2,hs:0.05,spread:0.5,tint:0.42,rim:0.6,dark:0,tess:0,hopf:0,slice:0},
+ {amp:0.30,f1:4.2,s1:2.4,l1:0.55,f2:3.3,s2:1.9,l2:0.45,f3:7.0,s3:4.0,l3:0.25,warp:0.6,twist:0.1,pulse:0.06,pf:3.3,drip:0,fp:0.6,hue:0.62,hs:0.08,spread:0.6,tint:0.55,rim:0.5,dark:0,tess:0,hopf:0,slice:0},
+ {amp:0.30,f1:2.6,s1:1.2,l1:0.6,f2:1.8,s2:0.9,l2:0.4,f3:4.0,s3:2.0,l3:0.2,warp:0.3,twist:0.8,pulse:0.03,pf:1.6,drip:0,fp:0.5,hue:0.36,hs:0.045,spread:0.45,tint:0.48,rim:0.45,dark:0,tess:0,hopf:0,slice:0},
+ {amp:0.26,f1:1.8,s1:0.7,l1:0.5,f2:1.2,s2:0.5,l2:0.4,f3:6.0,s3:3.0,l3:0.32,warp:0.25,twist:0.05,pulse:0.09,pf:1.0,drip:0.28,fp:0.5,hue:0.08,hs:0.03,spread:0.4,tint:0.45,rim:0.7,dark:0,tess:0,hopf:0,slice:0},
+ {amp:0.05,f1:2.0,s1:0.6,l1:0.6,f2:1.4,s2:0.4,l2:0.4,f3:3.0,s3:1.0,l3:0,warp:0.2,twist:0,pulse:0.015,pf:1.4,drip:0,fp:0.6,hue:0.05,hs:0.04,spread:0.3,tint:0,rim:0.5,dark:0.9,tess:1,hopf:0,slice:0},
+ {amp:0.04,f1:2.0,s1:0.5,l1:0.6,f2:1.4,s2:0.4,l2:0.4,f3:3.0,s3:1.0,l3:0,warp:0.2,twist:0,pulse:0,pf:1.0,drip:0,fp:0.6,hue:0.55,hs:0.04,spread:0.35,tint:0,rim:0.5,dark:0.9,tess:0,hopf:1,slice:1}];
+var MST={a:0,c:Object.assign({},MSTP[0]),t:0,ph1:0,ph2:0,ph3:0,php:0,hph:0,amp:0,pls:0,tw:0,sl:1,fd:[0,0.12,-0.993],lo:0,ft:0,fe:1/60,slow:0,p:0};
+function mstScale(x,y,z){ const C=MST.c, l=Math.hypot(x,y,z)||1, ux=x/l, uy=y/l, uz=z/l, s1=MST.ph1, s2=MST.ph2, w=C.warp;
+  const wx=ux+w*Math.sin(2.1*uy+s1*0.7), wy=uy+w*Math.sin(2.3*uz-s1*0.9), wz=uz+w*Math.sin(1.9*ux+s1*0.8);
+  let d=C.l1*Math.sin(C.f1*wx+s1)*Math.sin(C.f1*1.1*wy-s1*0.8)*Math.sin(C.f1*0.9*wz+s1*1.2)+C.l2*Math.sin(C.f2*(wx+wy)+s2)*Math.cos(C.f2*(wy-wz)-s2*1.3);
+  if (C.l3>1e-3 && !MST.lo) d+=C.l3*Math.sin(C.f3*wy+MST.ph3+3*wx*wz);
+  if (C.drip>1e-3) d+=C.drip*sstep(0.1,-0.9,uy)*(0.5+0.5*Math.sin(5*Math.atan2(uz,ux)+MST.ph2*1.7));
+  const fd=ux*MST.fd[0]+uy*MST.fd[1]+uz*MST.fd[2]; d*=1-C.fp*sstep(0.5,0.92,fd);
+  return Math.max(0.45,1+d*MST.amp+MST.pls)*MST.sl; }
+function mstInk(c){ const d=MST.a*MST.c.dark; if (!(d>0.01)) return c; const k=Math.min(1,d*1.15); return {r:c.r+(0.97-c.r)*k,g:c.g+(0.94-c.g)*k,b:c.b+(0.89-c.b)*k}; }
+function mstPalJS(h,o){ h=(h%1+1)%1*5; const i=Math.floor(h), f=h-i, s=f*f*(3-2*f); const P=MSTPAL, a=P[i%5], b=P[(i+1)%5]; o[0]=a[0]+(b[0]-a[0])*s; o[1]=a[1]+(b[1]-a[1])*s; o[2]=a[2]+(b[2]-a[2])*s; return o; }
+const MSTPAL=[[0.40,0.78,0.76],[0.52,0.75,0.95],[0.60,0.90,0.74],[0.98,0.85,0.56],[1.0,0.71,0.58]];
+function mstTick(dt){ const on=!!S['마스터 모드']; let p=Math.round(+S['마스터 형태']); if (!isFinite(p)) p=0; p=Math.max(0,Math.min(6,p)); MST.p=p;
+  let k=+S['마스터 세기']; if (!isFinite(k)) k=1; k=Math.max(0.3,Math.min(1.5,k));
+  if (!on && MST.a===0){ if (MSTL && MSTL.me.visible) MSTL.me.visible=false; if (MSTU.a.value!==0){ MSTU.a.value=0; MSTU.d.value=0; } return; }
+  MST.a+=((on?1:0)-MST.a)*Math.min(1,dt*2.2); if (!on && MST.a<0.002) MST.a=0;
+  const T=MSTP[p], C=MST.c, r=Math.min(1,dt*2.5); for (const key in C) C[key]+=(T[key]-C[key])*r;
+  MST.t+=dt; MST.ph1+=C.s1*dt; MST.ph2+=C.s2*dt; MST.ph3+=C.s3*dt; MST.php+=C.pf*dt; MST.hph+=C.hs*dt;
+  const a=MST.a, t=MST.t; MST.amp=a*k*C.amp; MST.pls=a*k*C.pulse*Math.sin(MST.php*Math.PI*2*0.35); MST.tw=a*k*C.twist*Math.sin(t*0.45);
+  { const w0=Math.sin(t*0.55)*0.85; MST.sl=1-a*C.slice*0.2*(1-Math.sqrt(1-w0*w0)); }
+  MSTU.a.value=a; MSTU.t.value=t; MSTU.p.value.set(C.hue+MST.hph, C.spread, C.tint*Math.min(1.2,0.7+0.3*k), C.rim*Math.min(1.3,0.7+0.3*k)); MSTU.d.value=a*C.dark;
+  // 느린 기기: 실제 프레임 간격을 재서 오래 느리면 세부를 줄여요 (세 번째 물결 · 초구 섬유 수)
+  { const now=performance.now(); if (MST.ft){ const e=Math.min(0.2,(now-MST.ft)/1000); MST.fe+=(e-MST.fe)*0.05; MST.slow=MST.fe>1/34?MST.slow+e:Math.max(0,MST.slow-e); if (MST.slow>2) MST.lo=1; } MST.ft=now; }
+  mstLines(a,k); }
+// 4D 선: 화면을 향한 얇은 띠(가운데 밝은 심 + 은은한 번짐) — 더하기 합성, 깊이 무시, 눈보다 먼저 그려요
+let MSTL=null; const _mc=new THREE.Vector3(), _mo=[0,0,0], _mo2=[0,0,0];
+function mstLinesInit(){ const CAP=1100, g=new THREE.BufferGeometry(), Pp=new Float32Array(CAP*12), UV=new Float32Array(CAP*8), Cc=new Float32Array(CAP*12), I=new Uint16Array(CAP*6);
+  for (let q=0;q<CAP;q++){ const v=q*4, o=q*6; I[o]=v; I[o+1]=v+1; I[o+2]=v+2; I[o+3]=v+2; I[o+4]=v+1; I[o+5]=v+3; }
+  g.setAttribute('position',new THREE.BufferAttribute(Pp,3).setUsage(THREE.DynamicDrawUsage)); g.setAttribute('aUV',new THREE.BufferAttribute(UV,2).setUsage(THREE.DynamicDrawUsage)); g.setAttribute('aC',new THREE.BufferAttribute(Cc,3).setUsage(THREE.DynamicDrawUsage)); g.setIndex(new THREE.BufferAttribute(I,1));
+  const m=new THREE.ShaderMaterial({uniforms:{uA:{value:0}},transparent:true,depthTest:false,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,
+    vertexShader:`attribute vec2 aUV; attribute vec3 aC; varying vec2 vUV; varying vec3 vC; void main(){ vUV=aUV; vC=aC; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader:`uniform float uA; varying vec2 vUV; varying vec3 vC; void main(){ float d=length(vUV); float a=((1.0-smoothstep(0.05,0.38,d))*0.9+0.45*(exp(-d*d*4.5)-exp(-4.5)))*uA; if (a<0.004) discard; gl_FragColor=vec4(vC,a); }`});
+  const me=new THREE.Mesh(g,m); me.frustumCulled=false; me.renderOrder=3500; me.visible=false; hupi.add(me);
+  MSTL={me,g,Pp,UV,Cc,CAP,m,n:0,cx:0,cy:0,cz:0,sc:1}; }
+function mstQuad(ax,ay,az,bx,by,bz,ux,uy,uz,u0,v0,u1,v1,u2,v2,u3,v3,ca,cb){ const L=MSTL; if (L.n>=L.CAP) return; const q=L.n++, P_=L.Pp, U=L.UV, C_=L.Cc, o=q*12, ou=q*8;
+  P_[o]=ax+ux; P_[o+1]=ay+uy; P_[o+2]=az+uz; P_[o+3]=ax-ux; P_[o+4]=ay-uy; P_[o+5]=az-uz; P_[o+6]=bx+ux; P_[o+7]=by+uy; P_[o+8]=bz+uz; P_[o+9]=bx-ux; P_[o+10]=by-uy; P_[o+11]=bz-uz;
+  U[ou]=u0; U[ou+1]=v0; U[ou+2]=u1; U[ou+3]=v1; U[ou+4]=u2; U[ou+5]=v2; U[ou+6]=u3; U[ou+7]=v3;
+  C_[o]=C_[o+3]=ca[0]; C_[o+1]=C_[o+4]=ca[1]; C_[o+2]=C_[o+5]=ca[2]; C_[o+6]=C_[o+9]=cb[0]; C_[o+7]=C_[o+10]=cb[1]; C_[o+8]=C_[o+11]=cb[2]; }
+function mstSeg(A,B,w,ca,cb,xt){ const dx=B[0]-A[0], dy=B[1]-A[1], dz=B[2]-A[2], vx=_mc.x-(A[0]+B[0])/2, vy=_mc.y-(A[1]+B[1])/2, vz=_mc.z-(A[2]+B[2])/2;
+  let sx=dy*vz-dz*vy, sy=dz*vx-dx*vz, sz=dx*vy-dy*vx; const l=Math.hypot(sx,sy,sz); if (l<1e-9) return; sx*=w/l; sy*=w/l; sz*=w/l;
+  const dl=Math.hypot(dx,dy,dz)||1, xf=(xt===undefined?0.35:xt)*w, ex=dx/dl*xf, ey=dy/dl*xf, ez=dz/dl*xf;   // 이음매가 둥글게 살짝 겹치게
+  mstQuad(A[0]-ex,A[1]-ey,A[2]-ez,B[0]+ex,B[1]+ey,B[2]+ez,sx,sy,sz,0,1,0,-1,0,1,0,-1,ca,cb); }
+function mstDot(Pt,w,c){ const vx=_mc.x-Pt[0], vy=_mc.y-Pt[1], vz=_mc.z-Pt[2], vl=Math.hypot(vx,vy,vz)||1; let rx=vz/vl, rz=-vx/vl, ry=0; const rl=Math.hypot(rx,rz)||1; rx/=rl; rz/=rl;
+  const upx=(vy/vl)*rz-(vz/vl)*ry, upy=(vz/vl)*rx-(vx/vl)*rz, upz=(vx/vl)*ry-(vy/vl)*rx;
+  const ax=Pt[0]-upx*w, ay=Pt[1]-upy*w, az=Pt[2]-upz*w, bx=Pt[0]+upx*w, by=Pt[1]+upy*w, bz=Pt[2]+upz*w;
+  mstQuad(ax,ay,az,bx,by,bz,rx*w,ry*w,rz*w,1,-1,-1,-1,1,1,-1,1,c,c); }
+const TSV=[]; for (let i=0;i<16;i++) TSV.push([(i&1)?1:-1,(i&2)?1:-1,(i&4)?1:-1,(i&8)?1:-1]);
+const TSE=[]; for (let i=0;i<16;i++) for (const b of [1,2,4,8]) if (!(i&b)) TSE.push([i,i|b]);
+const _tp=[], _tw=[]; for (let i=0;i<16;i++){ _tp.push([0,0,0]); _tw.push(0); }
+function rot4(v,i,j,a){ const c=Math.cos(a), s=Math.sin(a), x=v[i], y=v[j]; v[i]=x*c-y*s; v[j]=x*s+y*c; }
+function mstLines(a,k){ const wt=a*MST.c.tess, wh=a*MST.c.hopf;
+  if (wt<0.01 && wh<0.01){ if (MSTL && MSTL.me.visible) MSTL.me.visible=false; return; }
+  if (!MSTL) mstLinesInit(); const L=MSTL; L.n=0; L.me.visible=true; L.m.uniforms.uA.value=Math.min(1,0.75+0.25*k);
+  hupi.updateMatrixWorld(); _mc.copy(cam.position); hupi.worldToLocal(_mc);
+  // 몸 중심·크기를 따라가요 (잡아 끌어도 같이)
+  const cx=(BB[0]+BB[3])/2, cy=(BB[1]+BB[4])/2, cz=(BB[2]+BB[5])/2, sc=Math.max(0.6,Math.min(1.6,((BB[3]-BB[0])+(BB[4]-BB[1]))/(4*R)));
+  if (!(isFinite(cx)&&isFinite(cy)&&isFinite(cz))) { L.me.visible=false; return; }
+  const sm=L.n0?0.25:1; L.cx+=(cx-L.cx)*sm; L.cy+=(cy-L.cy)*sm; L.cz+=(cz-L.cz)*sm; L.sc+=(sc-L.sc)*sm; L.n0=1;
+  const t=MST.t, v=[0,0,0,0];
+  if (wt>=0.01){ const D=3.0, Sz=0.36*R*L.sc;
+    for (let i=0;i<16;i++){ v[0]=TSV[i][0]; v[1]=TSV[i][1]; v[2]=TSV[i][2]; v[3]=TSV[i][3];
+      rot4(v,0,3,t*0.37); rot4(v,1,3,t*0.29); rot4(v,2,3,t*0.23); rot4(v,0,1,t*0.11); rot4(v,0,2,t*0.17);
+      const kk=D/(D-v[3]); _tp[i][0]=L.cx+v[0]*kk*Sz; _tp[i][1]=L.cy+v[1]*kk*Sz; _tp[i][2]=L.cz+v[2]*kk*Sz; _tw[i]=v[3]; }
+    for (let e=0;e<TSE.length;e++){ const [i,j]=TSE[e], fl=wt*(0.82+0.18*Math.sin(t*6.3+e*1.7));
+      mstPalJS(MST.c.hue+MST.hph+0.18*_tw[i],_mo); mstPalJS(MST.c.hue+MST.hph+0.18*_tw[j],_mo2);
+      const bi=fl*(0.6+0.25*(_tw[i]+1)), bj=fl*(0.6+0.25*(_tw[j]+1)); _mo[0]*=bi; _mo[1]*=bi; _mo[2]*=bi; _mo2[0]*=bj; _mo2[1]*=bj; _mo2[2]*=bj;
+      mstSeg(_tp[i],_tp[j],0.045*R*L.sc,_mo,_mo2); }
+    for (let i=0;i<16;i++){ mstPalJS(MST.c.hue+MST.hph+0.18*_tw[i]+0.3,_mo); const b=wt*(0.75+0.3*Math.sin(t*3.1+i)); _mo[0]=Math.min(1,_mo[0]*b+0.25*b); _mo[1]=Math.min(1,_mo[1]*b+0.25*b); _mo[2]=Math.min(1,_mo[2]*b+0.25*b);
+      mstDot(_tp[i],0.07*R*L.sc*(1.4/(3.0-_tw[i])*1.5),_mo); } }
+  if (wh>=0.01){ const Sz=0.5*R*L.sc, NS=MST.lo?30:48, NF=7, A=[0,0,0], B=[0,0,0], ETA=[0.5,0.78,0.98], c1=Math.cos(t*0.23), s1=Math.sin(t*0.23), c2=Math.cos(0.5+0.25*Math.sin(t*0.17)), s2=Math.sin(0.5+0.25*Math.sin(t*0.17));
+    // 호프 섬유: 겹겹의 토러스 위 원들이 서로 고리처럼 엮여 흘러요 (z1·z2 위상 회전 = 섬유 구조 그대로) → 입체 투영 후 천천히 기울어 돌아요
+    for (let r=0;r<3;r++) for (let j=0;j<NF;j++){ const et=ETA[r]+0.05*Math.sin(t*0.5+r*2.1), ph=j/NF*Math.PI*2+r*0.45, ce=Math.cos(et), se=Math.sin(et), a1=t*0.35, a2=-t*0.22+r;
+      mstPalJS(MST.c.hue+MST.hph+j/NF*0.35+r*0.18,_mo); const br=wh*(0.42+0.1*Math.sin(t*1.3+j+r)); _mo[0]*=br; _mo[1]*=br; _mo[2]*=br;
+      for (let s=0;s<=NS;s++){ const th=s/NS*Math.PI*2; v[0]=ce*Math.cos(th+a1); v[1]=ce*Math.sin(th+a1); v[2]=se*Math.cos(th+ph+a2); v[3]=se*Math.sin(th+ph+a2);
+        const kk=1/(1.18-v[3]); let x=v[0]*kk, y=v[1]*kk, z=v[2]*kk; const x2=x*c1+z*s1, z2=-x*s1+z*c1; const y3=y*c2-z2*s2, z3=y*s2+z2*c2;
+        B[0]=L.cx+x2*Sz; B[1]=L.cy+y3*Sz; B[2]=L.cz+z3*Sz;
+        if (s>0) mstSeg(A,B,0.024*R*L.sc,_mo,_mo,0.02); A[0]=B[0]; A[1]=B[1]; A[2]=B[2]; } } }
+  L.g.setDrawRange(0,L.n*6); for (const k_ of ['position','aUV','aC']) L.g.attributes[k_].needsUpdate=true; }
+window.__mst={ set(o){ if ('on' in o) S['마스터 모드']=o.on; if ('p' in o) S['마스터 형태']=o.p; if ('k' in o) S['마스터 세기']=o.k; }, st:()=>({a:+MST.a.toFixed(3),p:MST.p,lo:MST.lo,n:MSTL?MSTL.n:0,vis:!!(MSTL&&MSTL.me.visible),fe:+MST.fe.toFixed(4)}), names:MST_NAMES, dbg:()=>MSTL?{c:[MSTL.cx,MSTL.cy,MSTL.cz,MSTL.sc],cam:[_mc.x,_mc.y,_mc.z],p0:Array.from(MSTL.Pp.slice(0,12)),c0:Array.from(MSTL.Cc.slice(0,6)),uA:MSTL.m.uniforms.uA.value,dr:MSTL.g.drawRange,R}:null };
 function deform(px,py,pz,tt){
   const ox=px,oy=py,oz=pz; shape(px,py,pz); px=SX; py=SY; pz=SZ;
   const BUTT_=MPH.nm!==null?BUTT*(1-clamp01(MPH.w)):BUTT;
@@ -830,6 +930,7 @@ function deform(px,py,pz,tt){
       const cy=BC[1]-0.03*BJ, cz=BC[2], rho=BRHO*(1+0.04*BJ), q=(cx)=>{ const b=ux*cx+uy*cy+uz*cz, dd=b*b-(cx*cx+cy*cy+cz*cz)+rho*rho; return dd>0?Math.max(0,b+Math.sqrt(dd)):0; };
       const s1=q(BC[0]), s2=q(-BC[0]); if (Math.max(s1,s2)>rb-5*BK){ const m=Math.max(rb,s1,s2), r=m+BK*Math.log(Math.exp((rb-m)/BK)+Math.exp((s1-m)/BK)+Math.exp((s2-m)/BK))-BK*Math.log(1+Math.exp(-1/BK)*0);
       const rr=rb+(Math.max(rb,r-BK*Math.log(3)*0)-rb)*BUTT_; const f=rr/rb; if (f>1.0005){ px*=f; py*=f; pz*=f; } } } } }
+  if (MST && MST.a>1e-3){ const f_=mstScale(ox,oy,oz); px*=f_; py*=f_; pz*=f_; if (MST.tw!==0){ const an=MST.tw*py/R, c_=Math.cos(an), s_=Math.sin(an), x_=px*c_-pz*s_; pz=px*s_+pz*c_; px=x_; } }
   tt*=S['일렁임속도']; const nz=Math.sin(px*2.1+tt*1.7)*Math.sin(py*2.3+tt*1.3)*Math.sin(pz*1.9+tt*1.1);
   const l=Math.hypot(px,py,pz); let k=l>1e-5?nz*S['일렁임크기']*SPNF/l:0;
   if (FX.wob>0 && l>1e-5) k+=Math.sin(px*3.7+wobPh*9)*Math.sin(py*4.1+wobPh*7.3)*Math.sin(pz*3.3+wobPh*8.1)*FX.wob/l*R*0.5;
@@ -2484,7 +2585,7 @@ function UpdateActions(tt){ const dt=1/60;
   HOLDP+=(HOLDT-HOLDP)*(HOLDT>HOLDP?0.12:0.25); if (HOLDP>0.01){ F.press+=HOLDP*0.34; F.sx*=1+HOLDP*0.1; }
   if (HOLDREL>0 && time-HOLDREL<1/30){ HOLDREL=0; jumpV+=S['클릭점프']*1.1; boingV+=0.12; Sfx('boing',0.9,S['튀는소리높이']*1.1); if (MINI()) playExpr('웃음','once'); dynReact('press'); }
   exprTarget(dt,F); if (MINI()){ gzBody(dt,F); esBody(dt,F); } dynBody(dt,F);
-  SAFE(()=>dynTick(dt),'dyn'); SAFE(()=>symTick(dt),'sym'); SAFE(()=>krTick(dt),'kr');
+  SAFE(()=>dynTick(dt),'dyn'); SAFE(()=>symTick(dt),'sym'); SAFE(()=>mstTick(dt),'mst'); SAFE(()=>krTick(dt),'kr');
   for (const k of PK) Pc[k]+=(PT[k]-Pc[k])*(k[0]==='m'?0.22:0.28);
   if (S['손항상'] && !POD.act) podReach();
   UpdatePod(dt,F);
@@ -2723,7 +2824,7 @@ function UpdateEyes(tt){
   if (dynNoBlink()){ nextBlink=Math.max(nextBlink,tt+1); } else if (gzBlinkOn()) gzBlinkTick(tt); else if (tt>nextBlink){ blinkStart=tt; nextBlink=tt+rnd(S['깜빡임간격']*0.6,S['깜빡임간격']*1.4); blinkQ=[tt]; if (Math.random()<0.22) blinkQ.push(tt+0.46); }
   let bl=0; for (const b of blinkQ) bl=Math.max(bl,blinkCl(tt-b));
   let nd=[M.x/W*2-1, M.y/H*2-1]; const ndl=Math.hypot(nd[0],nd[1]); if (ndl>1) nd=[nd[0]/ndl,nd[1]/ndl];
-  const ink3=S['눈색'], wc={r:1,g:1,b:1}, pc=ink3, lt=S['눈스타일']===0?[ink3.r,ink3.g,ink3.b]:[1,1,1]; const bk=S['볼색'];   // ver3: 잉크 눈 / 흰 눈
+  const ink3=mstInk(S['눈색']), wc={r:1,g:1,b:1}, pc=ink3, lt=S['눈스타일']===0?[ink3.r,ink3.g,ink3.b]:[1,1,1]; const bk=S['볼색'];   // ver3: 잉크 눈 / 흰 눈
   const st=builtEye, sleepy=st===5;
   for (let i=0;i<2;i++){ const e=EYE[i], u=e.u; const {q,nn}=surf(e.home,tt);
     gluePlane(e.me,e.home,S['눈크기'],0,tt,0.012,q,nn);
