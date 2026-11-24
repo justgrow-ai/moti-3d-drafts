@@ -465,6 +465,8 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   for (const h of ['ver2 잡기','젤리 늘어남']){ const g=G(h); g.tab='hid'; g.hide=0; for (const f of g.f) f.hide=['치즈지수','잡는범위','끝둥글기','되돌아오는속도','놓을때출렁임'].includes(f.k)?1:0; }
   G('ver2 잡기').h='잡기 · 늘이기'; G('젤리 늘어남').h='통째로 끌 때 늘어남';
   G('성능').f.push(...snd); G('성능').h='앱 설정'; G('몸 일렁임').h='일렁임 · 숨쉬기'; G('타격 임팩트 설정').hide=1;
+  { const cf=['충돌이펙트','쇼크웨이브','초현실충격파','만화충격파'].map(take).filter(Boolean); for (const f of cf) f.hide=0; const c0=cf.find(f=>f.k==='충돌이펙트'); if (c0){ c0.tip='벽·바닥에 부딪히는 순간 캐릭터 윤곽에 붙는 효과: 외곽 글로우(빨강·파랑 번짐) · 중첩(잔상) · 홀로그램 · 전부 (끔이면 비용 0)'; }
+    SCHEMA.push({h:'충돌 효과',lbl:'💥 충돌 효과',f:cf}); }   // step49: 충돌 이펙트 + 충격파 3종을 다시 패널에
   for (const [h,n] of [['염동력 설정','염동력'],['각성모드 설정','각성모드'],['명상 설정','명상'],['맥동 설정','맥동'],['소환 설정','소환']]) G(h).lbl=n+' 강도'; G('소환 설정').lbl='소환';
   for (const g of SCHEMA) for (const f of g.f) if (f.k in FINAL) f.d=JSON.parse(JSON.stringify(FINAL[f.k]));   // '이 섹션 초기화'도 최종값으로
   const EYE_SHP=['동그라미','콩','반달','아치','일자','물방울','아몬드','둥근 삼각','네모','다이아','별','하트','초승달','반짝','소용돌이','X','> <','열쇠구멍','도넛','꽃','세로 알약','사람 눈'];
@@ -486,7 +488,7 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
     for (const f of tg.f) if (f.k==='굴절강도') f.tip='왜곡 정도: 공간이 휘는 세기 (물결 + 아지랑이 전체)';
     tg.f.push({k:'파동 세기',r:[0,4],d:1,tip:'동심원 물결만 더 세게 휘게 (아지랑이는 그대로)'},{k:'파동 개수',r:[0.4,3],d:1,tip:'반경 안 동심원 물결 수 (1 = 지금)'},{k:'파동 두께',r:[0.3,3],d:1,tip:'물결 고리 두께 (작을수록 가는 선, 클수록 굵은 띠)'},
       {k:'파동 빛',r:[0,1.5],d:0,tip:'물결 고리에 은은한 빛을 얹어요 — 단색 배경에서도 파동이 또렷이 보여요 (0 = 지금처럼 굴절만)'},{k:'파동 색',t:'enum',o:['캐릭터 색','배경 색','흰빛'],d:0,tip:'파동 빛 색. 어두운 배경에선 밝게, 밝은 배경에선 진하게 보여요'}); }
-  const ORD=['얼굴 · 눈','다이나믹 표정','기호 변신','스핀 · 기울이기','커비크래클','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
+  const ORD=['얼굴 · 눈','다이나믹 표정','기호 변신','스핀 · 기울이기','커비크래클','충돌 효과','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
 const FIELDS = {}; for (const g of SCHEMA) for (const f of g.f) FIELDS[f.k] = f;
 // Unity 프로젝트의 moti-tuning.json (기본값)
 const TUNING = {"버전":2,"귀":1,"귀크기":1.0,"귀간격":1.0,"귀출렁임":1.0,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1.0},"벼슬색":{"r":1.0,"g":0.42,"b":0.48,"a":1.0},"하트정도":0.7,"위홈깊이":0.5,"아래뾰족":0.5,"앞뒤두께":0.88,"따라오는속도":0.49000000953674316,"출렁임잡기":0.4000000059604645,"늘어남시작":0.5099999904632568,"최대늘어남":1.840000033378601,"가운데잘록":1.0,"일렁임크기":0.06800000369548798,"일렁임속도":0.4099999964237213,"숨쉬기위아래":0.12,"숨쉬기부풀기":0.015,"몸광택":1.0,"테두리빛두께":0.5,"테두리빛세기":2.2799999713897705,"테두리색1":{"r":0.35,"g":0.65,"b":1.0,"a":1.0},"테두리색2":{"r":1.0,"g":0.45,"b":0.6,"a":1.0},"중력":0.01730000041425228,"바닥탄력":0.6959999799728394,"던지기최대속도":1.2000000476837158,"클릭띠용":0.2029999941587448,"클릭점프":0.289000004529953,"파티클개수":0.0,"눈크기":1.0800000429153442,"눈동자크기":1.0,"눈동자이동":0.3490000069141388,"왼눈위치":{"x":-0.2,"y":0.6},"오른눈위치":{"x":0.7,"y":0.2},"깜빡임간격":4.0,"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1.0},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1.0}};
@@ -1679,7 +1681,8 @@ void main(){ vec3 p=krBand(aB,aTh,aV);
   const mkG=(ix)=>{ const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(PS,3)); for (const k in AA) g.setAttribute(k,new THREE.Float32BufferAttribute(AA[k],1)); g.setIndex(ix); return g; };
   const GG=mkG(IG), G=mkG(IH); KR.cg=CG; KR.geo={g:G,gg:GG,n:n,set instanceCount(m){ this.n=m; G.setDrawRange(0,m*6); GG.setDrawRange(0,CG[m]); },get instanceCount(){ return this.n; }};
   const M=[[glowM,4605,GG],[haloM,4610,G],[dotM,4611,G]].map(([m,ro,g])=>{ const o=new THREE.Mesh(g,m); o.frustumCulled=false; o.visible=false; o.renderOrder=ro; scene.add(o); return o; });
-  KR.rib.onBeforeRender=()=>SAFE(krFollow,'krf'); KR.mesh=[KR.rib,...M]; }
+  KR.rib.onBeforeRender=()=>SAFE(krFollow,'krf'); KR.mesh=[KR.rib,...M];
+  for (const o of KR.mesh){ const m=o.material, add=m.blending===THREE.AdditiveBlending; m.blending=THREE.CustomBlending; m.blendEquation=THREE.AddEquation; m.blendSrc=THREE.OneFactor; m.blendDst=add?THREE.OneFactor:THREE.ZeroFactor; m.blendEquationAlpha=THREE.AddEquation; m.blendSrcAlpha=THREE.ZeroFactor; m.blendDstAlpha=THREE.OneFactor; m.needsUpdate=true; } }   // 알파(=충돌 이펙트 실루엣 마스크)는 건드리지 않아요
 const _krV=new THREE.Vector3(), _krS=new THREE.Vector3();
 function krFollow(){ const U=KR.u; if (!U) return; const cx=(BB[0]+BB[3])/2, cy=(BB[1]+BB[4])/2, cz=(BB[2]+BB[5])/2;
   if (![cx,cy,cz].every(isFinite)) return; _krV.set(cx,cy,cz); hupi.localToWorld(_krV); if (!isFinite(_krV.x+_krV.y+_krV.z)) return;
@@ -4371,7 +4374,7 @@ void main(){ vec2 px=1./uRes; vec3 col=C(vUv);
     o=mix(o,C(b),mb*(.4*out0+.18*(1.-out0))); }
   // 외곽 글로우·충격파: 실루엣 마스크를 넓게 흐려서(팽창) 바깥쪽에만, 실루엣 모양 그대로
   if (uGlow>.01||uRing>.01){ float bl=texture2D(tB,vUv).r;
-    float sh=(1.-smoothstep(.7,.98,m0))*smoothstep(.12,.32,dot(col,vec3(.3,.59,.11)));   // 본체·외곽선 위엔 안 칠해요                               // 본체 위엔 안 칠해요
+    float sh=1.-smoothstep(.7,.98,m0);   // 본체·외곽선 위엔 안 칠해요                               // 본체 위엔 안 칠해요
     float g=smoothstep(.0,.22,bl)*sh*uGlow;
     vec3 gc=mix(vec3(1.,.82,.12),vec3(1.,.28,.06),smoothstep(.1,.42,bl));  // 가까이 주황·빨강 → 멀리 노랑
     o=mix(o,gc,clamp(g,0.,1.));
