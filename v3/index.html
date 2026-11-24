@@ -466,7 +466,8 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   G('ver2 잡기').h='잡기 · 늘이기'; G('젤리 늘어남').h='통째로 끌 때 늘어남';
   G('성능').f.push(...snd); G('성능').h='앱 설정'; G('몸 일렁임').h='일렁임 · 숨쉬기'; G('타격 임팩트 설정').hide=1;
   { const cf=['충돌이펙트','쇼크웨이브','초현실충격파','만화충격파'].map(take).filter(Boolean); for (const f of cf) f.hide=0; const c0=cf.find(f=>f.k==='충돌이펙트'); if (c0){ c0.tip='벽·바닥에 부딪히는 순간 캐릭터 윤곽에 붙는 효과: 외곽 글로우(빨강·파랑 번짐) · 중첩(잔상) · 홀로그램 · 전부 (끔이면 비용 0)'; }
-    SCHEMA.push({h:'충돌 효과',lbl:'💥 충돌 효과',f:cf}); }   // step49: 충돌 이펙트 + 충격파 3종을 다시 패널에
+    cf.splice(1,0,{k:'윤곽 효과 지속',r:[0.2,2],d:0.6,tip:'부딪힌 뒤 윤곽 효과가 남는 시간(초). 길수록 천천히 사라져요'},{k:'윤곽 효과 민감도',r:[0,1],d:0.5,tip:'0.5 = 지금. 높을수록 살짝 부딪혀도 세게, 낮을수록 세게 박아야 나와요'},{k:'글로우 세기',r:[0,3],d:1,tip:'몸 바깥으로 번지는 빛의 진하기 (0 = 글로우 없음)'},{k:'글로우 퍼짐',r:[0.3,2.5],d:1,tip:'글로우가 몸에서 얼마나 멀리 번지는지 (두께)'},{k:'글로우 색',t:'enum',o:['주황·노랑','시안','흰 빛','빨강','라임'],d:0,tip:'가까이 진한 색 → 멀리 밝은 색으로 번져요'},{k:'글로우 링',r:[0,2],d:1,tip:'부딪힐 때 윤곽에서 바깥으로 한 번 퍼지는 밝은 테'},{k:'잔상 개수',r:[1,4],d:2,step:1,tip:'중첩: 충돌 방향으로 어긋난 몸 사본 수'},{k:'잔상 거리',r:[0,3],d:1,tip:'중첩: 사본이 어긋나는 거리'},{k:'잔상 진하기',r:[0,2],d:1,tip:'중첩: 사본의 진하기'},{k:'홀로그램 어긋남',r:[0,3],d:1,tip:'빨강·파랑 사본이 벌어지는 거리'},{k:'홀로그램 세기',r:[0,1.5],d:1,tip:'빨강·파랑 사본의 진하기'});
+    SCHEMA.push({h:'충돌 효과',lbl:'💥 충돌 효과',btns:'imfx',f:cf}); }   // step49: 충돌 이펙트 + 충격파 3종을 다시 패널에
   for (const [h,n] of [['염동력 설정','염동력'],['각성모드 설정','각성모드'],['명상 설정','명상'],['맥동 설정','맥동'],['소환 설정','소환']]) G(h).lbl=n+' 강도'; G('소환 설정').lbl='소환';
   for (const g of SCHEMA) for (const f of g.f) if (f.k in FINAL) f.d=JSON.parse(JSON.stringify(FINAL[f.k]));   // '이 섹션 초기화'도 최종값으로
   const EYE_SHP=['동그라미','콩','반달','아치','일자','물방울','아몬드','둥근 삼각','네모','다이아','별','하트','초승달','반짝','소용돌이','X','> <','열쇠구멍','도넛','꽃','세로 알약','사람 눈'];
@@ -4263,9 +4264,9 @@ function impactBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g
   if (!S['타격임팩트']){ S['타격임팩트']=true; save(); refreshAll(); }
   if (nm.includes('다시')) land(1); else vel=[Math.random()<0.5?-0.7:0.7,0.18,0]; }
 function btnGrid(det,kind){ const gd=document.createElement('div'); gd.className='grid';
-  const items=kind==='kr'?['⚡ 발동','💥 흩어지기','이 섹션 초기화']:kind==='sym'?['💭 생각 중','✖️ 막힘','❓ 물음표','✋ 손바닥','❗ 느낌표','❤️ 하트','✅ 체크','⭐ 별','🎲 아무거나','↩️ 원래대로','이 섹션 초기화']:kind==='dyn'?['😲 깜짝','🤩 반짝 기대','😊 찡긋 웃음','😣 질끈','↔️ 쫙 찢어짐','🫘 뿅 작아짐','🤨 의심','😞 시무룩','😠 화남','👀 두리번','😪 졸림 번쩍','😵 어지러움','😉 윙크','🎲 아무거나','이 섹션 초기화']:kind==='su'?['🪐 소환 재생','이 섹션 초기화']:kind==='pu'?['☀️ 맥동 켜기/끄기','이 섹션 초기화']:kind==='md'?['🧘 명상 시작/끝','이 섹션 초기화']:kind==='aw'?['✨ 각성 재생','이 섹션 초기화']:kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='es'?[...ES_NAMES,'기본']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
+  const items=kind==='imfx'?['💥 테스트 충돌','이 섹션 초기화']:kind==='kr'?['⚡ 발동','💥 흩어지기','이 섹션 초기화']:kind==='sym'?['💭 생각 중','✖️ 막힘','❓ 물음표','✋ 손바닥','❗ 느낌표','❤️ 하트','✅ 체크','⭐ 별','🎲 아무거나','↩️ 원래대로','이 섹션 초기화']:kind==='dyn'?['😲 깜짝','🤩 반짝 기대','😊 찡긋 웃음','😣 질끈','↔️ 쫙 찢어짐','🫘 뿅 작아짐','🤨 의심','😞 시무룩','😠 화남','👀 두리번','😪 졸림 번쩍','😵 어지러움','😉 윙크','🎲 아무거나','이 섹션 초기화']:kind==='su'?['🪐 소환 재생','이 섹션 초기화']:kind==='pu'?['☀️ 맥동 켜기/끄기','이 섹션 초기화']:kind==='md'?['🧘 명상 시작/끝','이 섹션 초기화']:kind==='aw'?['✨ 각성 재생','이 섹션 초기화']:kind==='tk'?['🌀 켜기·끄기','이 섹션 초기화']:kind==='impact'?['💥 다시 치기','🧱 벽에 던지기','이 섹션 초기화']:kind==='es'?[...ES_NAMES,'기본']:kind==='expr'?EXPRS:kind==='motion'?[...Object.keys(MOTIONS),'정지']:['손 뻗기','넣기','이 섹션 초기화',...GESTURES];
   for (const nm of items){ const b=document.createElement('button'); b.textContent=nm; b.title=nm;
-    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='es'){ esBtn(nm); return; } if (kind==='kr'){ krBtn(nm); return; } if (kind==='sym'){ symBtn(nm); return; } if (kind==='dyn'){ dynBtn(nm); return; } if (kind==='su'){ suBtn(nm); return; } if (kind==='pu'){ puBtn(nm); return; } if (kind==='md'){ mdBtn(nm); return; } if (kind==='aw'){ awBtn(nm); return; } if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
+    b.onclick=()=>{ unlockAudio(); lastTouch=time; if (kind==='es'){ esBtn(nm); return; } if (kind==='imfx'){ imfxBtn(nm); return; } if (kind==='kr'){ krBtn(nm); return; } if (kind==='sym'){ symBtn(nm); return; } if (kind==='dyn'){ dynBtn(nm); return; } if (kind==='su'){ suBtn(nm); return; } if (kind==='pu'){ puBtn(nm); return; } if (kind==='md'){ mdBtn(nm); return; } if (kind==='aw'){ awBtn(nm); return; } if (kind==='tk'){ tkBtn(nm); return; } if (kind==='impact'){ impactBtn(nm); return; } if (kind==='expr'){ S['표정']=EXPRS.indexOf(nm); save(); refreshAll(); playExpr(nm); } else if (kind==='motion'){ if (nm==='정지'){ endMotion(); if (EX) EX.out=true; } else playMotion(nm); } else if (nm==='손 뻗기') podReach(); else if (nm==='넣기') podRetract(); else if (nm==='이 섹션 초기화'){ for (const k of HANDKEYS) S[k]=clone(FIELDS[k].d); save(); refreshAll(); } else { S['손동작']=GESTURES.indexOf(nm); save(); refreshAll(); podReach(); } };
     gd.appendChild(b); actBtns.push({b,kind,nm}); }
   det.appendChild(gd);
   if (kind==='hand'){ const h=document.createElement('div'); h.className='hint'; h.textContent='몸 젤리가 가늘게 늘어나 팔이 되고, 더 뻗으면 엄지 → 손가락 순서로 갈라져 나와요. 손동작 버튼을 누르면 그 자세로 손을 뻗어요. 팔다리가 있으면 팔 위쪽에서 나와요.'; det.appendChild(h); } }
@@ -4349,8 +4350,18 @@ function buttTick(){ BUTT+=((S['엉덩이']?1:0)-BUTT)*0.12; if (Math.abs(BUTT-(
   BJV+=-BJ*0.32+clamp(kick,-0.6,0.6); BJV*=0.82; BJ=clamp(BJ+BJV,-1,1); }
 // 충돌 이펙트: 세기 s·시작 시각·방향(화면). 모드가 '끔'이거나 끝나면 평소처럼 바로 그려요(추가 비용 0)
 const IM={s:0,t0:-9,ix:1,iy:0,dur:0.6,rt:null,mk:null, active(){ return ((S['충돌이펙트']|0)>0 && this.s>0.01 && time-this.t0<this.dur) || PFX.swOn; }};
-function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03) return; SAFE(()=>dynReact('hit',s),'dynhit'); window.__hits=(window.__hits||0)+1; try{ if (ix||iy) pfxHit(s,ix,iy); }catch(e){ reportErr(e,'pfx'); } if (!(S['충돌이펙트']|0)) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
+function Impact(s,ix,iy){ s=clamp01(s); if (s<0.03) return; SAFE(()=>dynReact('hit',s),'dynhit'); window.__hits=(window.__hits||0)+1; try{ if (ix||iy) pfxHit(s,ix,iy); }catch(e){ reportErr(e,'pfx'); } if (!(S['충돌이펙트']|0)) return; imfxSync(); s=imfxSens(s); if (s<0.03) return; const t=time-IM.t0, rem=t<IM.dur?IM.s*Math.exp(-5*t):0; if (s<rem) return;
   IM.s=s; IM.t0=time; const l=Math.hypot(ix,iy); if (l>1e-3){ IM.ix=ix/l; IM.iy=iy/l; } else { IM.ix=Math.random()<0.5?1:-1; IM.iy=0.25; } }
+// step50: 윤곽 충돌 이펙트 슬라이더 → IM 값 (이상한 값은 기본값, 범위 밖은 잘라요)
+const IMFX_COL=[[[1,.82,.12],[1,.28,.06]],[[.55,.95,1],[.1,.6,1]],[[1,1,1],[.85,.9,1]],[[1,.45,.3],[.9,.08,.05]],[[.85,1,.4],[.35,.9,.15]]];
+function imfxN(k,d,lo,hi){ const v=+S[k]; return Number.isFinite(v)?Math.min(hi,Math.max(lo,v)):d; }
+function imfxSync(){ IM.dur=imfxN('윤곽 효과 지속',0.6,0.2,2); IM.tk=0.6/IM.dur; IM.gm=imfxN('글로우 세기',1,0,3); IM.gs=imfxN('글로우 퍼짐',1,0.3,2.5); IM.rg=imfxN('글로우 링',1,0,2);
+  IM.gd=imfxN('잔상 거리',1,0,3); IM.hd=imfxN('홀로그램 어긋남',1,0,3);
+  if (IM.u){ const c=IMFX_COL[Math.round(imfxN('글로우 색',0,0,IMFX_COL.length-1))]; IM.u.uGc1.value.setRGB(...c[0]); IM.u.uGc2.value.setRGB(...c[1]); IM.u.uGN.value=Math.round(imfxN('잔상 개수',2,1,4)); IM.u.uGA.value=imfxN('잔상 진하기',1,0,2); IM.u.uHA.value=imfxN('홀로그램 세기',1,0,1.5); } }
+function imfxSens(s){ const k=Math.pow(2,(imfxN('윤곽 효과 민감도',0.5,0,1)-0.5)*3); return clamp01(s*k); }   // 0.5 = 지금, 1 = 살짝 부딪혀도 세게, 0 = 세게 박아야
+function imfxTest(){ imfxSync(); const a=Math.random()*Math.PI*2; IM.s=0.9; IM.t0=time; IM.ix=Math.cos(a); IM.iy=Math.sin(a)*0.5; lastTouch=time; }   // 테스트: 몸 윤곽 효과만 (파티클·히트스톱 없이)
+function imfxBtn(nm){ if (nm==='이 섹션 초기화'){ const G_=SCHEMA.find(g=>g.h==='충돌 효과'); if (G_) for (const f of G_.f) S[f.k]=clone(f.d); save(); refreshAll(); return; } if (nm==='💥 테스트 충돌') imfxTest(); }
+window.__imfx={test:()=>imfxTest(),sync:()=>{ imfxSync(); return {dur:IM.dur,tk:IM.tk,gm:IM.gm,gs:IM.gs,rg:IM.rg,gd:IM.gd,hd:IM.hd,gn:IM.u?IM.u.uGN.value:null,ga:IM.u?IM.u.uGA.value:null,ha:IM.u?IM.u.uHA.value:null}; },sens:s=>imfxSens(s)};
 window.__impact=(s,ix,iy)=>Impact(s,ix||0,iy||0); window.__im=IM; window.__vel=(x,y)=>{ vel=[x,y,0]; }; window.__bp=()=>[basePos[0],basePos[1],vel[0],vel[1],dragging?1:0];
 function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,stencilBuffer:true,samples:fxMS()}); IM.b1=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false}); IM.b2=new THREE.WebGLRenderTarget(4,4,{depthBuffer:false});
   // 실루엣 마스크를 가로·세로로 부드럽게 흐려요(1/4 해상도) → 글로우·충격파가 실루엣 모양 그대로 번져요
@@ -4358,9 +4369,9 @@ function impactInit(){ IM.rt=new THREE.WebGLRenderTarget(4,4,{depthBuffer:true,s
     fragmentShader:`uniform sampler2D tM; uniform vec2 uStep; varying vec2 vUv; void main(){ float a=0.,w=0.; for (int i=-8;i<=8;i++){ float f=float(i), k=exp(-f*f/18.); a+=k*texture2D(tM,vUv+uStep*f).a; w+=k; } gl_FragColor=vec4(a/w); }`,depthTest:false,depthWrite:false});
   const bq=new THREE.Mesh(new THREE.PlaneGeometry(2,2),bm); bq.frustumCulled=false; IM.bs=new THREE.Scene(); IM.bs.add(bq); IM.bu=bm.uniforms;
   const mat=new THREE.ShaderMaterial({uniforms:{tC:{value:IM.rt.texture},tM:{value:IM.rt.texture},tB:{value:IM.b2.texture},uRes:{value:new THREE.Vector2()},uDir:{value:new THREE.Vector2(1,0)},uPR:{value:1},uBg:{value:new THREE.Color()},
-      uGlow:{value:0},uGhost:{value:0},uHolo:{value:0},uRing:{value:0},uRingL:{value:0.5},uSW:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]},uSWw:{value:[1,1,1]},uSWca:{value:0},tBG:{value:null},uUseBG:{value:0}},
+      uGlow:{value:0},uGhost:{value:0},uGN:{value:2},uGA:{value:1},uHA:{value:1},uGc1:{value:new THREE.Color(1,.82,.12)},uGc2:{value:new THREE.Color(1,.28,.06)},uHolo:{value:0},uRing:{value:0},uRingL:{value:0.5},uSW:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]},uSWw:{value:[1,1,1]},uSWca:{value:0},tBG:{value:null},uUseBG:{value:0}},
     vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
-    fragmentShader:`precision highp float; uniform sampler2D tC,tM,tB,tBG; uniform float uUseBG; uniform vec2 uRes,uDir; uniform vec3 uBg; uniform float uPR,uGlow,uGhost,uHolo,uRing,uRingL,uSWca; uniform vec4 uSW[3]; uniform float uSWw[3]; varying vec2 vUv;
+    fragmentShader:`precision highp float; uniform sampler2D tC,tM,tB,tBG; uniform float uUseBG; uniform vec2 uRes,uDir; uniform vec3 uBg; uniform float uPR,uGlow,uGhost,uHolo,uRing,uRingL,uSWca,uGN,uGA,uHA; uniform vec3 uGc1,uGc2; uniform vec4 uSW[3]; uniform float uSWw[3]; varying vec2 vUv;
 float M(vec2 uv){ return texture2D(tM,uv).a; }
 vec3 C(vec2 uv){ vec4 t=texture2D(tC,uv); return t.rgb+(uUseBG>.5?texture2D(tBG,uv).rgb:uBg)*(1.-t.a); }   // 알파 0으로 지운 자리에 배경색을 되살려요
 void main(){ vec2 px=1./uRes; vec3 col=C(vUv);
@@ -4370,39 +4381,41 @@ void main(){ vec2 px=1./uRes; vec3 col=C(vUv);
   // 중첩: 충돌 방향으로 어긋난 캐릭터 사본 두 겹이 반투명하게 겹쳐요 (본체 위에선 옅게)
   if (uGhost>.01){ vec2 d=uDir*uGhost*px*uPR;
     vec2 a=vUv+d, b=vUv-d*.55; vec2 ca=step(vec2(0.),a)*step(a,vec2(1.)), cb=step(vec2(0.),b)*step(b,vec2(1.)); float ma=M(a)*ca.x*ca.y, mb=M(b)*cb.x*cb.y;
-    o=mix(o,C(a),ma*(.55*out0+.28*(1.-out0)));
-    o=mix(o,C(b),mb*(.4*out0+.18*(1.-out0))); }
+    o=mix(o,C(a),clamp(ma*(.55*out0+.28*(1.-out0))*uGA,0.,1.));
+    if (uGN>1.5) o=mix(o,C(b),clamp(mb*(.4*out0+.18*(1.-out0))*uGA,0.,1.));
+    if (uGN>2.5){ vec2 c2=vUv+d*1.6; vec2 q2=step(vec2(0.),c2)*step(c2,vec2(1.)); o=mix(o,C(c2),clamp(M(c2)*q2.x*q2.y*(.32*out0+.14*(1.-out0))*uGA,0.,1.)); }
+    if (uGN>3.5){ vec2 c3=vUv-d*1.1; vec2 q3=step(vec2(0.),c3)*step(c3,vec2(1.)); o=mix(o,C(c3),clamp(M(c3)*q3.x*q3.y*(.24*out0+.1*(1.-out0))*uGA,0.,1.)); } }
   // 외곽 글로우·충격파: 실루엣 마스크를 넓게 흐려서(팽창) 바깥쪽에만, 실루엣 모양 그대로
   if (uGlow>.01||uRing>.01){ float bl=texture2D(tB,vUv).r;
     float sh=1.-smoothstep(.7,.98,m0);   // 본체·외곽선 위엔 안 칠해요                               // 본체 위엔 안 칠해요
     float g=smoothstep(.0,.22,bl)*sh*uGlow;
-    vec3 gc=mix(vec3(1.,.82,.12),vec3(1.,.28,.06),smoothstep(.1,.42,bl));  // 가까이 주황·빨강 → 멀리 노랑
+    vec3 gc=mix(uGc1,uGc2,smoothstep(.1,.42,bl));  // 가까이 주황·빨강 → 멀리 노랑
     o=mix(o,gc,clamp(g,0.,1.));
     float ring=exp(-pow((bl-uRingL)/.05,2.))*sh*uRing; o=mix(o,vec3(1.,.95,.75),clamp(ring,0.,1.)); }
   // 홀로그램: 빨강·파랑 실루엣 사본이 본체 뒤(바깥)에서만 벌어져요 → 본체·외곽선은 선명
   if (uHolo>.01){ vec2 d=uDir*uHolo*px*uPR; vec2 pd=vec2(-uDir.y,uDir.x)*uHolo*.35*px*uPR;
     vec2 ra=vUv-d+pd, ba=vUv+d-pd; vec2 cr=step(vec2(0.),ra)*step(ra,vec2(1.)), cq=step(vec2(0.),ba)*step(ba,vec2(1.)); float mr=M(ra)*cr.x*cr.y, mb=M(ba)*cq.x*cq.y;
     vec3 R=vec3(1.,.18,.32), B=vec3(.16,.48,1.);
-    o=mix(o,R,.85*mr*out0); o=mix(o,B,.85*mb*out0*(1.-.45*mr)); o=mix(o,vec3(.55,.2,.85),.5*mr*mb*out0); }
+    o=mix(o,R,clamp(.85*mr*out0*uHA,0.,1.)); o=mix(o,B,clamp(.85*mb*out0*(1.-.45*mr)*uHA,0.,1.)); o=mix(o,vec3(.55,.2,.85),clamp(.5*mr*mb*out0*uHA,0.,1.)); }
   gl_FragColor=vec4(o,1.); }`,depthTest:false,depthWrite:false});
   const qm=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat); qm.frustumCulled=false; IM.q=new THREE.Scene(); IM.q.add(qm); IM.u=mat.uniforms; IM.oc=new THREE.OrthographicCamera(-1,1,1,-1,0,1); }
 const _icc=new THREE.Color();
-function impactRender(){ if (!IM.rt) impactInit(); const t=time-IM.t0, s=(time-IM.t0<IM.dur)?IM.s:0, u=IM.u, md=s>0?(S['충돌이펙트']|0):0, all=md===4;
+function impactRender(){ if (!IM.rt) impactInit(); imfxSync(); const t=(time-IM.t0)*IM.tk, s=(time-IM.t0<IM.dur)?IM.s:0, u=IM.u, md=s>0?(S['충돌이펙트']|0):0, all=md===4;
   if (IM.rt.width!==_dbs.x||IM.rt.height!==_dbs.y){ IM.rt.setSize(_dbs.x,_dbs.y); IM.b1.setSize(Math.ceil(_dbs.x/4),Math.ceil(_dbs.y/4)); IM.b2.setSize(Math.ceil(_dbs.x/4),Math.ceil(_dbs.y/4)); }
   // 한 번만 그려요: 배경색으로 지우되 알파 0 → 색은 평소와 같고, 알파가 곧 캐릭터 실루엣 마스크
   const bg=scene.background; renderer.getClearColor(_icc); const ca=renderer.getClearAlpha();
   if (bg && bg.isColor){ scene.background=null; renderer.setClearColor(bg,0); } else if (bg && bg.isTexture){ scene.background=null; renderer.setClearColor(0x000000,0); }
   const _ub=tkIMPre(bg); renderer.setRenderTarget(IM.rt); renderer.clear(); renderer.render(scene,cam); renderClone(); if (_ub) for (const o of TK.__imHid) o.visible=true; IM.u.uUseBG.value=_ub?1:0; if (_ub) IM.u.tBG.value=TK.rb.texture;
   scene.background=bg; renderer.setClearColor(_icc,ca); renderer.setRenderTarget(null);
-  const pr=renderer.getPixelRatio(); if (md===1||md===4){ const sg=16*pr/(_dbs.x/IM.b1.width)/3;   // 한 칸 = 시그마의 1/3
+  const pr=renderer.getPixelRatio(); if (md===1||md===4){ const sg=16*IM.gs*pr/(_dbs.x/IM.b1.width)/3;   // 한 칸 = 시그마의 1/3
     IM.bu.tM.value=IM.rt.texture; IM.bu.uStep.value.set(sg/IM.b1.width,0); renderer.setRenderTarget(IM.b1); renderer.render(IM.bs,IM.oc);
     IM.bu.tM.value=IM.b1.texture; IM.bu.uStep.value.set(0,sg/IM.b1.height); renderer.setRenderTarget(IM.b2); renderer.render(IM.bs,IM.oc); renderer.setRenderTarget(null); }
   const wob=Math.exp(-5.5*t)*Math.cos(t*12);
   u.uRes.value.copy(_dbs); u.uPR.value=pr; if (bg&&bg.isColor) u.uBg.value.copy(bg); else u.uBg.value.setRGB(0,0,0); u.uDir.value.set(IM.ix,IM.iy);
-  u.uGlow.value=(md===1||all)?Math.min(1,s*1.3)*Math.min(1,t/0.03)*Math.exp(-5.5*t):0;
-  u.uGhost.value=(md===2||all)?s*(all?13:17)*wob:0;                      // css px, 어긋났다가 출렁이며 합쳐져요
-  u.uHolo.value=(md===3||all)?s*(all?9:12)*Math.exp(-5*t)*Math.cos(t*10):0;
-  pfxSWU(u,pr); const ur=t/0.42; u.uRing.value=(all||md===1)&&ur<1?s*0.9*(1-ur)*Math.min(1,t/0.04):0; u.uRingL.value=0.55-0.5*Math.sqrt(Math.min(1,ur));
+  u.uGlow.value=(md===1||all)?Math.min(1,s*1.3)*Math.min(1,t/0.03)*Math.exp(-5.5*t)*IM.gm:0;
+  u.uGhost.value=(md===2||all)?s*(all?13:17)*wob*IM.gd:0;                      // css px, 어긋났다가 출렁이며 합쳐져요
+  u.uHolo.value=(md===3||all)?s*(all?9:12)*Math.exp(-5*t)*Math.cos(t*10)*IM.hd:0;
+  pfxSWU(u,pr); const ur=t/0.42; u.uRing.value=(all||md===1)&&ur<1?s*0.9*IM.rg*(1-ur)*Math.min(1,t/0.04):0; u.uRingL.value=0.55-0.5*Math.sqrt(Math.min(1,ur));
   renderer.render(IM.q,IM.oc); }
 // ---------- 충격 파티클 (2D 오버레이 캔버스, 1/60초 고정 스텝 → 히트스톱 중에도 계속 움직여요). 다 끝나면 배열 비우고 캔버스 한 번 지워요
 var HSTOP=0; var PFX={L:[],cv:null,g:null,T:0,shT:0,shA:0,sw:[],swOn:false,live:false};
