@@ -84,7 +84,9 @@ import * as THREE from 'three';
 THREE.ColorManagement.enabled = false;
 
 // ============================================================ 설정 (Inspector 필드)
-const SHAPES = ['구','사각형','하트','구름','육각형','마시멜로','하리보','개 얼굴','원숭이 얼굴'];
+const SHAPES = ['구','사각형','하트','구름','육각형','마시멜로','하리보','개 얼굴','원숭이 얼굴','별','물방울','알'];
+const BODY_SH=['구','둥근 사각형','하트','별','물방울','알','구름','육각형','마시멜로','곰젤리'], BODY_K=[0,1,2,9,10,11,3,4,5,6];   // step51: 몸 도형 10종 → 모양 번호
+function bodyK(){ const m=S['모양']|0; if (m) return m; const i=Math.round(+S['몸 도형']); return Number.isFinite(i)?BODY_K[Math.min(9,Math.max(0,i))]:0; }
 const EYES = ['기본','동그란 큰 눈','세로 긴 눈','반달 눈','점 눈','졸린 눈','반짝 눈'];
 const EARS = ['없음','시바견','고양이','리트리버','사람','엘프','녹용','닭벼슬'];
 const EXPRS=['기본','웃음','행복','애틋','슬픔','편안','시원','하품','혼자 생각중','경청1 말하는걸 눈치챔','경청2 아하','경청3 끄덕끄덕','경청4 흥미로움','경청5 공감','궁금','놀람'];
@@ -467,7 +469,9 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
   G('성능').f.push(...snd); G('성능').h='앱 설정'; G('몸 일렁임').h='일렁임 · 숨쉬기'; G('타격 임팩트 설정').hide=1;
   { const cf=['충돌이펙트','쇼크웨이브','초현실충격파','만화충격파'].map(take).filter(Boolean); for (const f of cf) f.hide=0; const c0=cf.find(f=>f.k==='충돌이펙트'); if (c0){ c0.tip='벽·바닥에 부딪히는 순간 캐릭터 윤곽에 붙는 효과: 외곽 글로우(빨강·파랑 번짐) · 중첩(잔상) · 홀로그램 · 전부 (끔이면 비용 0)'; }
     cf.splice(1,0,{k:'윤곽 효과 지속',r:[0.2,2],d:0.6,tip:'부딪힌 뒤 윤곽 효과가 남는 시간(초). 길수록 천천히 사라져요'},{k:'윤곽 효과 민감도',r:[0,1],d:0.5,tip:'0.5 = 지금. 높을수록 살짝 부딪혀도 세게, 낮을수록 세게 박아야 나와요'},{k:'글로우 세기',r:[0,3],d:1,tip:'몸 바깥으로 번지는 빛의 진하기 (0 = 글로우 없음)'},{k:'글로우 퍼짐',r:[0.3,2.5],d:1,tip:'글로우가 몸에서 얼마나 멀리 번지는지 (두께)'},{k:'글로우 색',t:'enum',o:['주황·노랑','시안','흰 빛','빨강','라임'],d:0,tip:'가까이 진한 색 → 멀리 밝은 색으로 번져요'},{k:'글로우 링',r:[0,2],d:1,tip:'부딪힐 때 윤곽에서 바깥으로 한 번 퍼지는 밝은 테'},{k:'잔상 개수',r:[1,4],d:2,step:1,tip:'중첩: 충돌 방향으로 어긋난 몸 사본 수'},{k:'잔상 거리',r:[0,3],d:1,tip:'중첩: 사본이 어긋나는 거리'},{k:'잔상 진하기',r:[0,2],d:1,tip:'중첩: 사본의 진하기'},{k:'홀로그램 어긋남',r:[0,3],d:1,tip:'빨강·파랑 사본이 벌어지는 거리'},{k:'홀로그램 세기',r:[0,1.5],d:1,tip:'빨강·파랑 사본의 진하기'});
-    SCHEMA.push({h:'충돌 효과',lbl:'💥 충돌 효과',btns:'imfx',f:cf}); }   // step49: 충돌 이펙트 + 충격파 3종을 다시 패널에
+    SCHEMA.push({h:'충돌 효과',lbl:'💥 충돌 효과',btns:'imfx',f:cf}); }
+  { const md=take('모양정도'); md.hide=0; md.k='모양정도'; md.tip='0 = 동그라미, 1 = 고른 도형 그대로 (중간값은 둥글게 섞여요)';
+    SCHEMA.push({h:'몸 도형',lbl:'🔷 몸 도형',f:[{k:'몸 도형',t:'enum',o:BODY_SH,d:0,onSet:()=>{ if (S['얼굴']) applyFace(S,0); S['모양']=0; },tip:'몸 전체 도형 10가지. 젤리·잡기·벽·기호 변신·크래클 모두 그대로 돼요'},md]}); }   // step49: 충돌 이펙트 + 충격파 3종을 다시 패널에
   for (const [h,n] of [['염동력 설정','염동력'],['각성모드 설정','각성모드'],['명상 설정','명상'],['맥동 설정','맥동'],['소환 설정','소환']]) G(h).lbl=n+' 강도'; G('소환 설정').lbl='소환';
   for (const g of SCHEMA) for (const f of g.f) if (f.k in FINAL) f.d=JSON.parse(JSON.stringify(FINAL[f.k]));   // '이 섹션 초기화'도 최종값으로
   const EYE_SHP=['동그라미','콩','반달','아치','일자','물방울','아몬드','둥근 삼각','네모','다이아','별','하트','초승달','반짝','소용돌이','X','> <','열쇠구멍','도넛','꽃','세로 알약','사람 눈'];
@@ -489,7 +493,7 @@ const FINAL={"화질":0,"FPS표시":false,"배경스타일":0,"얼굴":0,"팔레
     for (const f of tg.f) if (f.k==='굴절강도') f.tip='왜곡 정도: 공간이 휘는 세기 (물결 + 아지랑이 전체)';
     tg.f.push({k:'파동 세기',r:[0,4],d:1,tip:'동심원 물결만 더 세게 휘게 (아지랑이는 그대로)'},{k:'파동 개수',r:[0.4,3],d:1,tip:'반경 안 동심원 물결 수 (1 = 지금)'},{k:'파동 두께',r:[0.3,3],d:1,tip:'물결 고리 두께 (작을수록 가는 선, 클수록 굵은 띠)'},
       {k:'파동 빛',r:[0,1.5],d:0,tip:'물결 고리에 은은한 빛을 얹어요 — 단색 배경에서도 파동이 또렷이 보여요 (0 = 지금처럼 굴절만)'},{k:'파동 색',t:'enum',o:['캐릭터 색','배경 색','흰빛'],d:0,tip:'파동 빛 색. 어두운 배경에선 밝게, 밝은 배경에선 진하게 보여요'}); }
-  const ORD=['얼굴 · 눈','다이나믹 표정','기호 변신','스핀 · 기울이기','커비크래클','충돌 효과','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
+  const ORD=['얼굴 · 눈','몸 도형','다이나믹 표정','기호 변신','스핀 · 기울이기','커비크래클','충돌 효과','색','염동력 설정','각성모드 설정','명상 설정','맥동 설정','소환 설정','일렁임 · 숨쉬기','앱 설정']; SCHEMA.sort((a,b)=>{ const ia=ORD.indexOf(a.h), ib=ORD.indexOf(b.h); return (ia<0?99:ia)-(ib<0?99:ib); }); }
 const FIELDS = {}; for (const g of SCHEMA) for (const f of g.f) FIELDS[f.k] = f;
 // Unity 프로젝트의 moti-tuning.json (기본값)
 const TUNING = {"버전":2,"귀":1,"귀크기":1.0,"귀간격":1.0,"귀출렁임":1.0,"녹용색":{"r":0.85,"g":0.7,"b":0.55,"a":1.0},"벼슬색":{"r":1.0,"g":0.42,"b":0.48,"a":1.0},"하트정도":0.7,"위홈깊이":0.5,"아래뾰족":0.5,"앞뒤두께":0.88,"따라오는속도":0.49000000953674316,"출렁임잡기":0.4000000059604645,"늘어남시작":0.5099999904632568,"최대늘어남":1.840000033378601,"가운데잘록":1.0,"일렁임크기":0.06800000369548798,"일렁임속도":0.4099999964237213,"숨쉬기위아래":0.12,"숨쉬기부풀기":0.015,"몸광택":1.0,"테두리빛두께":0.5,"테두리빛세기":2.2799999713897705,"테두리색1":{"r":0.35,"g":0.65,"b":1.0,"a":1.0},"테두리색2":{"r":1.0,"g":0.45,"b":0.6,"a":1.0},"중력":0.01730000041425228,"바닥탄력":0.6959999799728394,"던지기최대속도":1.2000000476837158,"클릭띠용":0.2029999941587448,"클릭점프":0.289000004529953,"파티클개수":0.0,"눈크기":1.0800000429153442,"눈동자크기":1.0,"눈동자이동":0.3490000069141388,"왼눈위치":{"x":-0.2,"y":0.6},"오른눈위치":{"x":0.7,"y":0.2},"깜빡임간격":4.0,"흰자색":{"r":0.72,"g":0.72,"b":0.74,"a":1.0},"눈동자색":{"r":0.12,"g":0.12,"b":0.12,"a":1.0}};
@@ -761,7 +765,11 @@ function shapeP(k,u){
     case 1: r=0.93/Math.pow(ax**5+ay**5+az**5, 0.2); break;                                                // 사각형 (둥근 정육면체)
     case 4: { const d1=Math.abs(x*0.866+y*0.5), d3=Math.abs(-x*0.866+y*0.5); const h=Math.pow(d1**8+ay**8+d3**8, 1/8);   // 육각형 (앞에서 보면 육각)
               r=0.97/Math.pow(h**6 + (az/0.72)**6, 1/6); break; }
-    case 5: r=0.98/Math.pow(Math.hypot(x,z)**6 + (ay/0.7)**6, 1/6); break;                                    // 마시멜로 (짧은 원기둥)
+    case 5: r=0.98/Math.pow(Math.hypot(x,z)**6 + (ay/0.7)**6, 1/6); break;
+    case 9: { const ph=Math.atan2(x,y), c=0.5+0.5*Math.cos(5*ph), fr=0.8+0.44*c*c, rho=Math.hypot(x,y);   // 별 (통통한 다섯 꼭지, 앞뒤 납작)
+              r=1/Math.pow(Math.pow(rho/fr,3)+Math.pow(az/0.66,3),1/3); break; }
+    case 10: { const up=Math.max(0,y), dn=Math.max(0,-y); r=0.9*(1+0.78*Math.pow(up,7))*(1-0.06*dn*dn)*(1-0.05*Math.pow(up,2)); break; }   // 물방울 (위가 동그랗게 뾰족)
+    case 11: r=ell(u,0.9-0.07*y,1.1,0.88-0.06*y); break;                                                     // 알 (아래가 살짝 넓은 달걀)                                    // 마시멜로 (짧은 원기둥)
     case 3: case 6: { tmpR.length=0; for (const b of BALLS[k]) tmpR.push(sph(u,b[0],b[1])); r=smax(tmpR,0.07);
               if (k===3){ if (y<-0.05) r=smin(r,0.6/(-y),0.05); zs=0.85; } else zs=0.78; r*=1.08; break; }
     case 7: { const fw=1+0.1*Math.max(0,y); tmpR.length=0; tmpR.push(ell(u,1.05*fw,0.95,0.92)); for (const e of SHIBA) tmpR.push(ellR(u,e[0],e[1])); r=smax(tmpR,SHIBA_K); break; }
@@ -770,12 +778,12 @@ function shapeP(k,u){
   }
   SX=x*r; SY=y*r; SZ=z*r*zs; }
 let SHA=null, SHI=-1;   // 정점별 모양 결과 캐시 (몸·소품)
-function shapeKey(){ return (ANIK>=0?'a'+ANIK:S['모양'])+'|'+S['모양정도']+'|'+S['위홈깊이']+'|'+S['아래뾰족']+'|'+S['앞뒤두께']; }
+function shapeKey(){ return (ANIK>=0?'a'+ANIK:bodyK())+'|'+S['모양정도']+'|'+S['위홈깊이']+'|'+S['아래뾰족']+'|'+S['앞뒤두께']; }
 function shapeCache(arr,src,n){ for (let i=0;i<n;i++){ shape(src[i*3],src[i*3+1],src[i*3+2]); arr[i*3]=SX; arr[i*3+1]=SY; arr[i*3+2]=SZ; } }
 function shape(px,py,pz){ shape0(px,py,pz); if (MPH.nm!==null && (SHA===BSH || MPH.ev)) symMix(px,py,pz); }
 function shape0(px,py,pz){
   if (SHA!==null){ const j=SHI*3; SX=SHA[j]; SY=SHA[j+1]; SZ=SHA[j+2]; return; }
-  const k=ANIK>=0?100:S['모양'], A=ANIK>=0?1:S['모양정도'];
+  const k=ANIK>=0?100:bodyK(), A=ANIK>=0?1:clamp01(+S['모양정도']||0);
   if (k===0 || A<=0){ SX=px; SY=py; SZ=pz; return; }
   if (k===2){ // Heart(p) — Unity 그대로
     const x=px/R, y=py/R, z=pz/R, up=Math.max(0,y), dn=Math.max(0,-y), lo=S['아래뾰족'];
@@ -5076,7 +5084,7 @@ function renderChips(){ chipsEl.innerHTML=''; tkChip(); chip('✨ 각성모드',
   chip('표정 ▶',EXS[exprI%EXS.length],()=>{ playExpr(EXS[exprI%EXS.length],'once'); exprI++; });
   chip('모션 ▶',MOTS[motI%MOTS.length],()=>{ playMotion(MOTS[motI%MOTS.length]); motI++; });
   chip('외곽선',S['외곽선']?'켬':'끔',()=>{ S['외곽선']=!S['외곽선']; });
-  ttlSub.textContent=S['얼굴']?FACES[S['얼굴']]:SHAPES[S['모양']]; }
+  ttlSub.textContent=S['얼굴']?FACES[S['얼굴']]:(S['모양']|0)?SHAPES[S['모양']]:BODY_SH[Math.round(+S['몸 도형'])||0]||'구'; }
 renderChips();
 if (innerWidth<700) panel.classList.add('closed');
 cvs.addEventListener('pointerdown',()=>{ document.getElementById('hint').style.opacity=0.3; },{once:true});
