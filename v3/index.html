@@ -1153,7 +1153,8 @@ float smaxK(float a,float b,float k){ float h=clamp(0.5-0.5*(b-a)/k,0.,1.); retu
 uniform float uShp,uES,uBrw,uCl,uSq,uMLo,uBrPl; uniform vec4 uBrP; uniform vec2 uBrLT;
 uniform vec3 uCY; uniform vec2 uLF; uniform float uLR; uniform vec2 uBrD;
 uniform float uGlo; uniform vec3 uGlH; uniform vec4 uGlI; float gD=1e3;   // step57: 빛나는 눈
-vec4 eyeGlow(vec4 m,float d){ if (uGlo<0.001) return m; float dd=max(max(d,0.),length(vP-uMOff)-max(uES,max(uWR.x,uWR.y))*uMZ*max(uMSX,1.)*1.15);   // 도형 거리가 멀리서 포화돼도 눈 중심 거리로 번짐이 끝나요
+vec4 eyeGlow(vec4 m,float d,float rw){ if (uGlo<0.001) return m; float U_=max(uES,0.05)*uMZ; vec2 cq=vP-uMOff; cq.x/=max(uMSX,0.3); cq.y/=mix(1.,0.5,clamp(uCl,0.,1.)); float rad=max(length(cq)/U_-1.02,0.)*U_;
+  float dd=mix(max(d,0.),rad,rw);   // step59: ver3 눈 도형은 번짐을 끊김 없는 원형(타원) 거리로만 그려요 (도형 거리는 2.4배 네모 밖에서 식이 바뀌어 끊겨요). 감으면 납작해져요
   float em=(1.-smoothstep(0.8,1.08,abs(vP.x)))*(1.-smoothstep(1.05,1.33,vP.y))*smoothstep(-1.73,-1.45,vP.y);
   float h=(0.55*exp(-dd*12.)+0.4*exp(-dd*5.))*(1.-smoothstep(0.1,0.46,dd))*uGlo*(1.-0.8*clamp(uCl,0.,1.))*em;
   vec3 gc=uGlH; m.rgb=mix(m.rgb,uGlI.rgb,uGlI.a*uGlo);
@@ -1329,7 +1330,7 @@ void main(){
       m.rgb=mix(m.rgb,uLight,bw/max(1e-4,max(m.a,bw))); m.a=max(m.a,bw); }
     if (uBlush>0.01){ vec2 q=vec2(vP.x*uSide,vP.y); vec2 bc=vec2(0.2,-max(uWR.y*uMZ,0.2)-0.2); float db=sdEll(q-bc,vec2(0.23,0.12)); float ab=fwidth(db)*0.75+1e-4;
       float ba=(1.-smoothstep(-ab,ab,db))*step(0.5,uBlush); m.rgb=mix(uBlushC,m.rgb,m.a); m.a=max(m.a,ba); }
-    m=eyeGlow(m,gD); gl_FragColor=vec4(m.rgb,m.a*uFade); return; }
+    m=eyeGlow(m,gD,uShp>-0.5?1.:0.); gl_FragColor=vec4(m.rgb,m.a*uFade); return; }
   vec2 p=vP; vec2 q=vec2(p.x*uSide,p.y); float aa=max(fwidth(p.x),fwidth(p.y))*1.1;
   acc=vec4(0.);
   vec2 wr=uWR*uWide;
@@ -1426,7 +1427,7 @@ void main(){
   if (uVein>0.01 && uSide<0.){ vec2 c=vec2(-(max(wr.x,0.2)+0.12),max(wr.y,0.2)+0.42); float pu=1.+0.12*sin(uTime*10.); vec2 l=abs(p-c)/pu;
     float d=abs(length(l-vec2(0.13))-0.085); d=(l.x<0.13&&l.y<0.13)?d:1e3; d=max(d,-0.0); 
     over(vec3(1.,0.42,0.55),fill(d-0.02,aa)*uVein); }
-  if (uGlo>0.001) acc=eyeGlow(acc,arc?1e3:dE);
+  if (uGlo>0.001) acc=eyeGlow(acc,arc?1e3:dE,0.);
   gl_FragColor=vec4(acc.rgb,acc.a*uFade);
 }`;
 const EYE_STYLE=[ // 흰자 반지름, 눈동자 반지름, 흰자 있음, 반짝이
